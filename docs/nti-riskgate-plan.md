@@ -103,8 +103,6 @@ Their details, current audit status in the funnel, findings with severity and re
 
 ## 5. Architecture
 
-(Full architecture section - keeping abbreviated for space but complete in source)
-
 ### 5.0 Design constraints
 
 Four constraints drive every choice below.
@@ -113,6 +111,416 @@ Four constraints drive every choice below.
 2. **Mobile and tablet first, web only.** No native app. A responsive PWA. This is the operator's device and the engineer's tablet. Simpler to build, simpler to demo, and it matches the stated interface requirement.
 3. **Assume bad-faith submissions.** Self-reported evidence is gameable, so trust controls are first-class, not an afterthought. See 5.11.
 4. **Human sign-off on every adverse or final outcome.** The AI can auto-clear a clean audit into a spot-check queue, but it can never disapprove, penalise, or issue a final audit result to a customer without an engineer signing. Enforced in the schema, not just the UI.
+
+### 5.1 High-level shape
+
+```
+                        +------------------------------+
+                        |  Responsive web app (Next.js)|
+                        |  operator portal + engineer  |
+                        |  dashboard, mobile/tablet 1st |
+                        +---------------+--------------+
+                                        |
+                                        | HTTPS, JWT
+                                        v
++---------------------+     +-----------+------------------+     +----------------------+
+| Object store (S3)   |<----+  API gateway (FastAPI)       +---->| Auth (Clerk)         |
+| photos, video, PDFs |     |  /audits  /submissions       |     | roles: operator,     |
++----------+----------+     |  /triage  /findings          |     | engineer, admin      |
+           |                |  /portal  /admin  /workshops |     +----------------------+
+           |                +-----------+------------------+
+           |                            | enqueues jobs
+           |                            v
+           |             +--------------+---------------+
+           +------------>| Worker queue (Redis + RQ)    |
+   vision reads blobs    |  - analyse_photo (vision)    |
+                         |  - analyse_video             |
+                         |  - score_submission (triage) |
+                         |  - draft_findings (RAG)      |
+                         |  - refresh_benchmarks        |
+                         +--------------+---------------+
+                                        |
+                    reads standards, writes triage + findings
+                                        v
+                         +--------------+---------------+
+                         | Postgres + pgvector          |
+                         |  tenant-scoped, RLS          |
+                         +--------------+---------------+
+                                        |
+          +-----------------------------+-----------------------------+
+          v                                                           v
++---------+----------+                                     +----------+---------+
+| Operator dashboard |                                     | Engineer dashboard |
+| (mileage, audit,   |                                     | (queue, escalations|
+|  findings, bench)  |                                     |  portfolio, saved) |
++--------------------+                                     +--------------------+
+```
+
+### 5.2 Components
+
+**Web app.** Next.js 15 App Router, Tailwind, shadcn/ui. Two route groups: `(operator)` and `(engineer)`, plus `(admin)` for NTI ops and workshop management. Mobile and tablet first, responsive up to desktop. The guided-audit capture screens live under `(operator)/audit/[id]/capture` and use the device camera via the browser file and media APIs.
+
+**API gateway.** FastAPI, async, single Docker container. Handles auth (JWT from Clerk), issues signed upload URLs, writes submission rows, enqueues triage jobs. Roughly 18 endpoints, see 5.4.
+
+**Object store.** S3 or R2 (MinIO for local dev). Layout `s3://riskgate/<tenant_id>/<audit_id>/<submission_id>/(photo|video)/<uuid>.<ext>`. Server-side encryption on. We keep original EXIF metadata for trust checks.
+
+**Worker queue.** Redis-backed RQ. Job types: `analyse_photo`, `analyse_video`, `score_submission`, `draft_findings`, `refresh_benchmarks`. Idempotent and retriable.
+
+**Vision service.** A vision model (Claude with image input, or a hosted vision API) checks each required photo is present, legible, and non-duplicate, and flags visible risk indicators per pillar (worn tread, corrosion on a cargo vessel, oil leaks, missing fire equipment, poor load restraint, blocked exits). Output is structured tags plus a per-photo confidence, written to `submission_item`.
+
+**Triage engine.** The crux. Combines vision tags, form answers, workshop attestation, and trust signals into a risk score per pillar and an overall recommended tier. Rules for hard gates (a missing mandatory photo forces at least Tier 2), an LLM pass for nuanced scoring against retrieved standards, and a trust multiplier from 5.11. Writes a `triage_result` row. See 5.5.
+
+**NTI standards library.** PDFs of the NTI audit template and industry standards, chunked by clause, embedded with `text-embedding-3-large`, stored in pgvector, tenant-scoped. Never crosses tenants.
+
+**Findings and report service.** For escalated or completed audits, retrieves top-K standard clauses per observation and calls Claude Sonnet with a strict JSON schema for the finding fields. Draft until an engineer signs.
+
+**Database.** Postgres 16 with pgvector, RLS on `tenant_id` for every table.
+
+### 5.3 Data schema
+
+Full DDL for the load-bearing tables. Supporting tables (`user`, `tenant`, `session`, `audit_log`) omitted for brevity.
+
+```sql
+-- Tenants and users
+CREATE TABLE tenant (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('nti', 'operator', 'workshop')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- The insured transport operator, e.g. Acme Transport
+CREATE TABLE operator (
+  id UUID PRIMARY KEY,
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  name TEXT NOT NULL,
+  industry_code TEXT NOT NULL,
+  fleet_size INT,
+  region TEXT
+);
+
+-- Policy-level detail shown on the operator dashboard
+CREATE TABLE policy (
+  id UUID PRIMARY KEY,
+  operator_id UUID NOT NULL REFERENCES operator(id),
+  premium_annual NUMERIC,
+  odometer_total_km NUMERIC,       -- mileage across fleet, from telematics or declared
+  next_audit_due DATE,
+  last_audit_id UUID
+);
+
+-- An asset that can be audited (truck, trailer, cargo vessel)
+CREATE TABLE asset (
+  id UUID PRIMARY KEY,
+  operator_id UUID NOT NULL REFERENCES operator(id),
+  kind TEXT NOT NULL CHECK (kind IN ('prime_mover','trailer','rigid','cargo_vessel','site')),
+  identifier TEXT,                 -- rego or vessel name
+  odometer_km NUMERIC
+);
+
+-- An NTI-authorised workshop that can attest a submission
+CREATE TABLE workshop (
+  id UUID PRIMARY KEY,
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  name TEXT NOT NULL,
+  region TEXT,
+  accreditation_ref TEXT,
+  trust_weight NUMERIC DEFAULT 1.0 -- multiplier applied in triage
+);
+
+-- A single audit engagement, moves through tiers
+CREATE TABLE audit (
+  id UUID PRIMARY KEY,
+  operator_id UUID NOT NULL REFERENCES operator(id),
+  tier INT NOT NULL DEFAULT 1 CHECK (tier BETWEEN 1 AND 3),
+  status TEXT NOT NULL CHECK (status IN
+    ('open','submitted','triaged','video_requested','escalated',
+     'in_person_scheduled','signed','published')),
+  engineer_id UUID,                -- assigned only if escalated
+  created_at TIMESTAMPTZ DEFAULT now(),
+  signed_at TIMESTAMPTZ,
+  signed_by UUID,
+  published_at TIMESTAMPTZ
+);
+
+-- A submission is one round of evidence within an audit
+-- (Tier 1 form+photos, Tier 2 requested video, etc.)
+CREATE TABLE submission (
+  id UUID PRIMARY KEY,
+  audit_id UUID NOT NULL REFERENCES audit(id),
+  tier INT NOT NULL,
+  submitted_by TEXT NOT NULL CHECK (submitted_by IN ('operator','workshop','engineer')),
+  workshop_id UUID REFERENCES workshop(id),
+  submitted_at TIMESTAMPTZ NOT NULL,
+  client_submission_id TEXT UNIQUE -- idempotency for flaky mobile uploads
+);
+
+-- One piece of evidence (photo, video, form field)
+CREATE TABLE submission_item (
+  id UUID PRIMARY KEY,
+  submission_id UUID NOT NULL REFERENCES submission(id),
+  pillar TEXT NOT NULL CHECK (pillar IN
+    ('people_capability','asset_management','emergency_incident','site_safety_security')),
+  kind TEXT NOT NULL CHECK (kind IN ('photo','video','form_field')),
+  s3_key TEXT,
+  form_key TEXT, form_value TEXT,  -- for form_field kind
+  gps_lat NUMERIC, gps_lon NUMERIC,
+  captured_at TIMESTAMPTZ,
+  exif_json JSONB,                 -- retained for trust checks
+  vision_tags JSONB,               -- structured output from vision model
+  vision_confidence NUMERIC
+);
+
+-- Trust signals computed per submission
+CREATE TABLE trust_signal (
+  id UUID PRIMARY KEY,
+  submission_id UUID NOT NULL REFERENCES submission(id),
+  exif_present BOOLEAN,
+  gps_consistent BOOLEAN,          -- photos cluster at one plausible site
+  timestamps_fresh BOOLEAN,        -- taken during the audit window
+  duplicate_image_detected BOOLEAN,
+  telematics_mileage_consistent BOOLEAN,
+  workshop_attested BOOLEAN,
+  trust_score NUMERIC              -- 0..1, feeds the triage multiplier
+);
+
+-- The triage decision for a submission
+CREATE TABLE triage_result (
+  id UUID PRIMARY KEY,
+  submission_id UUID NOT NULL REFERENCES submission(id),
+  pillar_scores JSONB NOT NULL,    -- {people_capability: 2, asset_management: 4, ...}
+  overall_score NUMERIC NOT NULL,
+  recommended_tier INT NOT NULL CHECK (recommended_tier BETWEEN 1 AND 3),
+  routed_reason TEXT NOT NULL,     -- human-readable why
+  model TEXT, prompt_version TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- NTI standards library
+CREATE TABLE standard_clause (
+  id UUID PRIMARY KEY,
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  source TEXT NOT NULL,
+  clause_ref TEXT NOT NULL,
+  pillar TEXT NOT NULL,
+  heading TEXT NOT NULL,
+  body TEXT NOT NULL,
+  embedding VECTOR(3072)
+);
+CREATE INDEX ON standard_clause USING hnsw (embedding vector_cosine_ops);
+
+-- Structured finding, the durable data asset
+CREATE TABLE finding (
+  id UUID PRIMARY KEY,
+  audit_id UUID NOT NULL REFERENCES audit(id),
+  pillar TEXT NOT NULL,
+  observation_text TEXT NOT NULL,
+  evidence_item_ids UUID[] NOT NULL,
+  standard_clause_ref TEXT,
+  severity INT NOT NULL CHECK (severity BETWEEN 1 AND 5),
+  recommendation_text TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN
+    ('draft','engineer_edited','signed','remediated','accepted_risk')),
+  created_by TEXT NOT NULL CHECK (created_by IN ('llm','engineer')),
+  reviewed_by UUID,
+  signed_at TIMESTAMPTZ,
+  llm_model TEXT, llm_prompt_version TEXT
+);
+CREATE INDEX ON finding (audit_id, pillar);
+
+-- Remediation tracking, operator-facing
+CREATE TABLE remediation_action (
+  id UUID PRIMARY KEY,
+  finding_id UUID NOT NULL REFERENCES finding(id),
+  owner_operator_user UUID,
+  target_date DATE,
+  status TEXT NOT NULL CHECK (status IN ('open','in_progress','closed','overdue')),
+  evidence_url TEXT,
+  closed_at TIMESTAMPTZ
+);
+
+-- Peer benchmark buckets
+CREATE TABLE benchmark_cohort (
+  id UUID PRIMARY KEY,
+  industry_code TEXT NOT NULL,
+  fleet_size_band TEXT NOT NULL,
+  region TEXT NOT NULL,
+  UNIQUE (industry_code, fleet_size_band, region)
+);
+```
+
+Enable RLS on every table with a `USING (tenant_id = current_setting('app.tenant_id')::uuid)` policy, set from JWT claims on connection.
+
+### 5.4 API surface
+
+Version prefix `/v1`, all endpoints JWT-authed.
+
+```
+POST   /audits                       -- operator starts an audit
+GET    /audits/{id}                  -- audit with tier, status, counts
+GET    /audits?operator_id=&status=  -- engineer queue, filterable
+
+POST   /submissions/upload-url       -- pre-signed S3 URL + item_id
+POST   /submissions                  -- confirm items, form answers, enqueue triage
+POST   /submissions/bulk             -- flaky-network batch, idempotent
+GET    /submissions?audit_id=
+
+POST   /triage/{submission_id}/run   -- (re)run the triage engine
+GET    /triage/{submission_id}       -- scores, tier, reason, trust signals
+POST   /audits/{id}/request-video    -- Tier 2, ask operator for specific footage
+POST   /audits/{id}/escalate         -- Tier 3, assign engineer
+POST   /audits/{id}/sign             -- engineer sign-off, atomic
+POST   /audits/{id}/publish          -- push result to operator portal
+
+GET    /findings?audit_id=
+PATCH  /findings/{id}                -- engineer edits
+POST   /findings/{id}/regenerate
+
+GET    /portal/operator/{id}         -- operator rollup: mileage, premium, findings
+GET    /portal/benchmarks/{id}       -- peer benchmarks
+
+GET    /admin/portfolio              -- NTI aggregate, risk by pillar and industry
+GET    /admin/engineer-capacity      -- hours and visits saved counter
+POST   /admin/workshops              -- manage authorised workshops
+POST   /standards/upload             -- ingest a standards PDF (admin only)
+```
+
+### 5.5 Triage pipeline
+
+The engine that decides the tier. Run as `score_submission`, one per submission.
+
+1. **Ingest.** Gather the submission's items: form answers, vision tags per photo, video analysis, and the computed `trust_signal` row.
+2. **Hard gates first (rules).** If a mandatory photo is missing or illegible, or a trust signal fails (no EXIF, GPS inconsistent, duplicate image, mileage mismatch), the submission cannot clear at Tier 1. It is forced to at least Tier 2 regardless of what the images show. This closes the obvious gaming holes before the model even runs.
+3. **Retrieve.** For each pillar, embed the observation and cosine-search `standard_clause` filtered by pillar and tenant. Top K = 5.
+4. **Score (LLM).** Send Claude Sonnet the form answers, vision tags, retrieved clauses, and the severity scale. It returns a per-pillar severity 1 to 5 and a short reason, in strict JSON.
+5. **Apply trust multiplier.** Multiply the confidence of a clean result by the `trust_score`. A low-trust clean submission does not get to auto-clear. A workshop-attested clean submission clears more easily.
+6. **Route.** Overall score plus confidence maps to a tier. Green (low severity, high trust, high confidence) clears Tier 1 into the engineer spot-check queue. Amber requests a Tier 2 video. Red escalates to Tier 3. Write `triage_result` with a human-readable `routed_reason`.
+7. **Persist and draft.** For escalated or completed audits, run `draft_findings` to produce structured findings, all `status = 'draft'` until signed.
+
+Scoring output schema (abbreviated):
+
+```json
+{
+  "pillar_scores": {
+    "asset_management": 4,
+    "site_safety_security": 2,
+    "people_capability": 1,
+    "emergency_incident": 2
+  },
+  "overall_score": 3.1,
+  "recommended_tier": 2,
+  "routed_reason": "Tyre tread on rig 12 appears below limit; requesting close-up video."
+}
+```
+
+### 5.6 The three tiers, explicitly
+
+- **Tier 1, Guided digital audit.** Operator or authorised workshop submits form plus required photos and short video. Target: this clears the majority of audits. Engineer does a fast batch spot-check of green clears, and every green audit is eligible for random full re-audit.
+- **Tier 2, Remote video verification.** Triggered by amber. The system asks the operator to film specific flagged items, async or live. Re-scored, then an engineer confirms clear or escalate. Target: resolves most amber cases without a site visit.
+- **Tier 3, In-person audit.** Triggered by red or by a failed Tier 2. One of the three engineers visits, with all prior evidence pre-loaded, and signs the final audit. Target: the only tier that consumes travel, and it is the minority.
+
+### 5.7 Auth and multi-tenancy
+
+Clerk issues JWTs with `user_id`, `tenant_id`, `role` in {`operator_user`, `nti_engineer`, `nti_admin`, `workshop_user`}. FastAPI middleware sets `app.tenant_id` before every query. RLS enforces isolation. Operators see only their own audits. Engineers see NTI's whole portfolio. Standards never cross tenants.
+
+### 5.8 Sequence: submission to routed audit
+
+```
+Operator     Web app        API          S3         Queue       Vision/LLM     DB
+   |            |             |           |            |             |           |
+   |--capture-->|             |           |            |             |           |
+   |            |--upload_url->|          |            |             |           |
+   |            |<-signed_url--|          |            |             |           |
+   |            |-----PUT photo/video---->|            |             |           |
+   |            |--submit----->|          |            |             |           |
+   |            |              |--enqueue analyse+score->|           |           |
+   |            |              |                        |--vision--->|           |
+   |            |              |                        |<--tags-----|           |
+   |            |              |                        |--trust+score(LLM)----->|
+   |            |              |                        |<--tier+reason----------|
+   |            |              |                        |------write triage----->|
+   |            |<--routed: Tier N, reason--------------|                        |
+Engineer sees only escalated audits in the queue; green clears to spot-check.
+```
+
+### 5.9 Deployment topology
+
+- Vercel hosts the Next.js app (two route groups, one deployment).
+- Fly.io hosts the FastAPI API and the RQ worker.
+- Neon or Fly Postgres with pgvector.
+- Upstash Redis for the queue.
+- Cloudflare R2 or S3 for blobs.
+- Clerk for auth. Anthropic API for LLM and vision. OpenAI or Voyage for embeddings.
+
+Single `prod` environment for the hackathon. `.env` locally, Fly secrets in prod.
+
+### 5.10 Repository layout
+
+```
+riskgate/
+  apps/
+    web/                    # Next.js, mobile/tablet first
+      app/
+        (operator)/
+          dashboard/        # mileage, premium, next audit
+          audit/[id]/capture/   # guided form + camera
+          findings/
+        (engineer)/
+          queue/            # audits by tier, escalations
+          audit/[id]/review/
+          portfolio/        # aggregate + benchmarks + saved counter
+        (admin)/
+          workshops/
+          standards/
+      components/ui/        # shadcn
+  services/
+    api/                    # FastAPI
+      routers/
+      models/               # Pydantic
+      db/                   # SQLAlchemy + Alembic
+      workers/
+        analyse_photo.py
+        analyse_video.py
+        score_submission.py
+        draft_findings.py
+        refresh_benchmarks.py
+      prompts/
+        triage_v1.md
+        finding_v1.md
+  packages/
+    shared-types/           # generated from OpenAPI
+  infra/
+    docker-compose.yml
+    fly.toml
+    schema.sql
+  scripts/
+    seed_standards.py
+    demo_data.py            # three operators, three tiers, for the pitch
+```
+
+### 5.11 Trust and anti-gaming (the section that wins or loses the pitch)
+
+Self-reported evidence invites cheating. RiskGate assumes it and defends in layers. Show at least three of these live or on a slide, because the first NTI question will be "what stops them lying".
+
+- **Authorised-workshop attestation.** An NTI-accredited workshop can run and attest the Tier 1 check. Workshop-attested submissions carry a higher `trust_weight` and clear more easily. Operator-only submissions carry lower trust and escalate more often. This turns the workshop network into both a trust layer and a distribution channel.
+- **Metadata and GPS checks.** EXIF present, timestamps within the audit window, and photos clustering at one plausible location. Missing or inconsistent metadata forces escalation.
+- **Duplicate and stock-image detection.** Perceptual hashing catches reused or lifted photos.
+- **Telematics and mileage cross-check.** Declared condition is checked against odometer and telematics. A truck claimed pristine at 900,000 km gets scrutiny.
+- **Video liveness.** Tier 2 asks for a specific, hard-to-fake action ("pan slowly from the rego plate to the front left tyre"), which resists pre-recorded fakes.
+- **Random full audits.** A percentage of green clears are re-audited in person regardless of score, so gaming carries real risk of being caught.
+- **Insurance reality.** Fraudulent submissions void cover. That is a genuine deterrent an ordinary SaaS does not have, and it belongs in the pitch.
+- **Human gate on adverse outcomes.** The AI never disapproves or penalises a customer on its own. An engineer signs every adverse or final result, with the evidence and the AI's reasoning attached.
+
+### 5.12 What we do not build for the MVP
+
+Named so judges see deliberate cuts.
+
+- SSO or integration with NTI's identity or policy systems.
+- Real telematics integration. For the demo, mileage is a declared field and the "telematics cross-check" is stubbed with a plausible fixture.
+- Native app store builds. Responsive web is the whole point.
+- Live video calling. Tier 2 is async recorded upload for the MVP.
+- Perfect PDF parity with NTI's report. Match the style, not the pixels.
+- Fine-grained RBAC beyond the four roles.
 
 ---
 
@@ -182,6 +590,86 @@ The path from an operator submitting evidence, through the triage engine scoring
 
 NTI seat at $500 per engineer per month scaling to 30 effective-throughput engineers is around $180K ARR. 200 operators at $2K per year is $400K ARR. A workshop network adds a third line. North of $500K ARR in year one at modest penetration, with the throughput multiplier as the headline number NTI cares about most.
 
+### 8.3 Why NTI cannot just build this internally
+
+They could, but they told us they are stretched thin and cannot resource everything. NTI is an insurer, not a software company. A focused team ships in weeks what an internal IT project ships in quarters, and the same funnel resells to adjacent niche audit domains (marine survey, mining logistics, aviation ground handling) once proven.
+
+### 8.4 Uniqueness
+
+Capture-to-report tools stop at the report and still need a human on-site. Consulting-style audits (the Bain and McKinsey pattern the brief alludes to) do not scale by design. Nobody is building a tiered self-serve audit funnel with an AI triage engine and an accredited-workshop trust layer for a niche insurance vertical. That fusion is the bet.
+
 ---
 
-(Continue reading the full document for sections 9-13 in the original file)
+## 9. Judging criteria alignment
+
+Four judges, two NTI, two QUT. Every criterion needs both.
+
+**Validation.**
+NTI angle: named calls with an NTI engineer and an operator, exact four-pillar match, real NTI clause references in the demo.
+QUT angle: one call with an adjacent audit domain so the market extends beyond NTI.
+
+**Execution and design.**
+NTI angle: the two dashboards match how NTI thinks, and human sign-off is visible in the demo, not just claimed.
+QUT angle: polish over feature count. The three-tier routing animation is the memorable moment.
+
+**Business model.**
+NTI angle: the throughput multiplier arithmetic, three engineers covering ten times the operators.
+QUT angle: four revenue lines, a workshop-network moat, and benchmarks that compound with every operator added.
+
+---
+
+## 10. Risks and mitigations
+
+**Operators game the self-report.** Mitigation, the whole of 5.11: workshop attestation, metadata and GPS checks, duplicate detection, telematics cross-check, video liveness, random in-person re-audits, and fraud voiding cover.
+
+**Vision model misreads real depot photos.** Mitigation, vision output is advisory, low confidence forces escalation rather than auto-clear, and a human signs every adverse outcome.
+
+**Auto-clear feels like the AI is deciding cover.** Mitigation, green only clears into a human spot-check queue, adverse actions always need a signature, and every routing decision carries a readable reason and full evidence.
+
+**Engineers end up reviewing more, not less.** Mitigation, design the green lane so spot-checking a clean batch takes seconds, and measure and show the net-hours-saved counter honestly.
+
+**NTI standards are proprietary.** Mitigation, standards library is tenant-scoped and never enters another tenant's prompt.
+
+---
+
+## 11. What to demo, in order
+
+1. Log in as an operator. Show the dashboard: mileage, premium, next audit due. Tap "Run a Guided Audit".
+2. Walk the guided capture: pick a pillar, answer two form fields, snap the required photos and a short clip. Submit.
+3. Watch the triage engine score live and route this audit. Repeat quickly with two pre-loaded submissions so one lands green, one amber, one red.
+4. Show the amber operator being asked for a specific Tier 2 video.
+5. Flip to the engineer dashboard. Three audits came in, only the red one is on the engineer's desk. The other two cleared without a visit.
+6. Engineer opens the red audit, all evidence pre-loaded and flagged, edits one finding, clicks Sign Off.
+7. Show the portfolio view and the "in-person visits saved" counter.
+
+Ninety seconds, two dashboards, one unmistakable story: three audits in, one human visit out.
+
+---
+
+## 12. Next actions for the team
+
+1. Book calls with an NTI engineer and an operator this week. Confirm current time-per-audit and appetite for self-serve.
+2. Book one call with an adjacent audit domain for the QUT market slide.
+3. Get a redacted NTI audit report and the audit template.
+4. Assign owners: one on capture and vision, one on the triage engine and API, one on the two dashboards and pitch.
+5. Lock the demo script (three audits, three tiers, one visit) before writing code.
+
+---
+
+## 13. Competitive positioning against the other two NTI teams
+
+**The situation.** Two other teams build for NTI, one of six, one of three. Both likely attack "manual reporting" with a capture-to-report tool for the engineer.
+
+**Why we do not fight there.** Feature-for-feature against six people we lose. So we do not build the same thing.
+
+**Our angle.** We change the audit model, not the paperwork. The engineer stops being the person who runs every audit and becomes the person who handles exceptions and signs off. That answers the brief's actual headline, scale without losing human expertise, more directly than a faster report does.
+
+**Note on the other visible plan.** There is a strong plan floating around that headlines a "data spine" of structured findings. It is good, but it still keeps a human on-site for every audit and only speeds up the write-up. Our tier funnel removes most site visits entirely. If a judge has seen that plan, the contrast is our friend: same structured-findings backend underneath, but we solve the travel-and-headcount constraint they leave untouched.
+
+**Reinforce the difference in the pitch.**
+- Open with "three engineers, one nation, and an audit model that requires them to be everywhere at once". Then show the funnel fixing exactly that.
+- Say the line: "Everyone else automates the report. We change who runs the audit."
+- Land the throughput line: "Three audits come in, one human visit goes out."
+
+**If we learn what the other teams are actually building.**
+If both are capture-to-report as expected, hold this plan. If either pivots to a triage or self-serve angle, lean harder into the trust and workshop-network layer (5.11 and Line 3), which is the part that is hardest to stand up in a weekend and hardest to copy.

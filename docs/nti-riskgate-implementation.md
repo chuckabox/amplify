@@ -378,13 +378,234 @@ Layout:
 
 ## 5. Full Supabase schema (`supabase/migrations/0001_init.sql`)
 
-(Full SQL schema provided in original document - keeping abbreviated for space)
+```sql
+-- Enable RLS-friendly extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Tenants and user profiles
+CREATE TABLE tenant (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('nti','operator','workshop')),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE user_profile (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  role TEXT NOT NULL CHECK (role IN ('operator_user','nti_engineer','nti_admin','workshop_user')),
+  display_name TEXT
+);
+
+-- Operators (audited fleets) and their policies
+CREATE TABLE operator (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  name TEXT NOT NULL,
+  industry_code TEXT NOT NULL DEFAULT 'road_freight',
+  fleet_size INT,
+  region TEXT
+);
+
+CREATE TABLE policy (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  operator_id UUID NOT NULL REFERENCES operator(id),
+  premium_annual NUMERIC,
+  odometer_total_km NUMERIC,
+  next_audit_due DATE,
+  last_audit_id UUID
+);
+
+-- Workshops (fixture only for MVP)
+CREATE TABLE workshop (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  name TEXT NOT NULL,
+  region TEXT,
+  trust_weight NUMERIC DEFAULT 1.0
+);
+
+-- Audits move through tiers
+CREATE TABLE audit (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  operator_id UUID NOT NULL REFERENCES operator(id),
+  tier INT NOT NULL DEFAULT 1 CHECK (tier BETWEEN 1 AND 3),
+  status TEXT NOT NULL CHECK (status IN
+    ('open','submitted','triaged','video_requested','escalated',
+     'in_person_scheduled','signed','published')),
+  engineer_id UUID REFERENCES user_profile(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  signed_at TIMESTAMPTZ,
+  signed_by UUID REFERENCES user_profile(id),
+  published_at TIMESTAMPTZ
+);
+
+-- A submission is one round of evidence
+CREATE TABLE submission (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  audit_id UUID NOT NULL REFERENCES audit(id),
+  tier INT NOT NULL,
+  submitted_by TEXT NOT NULL CHECK (submitted_by IN ('operator','workshop','engineer')),
+  workshop_id UUID REFERENCES workshop(id),
+  submitted_at TIMESTAMPTZ DEFAULT now(),
+  client_submission_id TEXT UNIQUE
+);
+
+-- One piece of evidence
+CREATE TABLE submission_item (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  submission_id UUID NOT NULL REFERENCES submission(id),
+  pillar TEXT NOT NULL CHECK (pillar IN
+    ('people_capability','asset_management','emergency_incident','site_safety_security')),
+  kind TEXT NOT NULL CHECK (kind IN ('photo','video','form_field')),
+  storage_path TEXT,
+  form_key TEXT, form_value TEXT,
+  gps_lat NUMERIC, gps_lon NUMERIC,
+  captured_at TIMESTAMPTZ,
+  exif_json JSONB,
+  vision_tags JSONB,
+  vision_confidence NUMERIC
+);
+
+-- Trust signals per submission
+CREATE TABLE trust_signal (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  submission_id UUID NOT NULL REFERENCES submission(id),
+  exif_present BOOLEAN,
+  gps_consistent BOOLEAN,
+  timestamps_fresh BOOLEAN,
+  workshop_attested BOOLEAN,
+  trust_score NUMERIC
+);
+
+-- Triage decision
+CREATE TABLE triage_result (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  submission_id UUID NOT NULL REFERENCES submission(id),
+  pillar_scores JSONB NOT NULL,
+  overall_score NUMERIC NOT NULL,
+  recommended_tier INT NOT NULL CHECK (recommended_tier BETWEEN 1 AND 3),
+  routed_reason TEXT NOT NULL,
+  hard_gate_reasons TEXT[],
+  model TEXT,
+  prompt_version TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- NTI standards (no pgvector, plain text)
+CREATE TABLE standard_clause (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tenant_id UUID NOT NULL REFERENCES tenant(id),
+  source TEXT NOT NULL,
+  clause_ref TEXT NOT NULL,
+  pillar TEXT NOT NULL,
+  heading TEXT NOT NULL,
+  body TEXT NOT NULL
+);
+
+-- Structured findings
+CREATE TABLE finding (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  audit_id UUID NOT NULL REFERENCES audit(id),
+  pillar TEXT NOT NULL,
+  observation_text TEXT NOT NULL,
+  evidence_item_ids UUID[] NOT NULL DEFAULT '{}',
+  standard_clause_ref TEXT,
+  severity INT NOT NULL CHECK (severity BETWEEN 1 AND 5),
+  recommendation_text TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN
+    ('draft','engineer_edited','signed','remediated','accepted_risk')),
+  created_by TEXT NOT NULL CHECK (created_by IN ('llm','engineer')),
+  reviewed_by UUID REFERENCES user_profile(id),
+  signed_at TIMESTAMPTZ,
+  llm_model TEXT,
+  llm_prompt_version TEXT
+);
+CREATE INDEX ON finding (audit_id, pillar);
+
+-- Remediation tracking
+CREATE TABLE remediation_action (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  finding_id UUID NOT NULL REFERENCES finding(id),
+  owner_user UUID REFERENCES user_profile(id),
+  target_date DATE,
+  status TEXT NOT NULL CHECK (status IN ('open','in_progress','closed','overdue')),
+  evidence_url TEXT,
+  closed_at TIMESTAMPTZ
+);
+
+-- Enable RLS on every table
+ALTER TABLE user_profile ENABLE ROW LEVEL SECURITY;
+ALTER TABLE operator ENABLE ROW LEVEL SECURITY;
+ALTER TABLE policy ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE submission ENABLE ROW LEVEL SECURITY;
+ALTER TABLE submission_item ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trust_signal ENABLE ROW LEVEL SECURITY;
+ALTER TABLE triage_result ENABLE ROW LEVEL SECURITY;
+ALTER TABLE standard_clause ENABLE ROW LEVEL SECURITY;
+ALTER TABLE finding ENABLE ROW LEVEL SECURITY;
+ALTER TABLE remediation_action ENABLE ROW LEVEL SECURITY;
+
+-- Simple policies: engineers see all under NTI tenant, operators see own
+-- (Expand these in migration 0002 if time allows)
+CREATE POLICY "engineers see all" ON audit FOR SELECT
+  USING (
+    (SELECT role FROM user_profile WHERE id = auth.uid()) IN ('nti_engineer','nti_admin')
+  );
+
+CREATE POLICY "operators see own" ON audit FOR SELECT
+  USING (
+    operator_id IN (
+      SELECT o.id FROM operator o
+      JOIN user_profile p ON p.tenant_id = o.tenant_id
+      WHERE p.id = auth.uid()
+    )
+  );
+```
 
 ---
 
 ## 6. Demo seed data (`supabase/seed.sql`)
 
-(Seed data structure provided in original document)
+```sql
+-- One NTI tenant, three operator tenants, one workshop
+INSERT INTO tenant (id, name, kind) VALUES
+  ('00000000-0000-0000-0000-000000000001', 'NTI', 'nti'),
+  ('00000000-0000-0000-0000-000000000002', 'Acme Transport', 'operator'),
+  ('00000000-0000-0000-0000-000000000003', 'Northern Freight', 'operator'),
+  ('00000000-0000-0000-0000-000000000004', 'Highway Haulage', 'operator'),
+  ('00000000-0000-0000-0000-000000000005', 'Brisbane Truck Workshop', 'workshop');
+
+-- Three operators, three policies
+INSERT INTO operator (id, tenant_id, name, industry_code, fleet_size, region) VALUES
+  ('a1000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'Acme Transport', 'road_freight', 45, 'QLD'),
+  ('a1000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003', 'Northern Freight', 'road_freight', 120, 'NT'),
+  ('a1000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000004', 'Highway Haulage', 'road_freight', 15, 'NSW');
+
+INSERT INTO policy (operator_id, premium_annual, odometer_total_km, next_audit_due) VALUES
+  ('a1000000-0000-0000-0000-000000000001', 285000, 2100000, '2026-08-15'),
+  ('a1000000-0000-0000-0000-000000000002', 640000, 6800000, '2026-08-22'),
+  ('a1000000-0000-0000-0000-000000000003', 92000, 780000, '2026-08-08');
+
+-- Five NTI standard clauses (real language, redacted or paraphrased)
+INSERT INTO standard_clause (tenant_id, source, clause_ref, pillar, heading, body) VALUES
+  ('00000000-0000-0000-0000-000000000001', 'NTI Audit Template v3.2', 'AM-4.2.1', 'asset_management', 'Tyre condition', 'All tyres must have minimum 1.6mm tread depth across the central three-quarters of the tyre width. Cuts or bulges are non-conformances requiring immediate action.'),
+  ('00000000-0000-0000-0000-000000000001', 'NTI Audit Template v3.2', 'AM-3.1.4', 'asset_management', 'Brake system', 'Brake pads must have minimum 3mm friction material remaining. Air lines must show no visible corrosion or leaks.'),
+  ('00000000-0000-0000-0000-000000000001', 'NTI Audit Template v3.2', 'EI-2.3.1', 'emergency_incident', 'Fire equipment', 'Fire extinguishers must be inspected within the past 12 months and mounted in accessible locations at all depot buildings.'),
+  ('00000000-0000-0000-0000-000000000001', 'NTI Audit Template v3.2', 'SS-1.4.2', 'site_safety_security', 'Load restraint', 'Loads must be secured per NTC Load Restraint Guide 2018. Restraints must be inspected before each departure.'),
+  ('00000000-0000-0000-0000-000000000001', 'NTI Audit Template v3.2', 'PC-2.1.3', 'people_capability', 'Driver fatigue management', 'Drivers must complete accredited fatigue management training every 24 months. Records must be maintained on file.');
+
+-- Three audits pre-seeded, one at each tier
+INSERT INTO audit (id, operator_id, tier, status) VALUES
+  ('aa000000-0000-0000-0000-000000000001', 'a1000000-0000-0000-0000-000000000001', 1, 'signed'),
+  ('aa000000-0000-0000-0000-000000000002', 'a1000000-0000-0000-0000-000000000002', 2, 'video_requested'),
+  ('aa000000-0000-0000-0000-000000000003', 'a1000000-0000-0000-0000-000000000003', 3, 'escalated');
+
+-- Pre-computed triage results for the three seeded audits (used to protect demo from rate limits)
+-- Insert submission, submission_item, triage_result rows for each.
+-- (Fill these in during hour 32 polish phase.)
+```
 
 ---
 
@@ -406,6 +627,8 @@ GEMINI_API_KEY=xxx
 NEXT_PUBLIC_APP_URL=https://riskgate.vercel.app
 ```
 
+Add all of these as Vercel environment variables for the `production` environment.
+
 ---
 
 ## 8. Key API routes reference
@@ -417,43 +640,107 @@ NEXT_PUBLIC_APP_URL=https://riskgate.vercel.app
 | `/api/vision/analyse` | POST | Run Gemini vision on a photo |
 | `/api/triage/[submissionId]` | POST | Full triage pipeline |
 | `/api/findings/draft` | POST | Draft findings for escalated audits |
+| `/api/audits/[id]/sign` | POST | Engineer sign-off |
+| `/api/audits/[id]/request-video` | POST | Tier 2 video request |
+| `/api/portal/benchmarks` | GET | Fixture peer benchmarks |
+| `/api/admin/portfolio` | GET | Aggregated portfolio for engineer view |
+
+Every route validates JWT via Supabase server client and enforces role. Non-mutating GETs on operator data only return rows for the caller's tenant.
 
 ---
 
-## 9. Testing checklist
+## 9. Testing checklist (run before each rehearsal)
 
-**Happy paths:**
-- [ ] New operator can log in and see their dashboard
-- [ ] Operator can start an audit and reach the capture screen
-- [ ] Capture screen works on iPhone Safari and Android Chrome
-- [ ] Photos upload successfully with GPS captured
-- [ ] Vision analysis returns tags for a typical depot photo
-- [ ] Triage runs end to end in under 10 seconds
-- [ ] Tier 1 audit clears to spot-check queue
-- [ ] Tier 2 audit shows video-request page to operator
-- [ ] Tier 3 audit escalates with evidence pre-loaded
-- [ ] Engineer can review, edit findings, sign off
+**Happy paths.**
+- [ ] New operator can log in and see their dashboard.
+- [ ] Operator can start an audit and reach the capture screen.
+- [ ] Capture screen works on iPhone Safari and Android Chrome.
+- [ ] Photos upload successfully with GPS captured.
+- [ ] Vision analysis returns tags for a typical depot photo.
+- [ ] Triage runs end to end in under 10 seconds.
+- [ ] Tier 1 audit clears to spot-check queue.
+- [ ] Tier 2 audit shows video-request page to operator, appears in engineer queue.
+- [ ] Tier 3 audit escalates, appears in engineer queue with all evidence pre-loaded.
+- [ ] Engineer can review, edit findings, sign off.
+- [ ] Signed audit updates operator portal in realtime.
 
-**Failure paths:**
-- [ ] Missing mandatory photo forces Tier 2
-- [ ] Low trust score forces Tier 2 or 3
-- [ ] Groq rate limit gracefully falls back to cached demo response
-- [ ] Vision timeout does not crash the submit flow
-- [ ] Network drop during upload retries automatically
+**Failure paths.**
+- [ ] Missing mandatory photo forces Tier 2 (hard gate).
+- [ ] Low trust score forces Tier 2 or 3.
+- [ ] Groq rate limit gracefully falls back to cached demo response.
+- [ ] Vision timeout does not crash the submit flow.
+- [ ] Network drop during upload retries automatically.
+
+**Demo-critical.**
+- [ ] Three seeded audits render correctly in engineer queue.
+- [ ] "Engineer hours saved" counter shows a believable number.
+- [ ] Landing page is visually polished.
+- [ ] Fallback demo video plays.
 
 ---
 
-## 10. Definition of "done"
+## 10. Rehearsal script (from `demo-script.md`)
+
+Rehearse three times before pitching. Time each run with a stopwatch.
+
+Target: 3 minutes 15 seconds (leaves 45 seconds for opening and closing).
+
+**Roles:**
+- Speaker: Dev C (drives narrative, holds nothing on stage but the mic).
+- Phone handler: Dev A (holds phone, taps buttons on speaker's cue).
+- Laptop handler: Dev B (switches tabs on speaker's cue).
+
+**Key beats to nail:**
+- The "three submissions in, one visit out" moment (this is the whole pitch).
+- The trust-signals panel visible on the escalated audit (proves you thought about gaming).
+- The engineer hours saved counter (concrete ROI number).
+
+---
+
+## 11. Fallback and contingency plans
+
+**WiFi dies.** Play the 60-second backup screen recording. Keep talking over it.
+
+**Groq rate-limited.** Cached responses for the three seeded audits will still work. Say "we're using our seed data because live rate limits during demos are the enemy" if asked.
+
+**Gemini rate-limited.** Vision falls back to fixture tags stored in `lib/fixtures/vision.ts`. Same script.
+
+**Vercel deploy broken.** Have `npm run dev` running on the demo laptop as fallback. Show localhost.
+
+**Camera does not open on phone.** Fall back to laptop demo. Use laptop webcam to snap a "photo" of a printed depot image.
+
+**Login broken.** Have all three demo users logged in already before you walk on stage. Do not log out.
+
+---
+
+## 12. Post-hackathon backlog (do not build during hackathon)
+
+Listed so you can honestly answer "what's next" when judges ask.
+
+- Real pgvector embeddings for standards library.
+- Real perceptual hashing for duplicate detection.
+- Telematics integration (start with Geotab, Motive).
+- Live video calling for Tier 2 verification.
+- Workshop network onboarding flow and payments.
+- SSO integration with NTI's identity provider.
+- Native mobile via React Native (only if operator adoption stalls on web).
+- Fine-grained RBAC beyond the four roles.
+- Multi-region deployment for data residency.
+- Underwriter-facing data licensing product.
+
+---
+
+## 13. Definition of "done" for the hackathon
 
 You are shippable when:
 
-1. Vercel deployment URL loads on any device on any network
-2. Three demo users can log in with magic link
-3. A new audit can be submitted end to end from a phone, and routes correctly
-4. Three pre-seeded audits render in the engineer queue with correct tier badges
-5. Engineer can sign off an escalated audit and the operator portal reflects it
-6. Fallback video exists and plays
-7. Pitch deck is 4 slides and rehearsed under 3 minutes
-8. Team knows the answers to all 8 Q&A questions
+1. Vercel deployment URL loads on any device on any network.
+2. The three demo users can log in with magic link.
+3. A new audit can be submitted end to end from a phone, and routes correctly.
+4. Three pre-seeded audits render in the engineer queue with correct tier badges.
+5. Engineer can sign off an escalated audit and the operator portal reflects it.
+6. Fallback video exists and plays.
+7. Pitch deck is 4 slides and rehearsed under 3 minutes.
+8. Team knows the answers to all 8 Q&A questions in `demo-script.md`.
 
 Ship it.
