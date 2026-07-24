@@ -15,7 +15,7 @@ export default function Home() {
             <span className="text-xl font-bold text-white">RiskGate</span>
           </div>
           <div className="flex gap-4">
-            <Link href="/login">
+            <Link href="/dashboard">
               <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800/50">
                 Sign In
               </Button>
@@ -42,13 +42,13 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link href="/operator/dashboard" className="w-full sm:w-auto">
+            <Link href="/dashboard" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200">
                 I'm an Operator
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link href="/engineer/queue" className="w-full sm:w-auto">
+            <Link href="/queue" className="w-full sm:w-auto">
               <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-600 text-white hover:bg-slate-800/50 hover:border-slate-500">
                 I'm an NTI Engineer
               </Button>
@@ -153,7 +153,7 @@ export default function Home() {
         {/* CTA Footer */}
         <div className="text-center py-16">
           <p className="text-slate-400 mb-8">Ready to amplify your audit capacity?</p>
-          <Link href="/operator/dashboard">
+          <Link href="/dashboard">
             <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200">
               Get Started
               <ArrowRight className="w-4 h-4 ml-2" />
