@@ -158,8 +158,9 @@ export default function EngineerQueue() {
         ))}
       </div>
 
+      <div className="mt-8 grid items-start gap-6 lg:grid-cols-2">
       {/* To do */}
-      <section className="mt-8">
+      <section>
         <div className="mb-3 flex items-center gap-2">
           <ListChecks className="h-4 w-4 text-rose-500" />
           <h2 className="text-sm font-semibold text-foreground">
@@ -203,7 +204,7 @@ export default function EngineerQueue() {
       </section>
 
       {/* Audited */}
-      <section className="mt-10">
+      <section>
         <div className="mb-3 flex items-center gap-2">
           <CircleCheck className="h-4 w-4 text-emerald-500" />
           <h2 className="text-sm font-semibold text-foreground">Audited</h2>
@@ -231,6 +232,7 @@ export default function EngineerQueue() {
           </div>
         )}
       </section>
+      </div>
     </main>
   );
 }
