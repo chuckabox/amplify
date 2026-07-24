@@ -57,12 +57,12 @@ export default function Home() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Logo />
           <div className="flex items-center gap-1.5">
-            <Link href="/dashboard">
+            <Link href="/login">
               <Button variant="ghost" size="sm" className="text-muted-foreground">
                 Sign in
               </Button>
             </Link>
-            <Link href="/dashboard">
+            <Link href="/login">
               <Button size="sm">Get started</Button>
             </Link>
           </div>
@@ -87,7 +87,7 @@ export default function Home() {
         </p>
 
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/dashboard" className="w-full sm:w-auto">
+          <Link href="/login" className="w-full sm:w-auto">
             <Button size="lg" className="w-full gap-2 sm:w-auto">
               I&apos;m an operator
               <ArrowRight className="h-4 w-4" />
