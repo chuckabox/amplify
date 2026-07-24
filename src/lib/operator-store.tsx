@@ -31,6 +31,7 @@ interface StoreValue {
   addVehicle: (vehicle: Omit<Vehicle, "id">) => void;
   removeVehicle: (vehicleId: string) => void;
   completeAudit: (audit: Audit) => void;
+  signOffAudit: (operatorId: string, auditId: string) => void;
   reset: () => void;
 }
 
@@ -111,6 +112,24 @@ export function OperatorProvider({ children }: { children: React.ReactNode }) {
     [mutateCurrent],
   );
 
+  const signOffAudit = useCallback(
+    (operatorId: string, auditId: string) => {
+      setOperators((prev) =>
+        prev.map((op) =>
+          op.id === operatorId
+            ? {
+                ...op,
+                audits: op.audits.map((a) =>
+                  a.id === auditId ? { ...a, status: "signed" } : a,
+                ),
+              }
+            : op,
+        ),
+      );
+    },
+    [],
+  );
+
   const reset = useCallback(() => {
     setOperators(INITIAL_OPERATORS);
     setCurrentId(null);
@@ -131,6 +150,7 @@ export function OperatorProvider({ children }: { children: React.ReactNode }) {
     addVehicle,
     removeVehicle,
     completeAudit,
+    signOffAudit,
     reset,
   };
 
