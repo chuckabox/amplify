@@ -43,18 +43,18 @@ export default function LoginPage() {
 
         <div className="relative max-w-md">
           <h1 className="text-3xl font-semibold leading-tight">
-            Your insurance audit, done from your phone.
+            Your insurance safety check, done from your phone.
           </h1>
           <p className="mt-4 text-primary-foreground/80">
             When you take out or renew an NTI policy, RiskGate walks you through
-            a guided audit and prices your premium on the evidence — no site
-            visit needed for most fleets.
+            a quick safety check and sets your price from what you show us — no
+            inspector visit needed for most fleets.
           </p>
           <ul className="mt-8 space-y-3 text-sm">
             {[
-              "Capture evidence across the four NTI pillars",
-              "Get an instant, transparent premium result",
-              "Track findings and remediation year-round",
+              "Snap a few photos across the four safety areas",
+              "See your price straight away, with nothing hidden",
+              "Keep track of what to fix, all year round",
             ].map((item) => (
               <li key={item} className="flex items-center gap-2.5">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15">

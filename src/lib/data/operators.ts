@@ -43,6 +43,20 @@ export interface Vehicle {
 
 export type FindingStatus = "clear" | "advisory" | "action";
 
+// Plain-English labels shown in the UI.
+export const FINDING_STATUS_LABEL: Record<FindingStatus, string> = {
+  clear: "Good",
+  advisory: "Keep an eye on",
+  action: "Needs fixing",
+};
+
+// What each tier means, in one sentence, for people who don't know the jargon.
+export const TIER_MEANING: Record<1 | 2 | 3, string> = {
+  1: "Passed — cleared automatically, no visit needed.",
+  2: "Almost there — send a short video to confirm a couple of things.",
+  3: "Needs an NTI engineer to visit in person.",
+};
+
 export interface Finding {
   pillar: Pillar;
   observation: string;

@@ -41,11 +41,11 @@ export default function PremiumPage() {
     <main className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-foreground">
-          Premium breakdown
+          How your price is worked out
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Exactly how your {formatCurrency(premium)} annual premium is
-          calculated — and how your audit changes it.
+          Exactly how we get to your {formatCurrency(premium)} yearly price — and
+          how doing a safety check changes it.
         </p>
       </div>
 
@@ -57,7 +57,7 @@ export default function PremiumPage() {
           {/* Base by vehicle type */}
           <div className="mt-4 space-y-2">
             <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              1 · Fleet base rate
+              1 · Starting price for your vehicles
             </div>
             {byType.map((r) => (
               <div
@@ -77,7 +77,7 @@ export default function PremiumPage() {
               </div>
             ))}
             <div className="flex items-center justify-between border-t border-border pt-2 text-sm">
-              <span className="font-medium text-foreground">Base subtotal</span>
+              <span className="font-medium text-foreground">Subtotal</span>
               <span className="font-semibold text-foreground">
                 {formatCurrency(base)}
               </span>
@@ -87,17 +87,17 @@ export default function PremiumPage() {
           {/* Risk multiplier */}
           <div className="mt-6 space-y-2">
             <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              2 · Audit risk adjustment
+              2 · Change from your safety check
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-muted-foreground">
                 {latest ? (
                   <>
                     <TierBadge tier={latest.tier} /> ×{mult.toFixed(2)}{" "}
-                    {multLabel}
+                    {multLabel === "loading" ? "extra" : multLabel}
                   </>
                 ) : (
-                  <>Un-audited loading ×{mult.toFixed(2)}</>
+                  <>No check yet — extra added ×{mult.toFixed(2)}</>
                 )}
               </span>
               <span
@@ -114,11 +114,11 @@ export default function PremiumPage() {
           {/* Mileage loading */}
           <div className="mt-6 space-y-2">
             <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              3 · Fleet mileage loading
+              3 · Extra for distance driven
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                ~$3,500 per million fleet km
+                More kilometres means more time on the road, so a little more.
               </span>
               <span className="font-medium text-foreground">
                 +{formatCurrency(loading)}
@@ -129,7 +129,7 @@ export default function PremiumPage() {
           {/* Total */}
           <div className="mt-6 flex items-center justify-between rounded-xl bg-accent/60 px-4 py-3">
             <span className="text-sm font-semibold text-foreground">
-              Annual premium
+              Your yearly price
             </span>
             <span className="text-xl font-semibold text-foreground">
               {formatCurrency(premium)}
@@ -143,21 +143,22 @@ export default function PremiumPage() {
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">
-                Lower your premium
+                How to pay less
               </h2>
             </div>
             <ul className="mt-3 space-y-3 text-sm text-muted-foreground">
               <li>
-                A <span className="font-medium text-foreground">Tier 1</span>{" "}
-                audit applies a 0.90× discount to your base rate.
+                A{" "}
+                <span className="font-medium text-foreground">passing check</span>{" "}
+                takes 10% off your starting price.
               </li>
               <li>
-                Resolving open findings before your next audit improves your
-                score and rating.
+                Fix the things flagged in your last check before the next one to
+                improve your score.
               </li>
               <li>
-                Workshop-attested evidence raises trust and clears more items
-                automatically.
+                Have an approved workshop do the check for you — it&apos;s trusted
+                more and clears faster.
               </li>
             </ul>
             <Link href="/audit/new">

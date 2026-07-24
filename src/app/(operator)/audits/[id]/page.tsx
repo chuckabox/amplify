@@ -9,8 +9,11 @@ import {
   formatCurrency,
   formatDate,
   PILLAR_LABEL,
+  FINDING_STATUS_LABEL,
+  TIER_MEANING,
   type FindingStatus,
 } from "@/lib/data/operators";
+import { Hint } from "@/components/hint";
 
 const statusStyles: Record<FindingStatus, string> = {
   clear: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
@@ -68,6 +71,7 @@ export default function AuditDetailPage({
       <div className="mt-4 rounded-2xl border border-border bg-card p-6">
         <div className="flex flex-wrap items-center gap-3">
           <TierBadge tier={audit.tier} />
+          <Hint text={TIER_MEANING[audit.tier]} />
           <span className="font-mono text-xs text-muted-foreground">
             {audit.id}
           </span>
@@ -79,8 +83,9 @@ export default function AuditDetailPage({
 
         <div className="mt-5 grid grid-cols-3 gap-4">
           <div>
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Risk score
+              <Hint text="Lower is safer. 1 is the best score, 5 is the worst." />
             </div>
             <div className="mt-1 text-2xl font-semibold text-foreground">
               {audit.score.toFixed(1)}
@@ -89,7 +94,7 @@ export default function AuditDetailPage({
           </div>
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Findings
+              Notes
             </div>
             <div className="mt-1 text-2xl font-semibold text-foreground">
               {audit.findings.length}
@@ -97,7 +102,7 @@ export default function AuditDetailPage({
           </div>
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Premium
+              Price change
             </div>
             <div
               className={`mt-1 text-2xl font-semibold ${
@@ -113,7 +118,7 @@ export default function AuditDetailPage({
 
       {/* Findings */}
       <h2 className="mt-8 mb-3 text-sm font-semibold text-foreground">
-        Findings
+        What we found
       </h2>
       <div className="space-y-3">
         {audit.findings.map((f, i) => (
@@ -123,9 +128,9 @@ export default function AuditDetailPage({
                 {PILLAR_LABEL[f.pillar]}
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${statusStyles[f.status]}`}
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyles[f.status]}`}
               >
-                {f.status}
+                {FINDING_STATUS_LABEL[f.status]}
               </span>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">

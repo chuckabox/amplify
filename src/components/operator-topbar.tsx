@@ -8,10 +8,10 @@ import { useStore } from "@/lib/operator-store";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard", label: "Home" },
   { href: "/fleet", label: "Fleet" },
-  { href: "/audits", label: "Audits" },
-  { href: "/premium", label: "Premium" },
+  { href: "/audits", label: "Checks" },
+  { href: "/premium", label: "Price" },
 ];
 
 export function OperatorTopBar() {
@@ -29,7 +29,7 @@ export function OperatorTopBar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-6">
           <Logo href="/dashboard" />
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-1 md:flex" data-tour="nav">
             {NAV.map((item) => {
               const active =
                 pathname === item.href || pathname.startsWith(item.href + "/");

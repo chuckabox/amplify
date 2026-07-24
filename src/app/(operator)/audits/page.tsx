@@ -16,16 +16,17 @@ export default function AuditsPage() {
       <div className="mb-8 flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">
-            Audit history
+            Your safety checks
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Every submission, its outcome and its effect on your premium.
+            Every check you&apos;ve done, how it went, and what it did to your
+            price.
           </p>
         </div>
         <Link href="/audit/new">
           <Button className="gap-2">
             <ClipboardCheck className="h-4 w-4" />
-            New audit
+            New check
           </Button>
         </Link>
       </div>
@@ -54,7 +55,7 @@ export default function AuditsPage() {
                   {a.reason}
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {a.findings.length} findings · score {a.score.toFixed(1)}/5
+                  {a.findings.length} notes · score {a.score.toFixed(1)}/5
                 </p>
               </div>
 
@@ -73,7 +74,7 @@ export default function AuditsPage() {
                   {formatCurrency(Math.abs(delta))}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  premium {down ? "saved" : "loaded"}
+                  {down ? "off your price" : "added to price"}
                 </div>
               </div>
 

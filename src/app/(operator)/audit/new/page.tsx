@@ -29,12 +29,12 @@ import {
 } from "@/lib/data/operators";
 
 const ANALYSIS_STAGES = [
-  "Uploading evidence securely",
-  "Running AI vision on photos",
-  "Benchmarking answers against NTI standards",
-  "Computing pillar risk scores",
-  "Applying trust & anti-gaming signals",
-  "Routing to a tier",
+  "Uploading your photos",
+  "Checking your photos with AI",
+  "Comparing your answers to NTI safety rules",
+  "Working out your risk score",
+  "Making sure the photos are genuine",
+  "Deciding what happens next",
 ];
 
 type Preview = { name: string; url: string };
@@ -291,8 +291,9 @@ export default function GuidedAuditPage() {
             Upload evidence
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Snap a photo for each item below. Photos carry GPS and timestamp
-            metadata that our trust checks use — take them on site, now.
+            Snap a photo for each item below. Photos record the time and place
+            they were taken, which helps us check they&apos;re genuine — so take
+            them on site, right now.
           </p>
 
           <div className="mt-6 space-y-3">

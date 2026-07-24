@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TierBadge } from "@/components/tier-badge";
+import { Hint } from "@/components/hint";
+import { OperatorTour } from "@/components/operator-tour";
 import { useStore } from "@/lib/operator-store";
 import {
   computePremium,
@@ -22,6 +24,8 @@ import {
   daysUntil,
   totalOdometer,
   PILLAR_LABEL,
+  FINDING_STATUS_LABEL,
+  TIER_MEANING,
 } from "@/lib/data/operators";
 
 const statusStyles: Record<string, string> = {
@@ -51,21 +55,21 @@ export default function OperatorDashboard() {
     {
       href: "/premium",
       icon: Wallet,
-      label: "Annual premium",
+      label: "Yearly price",
       value: formatCurrency(premium),
-      sub: "see breakdown",
+      sub: "see how it's worked out",
     },
     {
       href: "/fleet",
       icon: Route,
-      label: "Total mileage",
-      value: `${(odo / 1_000_000).toFixed(2)}M`,
-      sub: "fleet km",
+      label: "Total distance driven",
+      value: `${(odo / 1_000_000).toFixed(2)}M km`,
+      sub: "across the fleet",
     },
     {
       href: "/audit/new",
       icon: CalendarClock,
-      label: "Next audit",
+      label: "Next check due",
       value: dueDays > 0 ? `${dueDays} days` : "Due now",
       sub: `due ${formatDate(due)}`,
     },
@@ -91,21 +95,24 @@ export default function OperatorDashboard() {
               </span>
               <span>Policy {current.policy.number}</span>
             </div>
+            <div className="mt-3">
+              <OperatorTour />
+            </div>
           </div>
-          <Link href="/audit/new">
+          <Link href="/audit/new" data-tour="start-audit">
             <Button
               size="lg"
               className="gap-2 bg-white text-primary hover:bg-white/90"
             >
               <ClipboardCheck className="h-4 w-4" />
-              Start guided audit
+              Start safety check
             </Button>
           </Link>
         </div>
       </div>
 
       {/* Stats (clickable) */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4" data-tour="stats">
         {stats.map((s) => (
           <Link
             key={s.label}
@@ -134,8 +141,8 @@ export default function OperatorDashboard() {
         {/* Latest audit */}
         <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">
-              Latest audit
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              Your last safety check
             </h2>
             {latest && (
               <Link
@@ -151,8 +158,10 @@ export default function OperatorDashboard() {
             <>
               <div className="flex flex-wrap items-center gap-3">
                 <TierBadge tier={latest.tier} />
-                <span className="text-sm text-muted-foreground">
+                <Hint text={TIER_MEANING[latest.tier]} />
+                <span className="flex items-center gap-1 text-sm text-muted-foreground">
                   {formatDate(latest.date)} · score {latest.score.toFixed(1)}/5
+                  <Hint text="Lower is safer. 1 is the best score, 5 is the worst." />
                 </span>
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
@@ -170,9 +179,9 @@ export default function OperatorDashboard() {
                       </div>
                     </div>
                     <span
-                      className={`ml-3 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${statusStyles[f.status]}`}
+                      className={`ml-3 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyles[f.status]}`}
                     >
-                      {f.status}
+                      {FINDING_STATUS_LABEL[f.status]}
                     </span>
                   </li>
                 ))}
@@ -180,16 +189,17 @@ export default function OperatorDashboard() {
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No audits yet. Start your first guided audit to set your premium.
+              No safety checks yet. Do your first one to set your price.
             </p>
           )}
         </div>
 
         {/* Premium / benchmark */}
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-accent/50 p-6">
-            <h2 className="text-sm font-semibold text-foreground">
-              Current premium
+          <div className="rounded-2xl border border-border bg-accent/50 p-6" data-tour="premium">
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              Your yearly price
+              <Hint text="Your insurance premium — what you pay NTI each year to be covered." />
             </h2>
             <div className="mt-3 text-3xl font-semibold text-foreground">
               {formatCurrency(premium)}
@@ -198,12 +208,12 @@ export default function OperatorDashboard() {
             {latest && (
               <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-xs font-medium text-emerald-700">
                 <TrendingDown className="h-3 w-3" />
-                Priced on your {formatDate(latest.date)} audit
+                Based on your {formatDate(latest.date)} check
               </div>
             )}
             <Link href="/premium">
               <Button variant="outline" size="sm" className="mt-4 w-full gap-1">
-                How this is calculated
+                See how it&apos;s worked out
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
@@ -211,13 +221,12 @@ export default function OperatorDashboard() {
 
           <div className="rounded-2xl border border-border bg-card p-6">
             <h2 className="text-sm font-semibold text-foreground">
-              Peer benchmark
+              How you compare
             </h2>
             <div className="mt-3 flex items-end gap-1">
               <span className="text-3xl font-semibold text-foreground">
-                {current.benchmarkPercentile}
+                Top {100 - current.benchmarkPercentile}%
               </span>
-              <span className="mb-1 text-sm text-muted-foreground">th pct</span>
             </div>
             <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
@@ -226,8 +235,8 @@ export default function OperatorDashboard() {
               />
             </div>
             <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              Safer than {current.benchmarkPercentile}% of similar fleets in your
-              region and size band.
+              Safer than {current.benchmarkPercentile}% of similar fleets your
+              size in your area.
             </p>
           </div>
         </div>
