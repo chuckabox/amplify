@@ -1,53 +1,129 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Inbox, CircleCheck, Video, MapPin, Info } from "lucide-react";
+import {
+  ListChecks,
+  Sparkles,
+  CircleCheck,
+  Layers,
+  Info,
+  ChevronRight,
+  Video,
+  MapPin,
+} from "lucide-react";
 import { TierBadge } from "@/components/tier-badge";
 import { Hint } from "@/components/hint";
 import { useStore } from "@/lib/operator-store";
-import { getQueue, portfolio } from "@/lib/data/engineer";
+import {
+  getAllWork,
+  groupByOperator,
+  workStatus,
+  type WorkItem,
+} from "@/lib/data/engineer";
 import { PILLAR_LABEL } from "@/lib/data/operators";
 
-const STATUS_LABEL: Record<string, string> = {
-  signed: "Signed off",
-  video_requested: "Waiting on video",
-  escalated: "Needs a visit",
+const toneChip: Record<string, string> = {
+  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
+  blue: "bg-sky-50 text-sky-700 ring-sky-600/15",
+  amber: "bg-amber-50 text-amber-700 ring-amber-600/15",
+  rose: "bg-rose-50 text-rose-700 ring-rose-600/15",
 };
 
-type Filter = "all" | 1 | 2 | 3;
+const scoreTone: Record<1 | 2 | 3, string> = {
+  1: "text-emerald-600",
+  2: "text-amber-600",
+  3: "text-rose-600",
+};
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: 1, label: "Passed" },
-  { key: 2, label: "Video check" },
-  { key: 3, label: "Needs visit" },
-];
+function WorkRow({ item }: { item: WorkItem }) {
+  const router = useRouter();
+  const ws = workStatus(item.audit);
+  const finding = item.audit.findings[0];
+  return (
+    <button
+      onClick={() => router.push(`/queue/${item.audit.id}`)}
+      className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-muted/40"
+    >
+      <TierBadge tier={item.audit.tier} />
+      <span className={`text-sm font-semibold ${scoreTone[item.audit.tier]}`}>
+        {item.audit.score.toFixed(1)}
+        <span className="font-normal text-muted-foreground">/5</span>
+      </span>
+      <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+        {finding ? `${PILLAR_LABEL[finding.pillar]}: ` : ""}
+        {item.audit.reason}
+      </span>
+      <span
+        className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${toneChip[ws.tone]}`}
+      >
+        {ws.label}
+      </span>
+      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+    </button>
+  );
+}
+
+function OperatorGroup({
+  name,
+  region,
+  fleetSize,
+  items,
+}: {
+  name: string;
+  region: string;
+  fleetSize: number;
+  items: WorkItem[];
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border bg-muted/40 px-5 py-3">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-foreground">{name}</span>
+          <span className="text-xs text-muted-foreground">· {region}</span>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {fleetSize} vehicles · {items.length}{" "}
+          {items.length === 1 ? "check" : "checks"}
+        </span>
+      </div>
+      <div className="divide-y divide-border">
+        {items.map((it) => (
+          <WorkRow key={it.audit.id} item={it} />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function EngineerQueue() {
-  const router = useRouter();
   const { operators } = useStore();
-  const [filter, setFilter] = useState<Filter>("all");
 
-  const queue = getQueue(operators);
-  const stats = portfolio(operators);
-  const rows = queue.filter((r) => filter === "all" || r.audit.tier === filter);
+  const work = getAllWork(operators);
+  const todo = work.filter((w) => workStatus(w.audit).group === "todo");
+  const done = work.filter((w) => workStatus(w.audit).group === "done");
+  const todoGroups = groupByOperator(todo);
+  const doneGroups = groupByOperator(done);
+
+  const aiApproved = done.filter((w) => w.audit.status !== "signed").length;
+  const signedOff = done.filter((w) => w.audit.status === "signed").length;
+  const needVideo = todo.filter((w) => w.audit.tier === 2).length;
+  const needVisit = todo.filter((w) => w.audit.tier === 3).length;
 
   const metrics = [
-    { icon: Inbox, label: "In the queue", value: stats.total, tone: "text-foreground" },
-    { icon: CircleCheck, label: "Passed on their own", value: stats.autoCleared, tone: "text-emerald-600" },
-    { icon: Video, label: "Need a video", value: stats.videoCheck, tone: "text-amber-600" },
-    { icon: MapPin, label: "Need a visit", value: stats.visits, tone: "text-rose-600" },
+    { icon: ListChecks, label: "To do", value: todo.length, tone: "text-rose-600" },
+    { icon: Sparkles, label: "AI approved", value: aiApproved, tone: "text-sky-600" },
+    { icon: CircleCheck, label: "Signed off", value: signedOff, tone: "text-emerald-600" },
+    { icon: Layers, label: "All checks", value: work.length, tone: "text-foreground" },
   ];
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
       {/* Heading */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-foreground">Audit queue</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Your work</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Every fleet&apos;s safety check lands here already scored. You only act
-          on the ones that need a person.
+          Everything the AI has triaged, grouped by fleet. Your to-do list is on
+          top; everything already handled is below.
         </p>
       </div>
 
@@ -56,9 +132,9 @@ export default function EngineerQueue() {
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <p>
           <span className="font-medium text-foreground">Why this screen: </span>
-          instead of driving to every depot, you see all fleets in one list.
-          Green ones already passed — a quick look is enough. Amber and red are
-          where your time actually matters.
+          instead of driving to every depot, the AI sorts every fleet for you.
+          You only work through the &ldquo;To do&rdquo; list — and can still open
+          anything the AI approved to double-check it.
         </p>
       </div>
 
@@ -82,106 +158,79 @@ export default function EngineerQueue() {
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="mt-8 flex items-center justify-between">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-          Fleets
-          <Hint text="Sorted with the riskiest at the top, so the fleets that need you are first." />
-        </h2>
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
-          {FILTERS.map((f) => (
-            <button
-              key={String(f.key)}
-              onClick={() => setFilter(f.key)}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                filter === f.key
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+      {/* To do */}
+      <section className="mt-8">
+        <div className="mb-3 flex items-center gap-2">
+          <ListChecks className="h-4 w-4 text-rose-500" />
+          <h2 className="text-sm font-semibold text-foreground">
+            To do — needs your action
+          </h2>
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+            {todo.length}
+          </span>
+          <Hint text="Only Tier 2 (video) and Tier 3 (visit) fleets land here. Tier 1 passes on its own." />
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left">
-                {["Fleet", "Area", "Vehicles", "Result", "Score", "What we found", "Status"].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {rows.map((r) => (
-                <tr
-                  key={r.audit.id}
-                  onClick={() => router.push(`/queue/${r.audit.id}`)}
-                  className="cursor-pointer transition-colors hover:bg-muted/40"
-                >
-                  <td className="px-5 py-4 font-medium text-foreground">
-                    {r.operatorName}
-                  </td>
-                  <td className="px-5 py-4 text-muted-foreground">{r.region}</td>
-                  <td className="px-5 py-4 text-muted-foreground">
-                    {r.fleetSize}
-                  </td>
-                  <td className="px-5 py-4">
-                    <TierBadge tier={r.audit.tier} />
-                  </td>
-                  <td className="px-5 py-4">
-                    <span
-                      className={`font-semibold ${
-                        r.audit.tier === 1
-                          ? "text-emerald-600"
-                          : r.audit.tier === 2
-                            ? "text-amber-600"
-                            : "text-rose-600"
-                      }`}
-                    >
-                      {r.audit.score.toFixed(1)}
-                    </span>
-                    <span className="text-muted-foreground"> / 5</span>
-                  </td>
-                  <td className="max-w-xs truncate px-5 py-4 text-muted-foreground">
-                    {r.audit.findings[0]
-                      ? PILLAR_LABEL[r.audit.findings[0].pillar] +
-                        ": " +
-                        r.audit.reason
-                      : r.audit.reason}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="text-muted-foreground">
-                      {STATUS_LABEL[r.audit.status] ?? r.audit.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {rows.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={7}
-                    className="px-5 py-10 text-center text-sm text-muted-foreground"
-                  >
-                    No fleets in this group.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {todoGroups.length > 0 ? (
+          <div className="space-y-3">
+            {todoGroups.map((g) => (
+              <OperatorGroup
+                key={g.operatorId}
+                name={g.operatorName}
+                region={g.region}
+                fleetSize={g.items[0].fleetSize}
+                items={g.items}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+            You&apos;re all caught up — nothing needs action right now.
+          </div>
+        )}
+
+        {/* Small legend */}
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <Video className="h-3.5 w-3.5 text-amber-500" />
+            {needVideo} waiting on a video
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 text-rose-500" />
+            {needVisit} waiting on a visit
+          </span>
         </div>
-      </div>
+      </section>
+
+      {/* Audited */}
+      <section className="mt-10">
+        <div className="mb-3 flex items-center gap-2">
+          <CircleCheck className="h-4 w-4 text-emerald-500" />
+          <h2 className="text-sm font-semibold text-foreground">Audited</h2>
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
+            {done.length}
+          </span>
+          <Hint text="Passed automatically by the AI, or signed off by you. Open any to double-check the evidence." />
+        </div>
+
+        {doneGroups.length > 0 ? (
+          <div className="space-y-3">
+            {doneGroups.map((g) => (
+              <OperatorGroup
+                key={g.operatorId}
+                name={g.operatorName}
+                region={g.region}
+                fleetSize={g.items[0].fleetSize}
+                items={g.items}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+            Nothing audited yet.
+          </div>
+        )}
+      </section>
     </main>
   );
 }

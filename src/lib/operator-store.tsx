@@ -15,7 +15,7 @@ import {
   type Vehicle,
 } from "@/lib/data/operators";
 
-const STORAGE_KEY = "riskgate:v1";
+const STORAGE_KEY = "riskgate:v2";
 
 interface Persisted {
   operators: Operator[];
@@ -31,7 +31,11 @@ interface StoreValue {
   addVehicle: (vehicle: Omit<Vehicle, "id">) => void;
   removeVehicle: (vehicleId: string) => void;
   completeAudit: (audit: Audit) => void;
-  signOffAudit: (operatorId: string, auditId: string) => void;
+  signOffAudit: (
+    operatorId: string,
+    auditId: string,
+    opts?: { decision?: "agreed" | "noted"; notes?: string },
+  ) => void;
   reset: () => void;
 }
 
@@ -113,14 +117,25 @@ export function OperatorProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOffAudit = useCallback(
-    (operatorId: string, auditId: string) => {
+    (
+      operatorId: string,
+      auditId: string,
+      opts?: { decision?: "agreed" | "noted"; notes?: string },
+    ) => {
       setOperators((prev) =>
         prev.map((op) =>
           op.id === operatorId
             ? {
                 ...op,
                 audits: op.audits.map((a) =>
-                  a.id === auditId ? { ...a, status: "signed" } : a,
+                  a.id === auditId
+                    ? {
+                        ...a,
+                        status: "signed",
+                        engineerDecision: opts?.decision ?? "agreed",
+                        engineerNotes: opts?.notes,
+                      }
+                    : a,
                 ),
               }
             : op,

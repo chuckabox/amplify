@@ -65,17 +65,33 @@ export interface Finding {
   status: FindingStatus;
 }
 
+export type AuditStatus =
+  | "triaged" // AI-cleared, waiting for an optional engineer spot-check
+  | "signed" // an engineer has signed it off
+  | "video_requested" // Tier 2 — waiting on a verification video
+  | "escalated"; // Tier 3 — waiting on an in-person visit
+
 export interface Audit {
   id: string;
   date: string; // ISO date
   tier: 1 | 2 | 3;
   score: number; // 1..5, lower is better
-  status: "signed" | "video_requested" | "escalated";
+  status: AuditStatus;
   reason: string;
   findings: Finding[];
   premiumBefore: number;
   premiumAfter: number;
+  engineerDecision?: "agreed" | "noted"; // agreed with AI, or added own notes
+  engineerNotes?: string;
 }
+
+// The demo forces each of the three login fleets to a fixed outcome so the
+// three tiers are always demonstrable. Fleets not listed here default to pass.
+export const FORCED_TIER: Record<string, 1 | 2 | 3> = {
+  acme: 1,
+  northern: 2,
+  highway: 3,
+};
 
 export interface Operator {
   id: string;
@@ -85,6 +101,7 @@ export interface Operator {
   region: string;
   contact: string;
   memberSince: string;
+  demoLogin?: boolean; // shown as a pickable fleet on the login screen
   policy: {
     number: string;
     coverage: string[];
@@ -189,6 +206,7 @@ export const INITIAL_OPERATORS: Operator[] = [
     region: "Brisbane, QLD",
     contact: "ops@acmetransport.com.au",
     memberSince: "2021",
+    demoLogin: true,
     policy: {
       number: "NTI-QLD-04821",
       coverage: ["Heavy motor", "Goods in transit", "Public liability"],
@@ -250,6 +268,7 @@ export const INITIAL_OPERATORS: Operator[] = [
     region: "Darwin, NT",
     contact: "compliance@northernfreight.com.au",
     memberSince: "2019",
+    demoLogin: true,
     policy: {
       number: "NTI-NT-01193",
       coverage: ["Heavy motor", "Refrigerated goods", "Public liability", "Downtime"],
@@ -324,6 +343,7 @@ export const INITIAL_OPERATORS: Operator[] = [
     region: "Newcastle, NSW",
     contact: "admin@highwayhaulage.com.au",
     memberSince: "2023",
+    demoLogin: true,
     policy: {
       number: "NTI-NSW-07740",
       coverage: ["Heavy motor", "Goods in transit"],
@@ -371,6 +391,154 @@ export const INITIAL_OPERATORS: Operator[] = [
             severity: 3,
             recommendation: "Re-certify drivers within 30 days.",
             status: "action",
+          },
+        ],
+      },
+    ],
+  },
+
+  // --- Extra fleets: not login-able, they exist to fill the engineer queue ---
+  {
+    id: "coastal",
+    name: "Coastal Carriers",
+    initials: "CC",
+    industry: "Refrigerated distribution",
+    region: "Geelong, VIC",
+    contact: "ops@coastalcarriers.com.au",
+    memberSince: "2020",
+    policy: {
+      number: "NTI-VIC-03310",
+      coverage: ["Heavy motor", "Refrigerated goods"],
+      excess: 7500,
+      riskRating: "Standard",
+      auditIntervalMonths: 9,
+    },
+    benchmarkPercentile: 61,
+    vehicles: [
+      v("CST-1", "Prime mover", "Volvo FH", 2021, 288000),
+      v("CST-2", "Rigid", "Isuzu FVR", 2022, 132000),
+      v("CST-3", "Trailer", "Maxitrans Reefer", 2020, 305000),
+      v("CST-4", "Van", "Renault Master", 2021, 88000),
+    ],
+    audits: [
+      {
+        id: "AUD-2025-121",
+        date: "2025-08-24",
+        tier: 2,
+        score: 3.1,
+        status: "video_requested",
+        reason: "Fridge unit seal wear on CST-3; asked for a close-up video.",
+        premiumBefore: 41200,
+        premiumAfter: 43900,
+        findings: [
+          {
+            pillar: "asset_management",
+            observation: "Reefer door seal on CST-3 looks worn; hard to judge from photo.",
+            severity: 3,
+            recommendation: "Send a short video panning across the door seal.",
+            status: "action",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "outback",
+    name: "Outback Logistics",
+    initials: "OL",
+    industry: "Remote-area haulage",
+    region: "Alice Springs, NT",
+    contact: "admin@outbacklog.com.au",
+    memberSince: "2018",
+    policy: {
+      number: "NTI-NT-02087",
+      coverage: ["Heavy motor", "Goods in transit", "Public liability"],
+      excess: 12500,
+      riskRating: "Watch",
+      auditIntervalMonths: 6,
+    },
+    benchmarkPercentile: 18,
+    vehicles: [
+      v("OBK-1", "Prime mover", "Kenworth C509", 2016, 1020000),
+      v("OBK-2", "Prime mover", "Mack Trident", 2017, 880000, "maintenance"),
+      v("OBK-3", "Trailer", "Vawdrey Road-train", 2015, 760000),
+      v("OBK-4", "Trailer", "Krueger Flat-top", 2016, 690000),
+    ],
+    audits: [
+      {
+        id: "AUD-2025-057",
+        date: "2025-08-05",
+        tier: 3,
+        score: 4.5,
+        status: "escalated",
+        reason: "Brake wear across two units and no recent maintenance logs.",
+        premiumBefore: 44800,
+        premiumAfter: 62700,
+        findings: [
+          {
+            pillar: "asset_management",
+            observation: "OBK-2 air lines show corrosion; brakes overdue for service.",
+            severity: 5,
+            recommendation: "Immediate: full brake service before next trip.",
+            status: "action",
+          },
+          {
+            pillar: "emergency_incident",
+            observation: "No fire equipment visible in cab photos.",
+            severity: 4,
+            recommendation: "Fit and tag extinguishers in every unit.",
+            status: "action",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "metro",
+    name: "Metro Movers",
+    initials: "MM",
+    industry: "Urban parcel delivery",
+    region: "Perth, WA",
+    contact: "hello@metromovers.com.au",
+    memberSince: "2022",
+    policy: {
+      number: "NTI-WA-06642",
+      coverage: ["Heavy motor", "Goods in transit"],
+      excess: 4000,
+      riskRating: "Preferred",
+      auditIntervalMonths: 12,
+    },
+    benchmarkPercentile: 84,
+    vehicles: [
+      v("MET-1", "Van", "Mercedes Sprinter", 2022, 64000),
+      v("MET-2", "Van", "Ford Transit", 2023, 31000),
+      v("MET-3", "Rigid", "Hino 300", 2022, 88000),
+      v("MET-4", "Van", "Renault Master", 2021, 102000),
+    ],
+    audits: [
+      {
+        id: "AUD-2025-133",
+        date: "2025-08-26",
+        tier: 1,
+        score: 1.6,
+        status: "triaged",
+        reason: "Clean check across all pillars; AI cleared, awaiting spot-check.",
+        premiumBefore: 12400,
+        premiumAfter: 11160,
+        findings: [
+          {
+            pillar: "asset_management",
+            observation: "All vehicles recently serviced; tread and brakes healthy.",
+            severity: 1,
+            recommendation: "No action.",
+            status: "clear",
+          },
+          {
+            pillar: "people_capability",
+            observation: "All drivers current on induction and training.",
+            severity: 1,
+            recommendation: "No action.",
+            status: "clear",
           },
         ],
       },

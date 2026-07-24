@@ -24,9 +24,39 @@ import {
   computePremium,
   formatCurrency,
   PILLAR_LABEL,
+  FORCED_TIER,
   type Audit,
+  type AuditStatus,
   type Finding,
 } from "@/lib/data/operators";
+
+// Per-tier outcome the demo forces. Keeps the three tiers always demonstrable.
+const TIER_OUTCOME: Record<
+  1 | 2 | 3,
+  { score: number; mult: number; status: AuditStatus; reason: string }
+> = {
+  1: {
+    score: 1.7,
+    mult: 0.9,
+    status: "triaged",
+    reason:
+      "All four areas passed against NTI safety rules with genuine evidence. Cleared automatically — an engineer may spot-check.",
+  },
+  2: {
+    score: 2.9,
+    mult: 1.12,
+    status: "video_requested",
+    reason:
+      "Almost there — one area needs a closer look. Please send a short video of the flagged item so an engineer can confirm.",
+  },
+  3: {
+    score: 4.2,
+    mult: 1.4,
+    status: "escalated",
+    reason:
+      "A few things need checking in person. An NTI engineer will visit your site to finish this check.",
+  },
+};
 
 const ANALYSIS_STAGES = [
   "Uploading your photos",
@@ -92,8 +122,10 @@ export default function GuidedAuditPage() {
     }));
   }
 
-  function buildFindings(): Finding[] {
-    return QUESTIONNAIRE.map((section) => {
+  // Findings react to the tier: at Tier 2/3 the worst area becomes a real
+  // "needs fixing" item; at Tier 1 everything reads good or minor.
+  function buildFindings(tier: 1 | 2 | 3): Finding[] {
+    return QUESTIONNAIRE.map((section, idx) => {
       let worst = section.questions[0];
       let worstWeight = 0;
       for (const q of section.questions) {
@@ -104,16 +136,32 @@ export default function GuidedAuditPage() {
           worst = q;
         }
       }
-      const advisory = worstWeight >= 4;
+      // The first section carries the tier's headline issue.
+      const flagged = tier >= 2 && idx === 0;
+      const advisory = tier >= 2 && idx === 1;
+      const topic = worst.prompt.toLowerCase().replace(/\?$/, "");
+
+      if (flagged) {
+        return {
+          pillar: section.pillar,
+          observation: `${section.title}: the photo of “${topic}” wasn't clear enough to pass on its own.`,
+          severity: tier === 3 ? 4 : 3,
+          recommendation:
+            tier === 3
+              ? "An engineer will check this in person during the visit."
+              : "Send a short, clear video of this item so an engineer can confirm.",
+          status: "action",
+        } as Finding;
+      }
       return {
         pillar: section.pillar,
         observation: advisory
-          ? `${section.title} controls acceptable, with one area to watch (${worst.prompt.toLowerCase().replace(/\?$/, "")}).`
-          : `${section.title} controls meet NTI standards based on evidence and responses.`,
+          ? `${section.title} is mostly fine, with one thing to keep an eye on.`
+          : `${section.title} meets NTI safety rules based on your photos and answers.`,
         severity: advisory ? 2 : 1,
         recommendation: advisory
-          ? "Advisory only — tighten before your next renewal to protect your rating."
-          : "No action required.",
+          ? "Keep an eye on this before your next check."
+          : "No action needed.",
         status: advisory ? "advisory" : "clear",
       } as Finding;
     });
@@ -123,22 +171,24 @@ export default function GuidedAuditPage() {
     if (submitted.current) return;
     submitted.current = true;
 
-    // Premium: this always-clears to Tier 1, which applies the 0.90x discount.
+    const tier = FORCED_TIER[current!.id] ?? 1;
+    const outcome = TIER_OUTCOME[tier];
+
     const base = fleetBasePremium(current!.vehicles);
     const loading = mileageLoading(current!.vehicles);
     const premiumBefore = computePremium(current!);
-    const premiumAfter = Math.round((base * 0.9 + loading) / 10) * 10;
+    const premiumAfter =
+      Math.round((base * outcome.mult + loading) / 10) * 10;
 
     const now = new Date();
     const audit: Audit = {
       id: `AUD-${now.getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
       date: now.toISOString().slice(0, 10),
-      tier: 1,
-      score: 1.7,
-      status: "signed",
-      reason:
-        "All four pillars cleared against NTI standards with strong trust signals. Cleared to spot-check.",
-      findings: buildFindings(),
+      tier,
+      score: outcome.score,
+      status: outcome.status,
+      reason: outcome.reason,
+      findings: buildFindings(tier),
       premiumBefore,
       premiumAfter,
     };
@@ -440,31 +490,88 @@ export default function GuidedAuditPage() {
 
   // ---------- Result step ----------
   if (step === 7 && result) {
-    const saved = result.premiumBefore - result.premiumAfter;
+    const diff = result.premiumAfter - result.premiumBefore;
+    const saved = -diff;
+    const t = result.tier;
+
+    const head =
+      t === 1
+        ? {
+            ring: "bg-emerald-100 text-emerald-600",
+            title: "You passed",
+            badge: "Passed · no visit needed",
+          }
+        : t === 2
+          ? {
+              ring: "bg-amber-100 text-amber-600",
+              title: "Almost there — one quick video",
+              badge: "Video check needed",
+            }
+          : {
+              ring: "bg-rose-100 text-rose-600",
+              title: "An engineer will visit",
+              badge: "In-person visit needed",
+            };
+
+    const actionItems = result.findings.filter((f) => f.status === "action");
+
     return (
       <Shell>
         <div className="mx-auto max-w-lg py-6 text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-            <Check className="h-8 w-8" strokeWidth={2.5} />
+          <span
+            className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ${head.ring}`}
+          >
+            {t === 1 ? (
+              <Check className="h-8 w-8" strokeWidth={2.5} />
+            ) : t === 2 ? (
+              <Camera className="h-7 w-7" />
+            ) : (
+              <ShieldCheck className="h-7 w-7" />
+            )}
           </span>
           <h1 className="mt-5 text-2xl font-semibold text-foreground">
-            Audit cleared
+            {head.title}
           </h1>
           <div className="mt-3 flex items-center justify-center gap-2">
-            <TierBadge tier={1} label="Tier 1 · Auto-cleared" />
+            <TierBadge tier={t} label={head.badge} />
             <span className="text-sm text-muted-foreground">
               score {result.score.toFixed(1)}/5
             </span>
           </div>
           <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
-            {result.reason} An NTI engineer may spot-check your evidence.
+            {result.reason}
           </p>
+
+          {/* Next step for Tier 2 / 3 */}
+          {t >= 2 && actionItems.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-border bg-card p-5 text-left">
+              <div className="text-sm font-semibold text-foreground">
+                {t === 2 ? "What to send next" : "What the engineer will check"}
+              </div>
+              <ul className="mt-3 space-y-2">
+                {actionItems.map((f, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                    <span className="text-muted-foreground">
+                      {PILLAR_LABEL[f.pillar]} — {f.recommendation}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {t === 2 && (
+                <Button className="mt-4 w-full gap-1.5" disabled>
+                  <Camera className="h-4 w-4" />
+                  Record video (demo)
+                </Button>
+              )}
+            </div>
+          )}
 
           {/* Premium result */}
           <div className="mt-6 rounded-2xl border border-border bg-card p-6 text-left">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                Previous premium
+                Price before
               </span>
               <span className="text-sm text-muted-foreground line-through">
                 {formatCurrency(result.premiumBefore)}
@@ -472,15 +579,21 @@ export default function GuidedAuditPage() {
             </div>
             <div className="mt-2 flex items-center justify-between">
               <span className="text-sm font-medium text-foreground">
-                New annual premium
+                {t === 1 ? "Your new yearly price" : "Your price for now"}
               </span>
               <span className="text-2xl font-semibold text-foreground">
                 {formatCurrency(result.premiumAfter)}
               </span>
             </div>
-            {saved > 0 && (
+            {saved > 0 ? (
               <div className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700">
                 You saved {formatCurrency(saved)} per year
+              </div>
+            ) : (
+              <div className="mt-3 rounded-lg bg-muted/70 px-3 py-2 text-center text-xs text-muted-foreground">
+                {t === 2
+                  ? "This can come down once your video clears the flagged item."
+                  : "This can come down after the visit if the issues are fixed."}
               </div>
             )}
           </div>
@@ -491,7 +604,7 @@ export default function GuidedAuditPage() {
             </Link>
             <Link href={`/audits/${result.id}`}>
               <Button className="gap-1.5">
-                View full audit
+                See the details
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

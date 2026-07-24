@@ -153,7 +153,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2.5">
-            {INITIAL_OPERATORS.map((op) => (
+            {INITIAL_OPERATORS.filter((op) => op.demoLogin).map((op) => (
               <button
                 key={op.id}
                 onClick={() => chooseDemo(op.id)}

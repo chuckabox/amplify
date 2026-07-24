@@ -37,6 +37,75 @@ export function findAuditContext(
   return null;
 }
 
+// ---------- Engineer work list ----------
+
+export type WorkGroup = "todo" | "done";
+
+export interface WorkStatus {
+  group: WorkGroup;
+  label: string;
+  tone: "emerald" | "blue" | "amber" | "rose";
+}
+
+// What the engineer needs to do with an audit, from its status/tier.
+export function workStatus(audit: Audit): WorkStatus {
+  if (audit.status === "signed")
+    return { group: "done", label: "Signed off", tone: "emerald" };
+  if (audit.tier === 1)
+    return { group: "done", label: "AI approved", tone: "blue" };
+  if (audit.tier === 2)
+    return { group: "todo", label: "Review video", tone: "amber" };
+  return { group: "todo", label: "Schedule visit", tone: "rose" };
+}
+
+export interface WorkItem {
+  operatorId: string;
+  operatorName: string;
+  region: string;
+  fleetSize: number;
+  audit: Audit;
+}
+
+// Every audit across every fleet becomes a work item.
+export function getAllWork(operators: Operator[]): WorkItem[] {
+  return operators
+    .flatMap((op) =>
+      op.audits.map((audit) => ({
+        operatorId: op.id,
+        operatorName: op.name,
+        region: op.region,
+        fleetSize: op.vehicles.length,
+        audit,
+      })),
+    )
+    .sort(
+      (a, b) =>
+        b.audit.tier - a.audit.tier ||
+        b.audit.date.localeCompare(a.audit.date),
+    );
+}
+
+// Group work items by operator, preserving order.
+export function groupByOperator(items: WorkItem[]): {
+  operatorId: string;
+  operatorName: string;
+  region: string;
+  items: WorkItem[];
+}[] {
+  const map = new Map<string, WorkItem[]>();
+  for (const it of items) {
+    const arr = map.get(it.operatorId) ?? [];
+    arr.push(it);
+    map.set(it.operatorId, arr);
+  }
+  return Array.from(map.entries()).map(([operatorId, its]) => ({
+    operatorId,
+    operatorName: its[0].operatorName,
+    region: its[0].region,
+    items: its,
+  }));
+}
+
 export interface TrustSignal {
   key: string;
   label: string;
