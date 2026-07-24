@@ -1,166 +1,199 @@
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  ScanLine,
+  Cpu,
+  Gauge,
+  Check,
+  MoveRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
+
+const features = [
+  {
+    icon: ScanLine,
+    title: "Guided capture",
+    body: "Operators submit structured evidence — photos, video and short forms — mapped to the four NTI pillars, straight from a phone.",
+  },
+  {
+    icon: Cpu,
+    title: "AI triage engine",
+    body: "Vision analysis and standards-benchmarked scoring route every submission to the right tier in seconds, with a readable reason.",
+  },
+  {
+    icon: Gauge,
+    title: "Engineer amplification",
+    body: "Engineers review only escalations and sign off outcomes, concentrating scarce expertise where it actually moves risk.",
+  },
+];
+
+const tiers = [
+  {
+    pct: "70%",
+    name: "Tier 1 — Auto-clear",
+    desc: "Clean submissions clear to a fast spot-check.",
+    dot: "bg-emerald-500",
+  },
+  {
+    pct: "20%",
+    name: "Tier 2 — Remote video",
+    desc: "Flagged items verified over a short requested clip.",
+    dot: "bg-amber-500",
+  },
+  {
+    pct: "10%",
+    name: "Tier 3 — In-person",
+    desc: "Only genuine risk reaches a site visit.",
+    dot: "bg-rose-500",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">RG</span>
-            </div>
-            <span className="text-xl font-bold text-white">RiskGate</span>
-          </div>
-          <div className="flex gap-4">
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <Logo />
+          <div className="flex items-center gap-1.5">
             <Link href="/dashboard">
-              <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800/50">
-                Sign In
+              <Button variant="ghost" size="sm" className="text-muted-foreground">
+                Sign in
               </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button size="sm">Get started</Button>
             </Link>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 py-24 md:py-32">
-        <div className="text-center mb-20">
-          <div className="inline-block mb-6">
-            <span className="px-4 py-2 rounded-full text-sm font-medium bg-blue-500/10 text-blue-400 border border-blue-500/30">
-              Audit Platform for NTI
-            </span>
-          </div>
-
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight tracking-tight">
-            Scale audits without scaling headcount
-          </h1>
-
-          <p className="text-lg md:text-xl text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            Deploy AI-powered triage to route 70% of audits to auto-clear, 20% to remote verification, and only 10% to in-person visits. Let three engineers cover the work of thirty.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link href="/dashboard" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200">
-                I'm an Operator
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-            <Link href="/queue" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-slate-600 text-white hover:bg-slate-800/50 hover:border-slate-500">
-                I'm an NTI Engineer
-              </Button>
-            </Link>
-          </div>
-
-          {/* Trust indicators */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center text-sm text-slate-400">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
-              <span>AI-powered vision analysis</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
-              <span>Multi-tier routing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-green-500" />
-              <span>Human sign-off required</span>
-            </div>
-          </div>
+      {/* Hero */}
+      <section className="mx-auto w-full max-w-6xl px-6 pt-24 pb-20 text-center">
+        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          Built for NTI risk engineering
         </div>
 
-        {/* Feature Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mt-24 mb-24">
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300" />
-            <div className="relative bg-slate-900/50 border border-slate-800 hover:border-slate-700 rounded-2xl p-8 transition-all duration-300">
-              <div className="text-5xl mb-6">📱</div>
-              <h3 className="text-xl font-semibold text-white mb-3">Guided Capture</h3>
-              <p className="text-slate-400 leading-relaxed">Operators submit evidence through a structured mobile-first audit with photos, videos, and forms mapped to NTI pillars.</p>
-            </div>
-          </div>
+        <h1 className="mx-auto max-w-3xl text-5xl font-semibold leading-[1.05] text-foreground sm:text-6xl">
+          Send a human only where a human is needed.
+        </h1>
 
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300" />
-            <div className="relative bg-slate-900/50 border border-slate-800 hover:border-slate-700 rounded-2xl p-8 transition-all duration-300">
-              <div className="text-5xl mb-6">🤖</div>
-              <h3 className="text-xl font-semibold text-white mb-3">AI Triage Engine</h3>
-              <p className="text-slate-400 leading-relaxed">Vision analysis plus LLM scoring routes each audit instantly to the optimal tier: auto-clear, video verification, or in-person.</p>
-            </div>
-          </div>
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+          RiskGate triages every audit and routes it to the cheapest tier that
+          can safely clear it — so three engineers can cover the workload of
+          thirty, without losing human sign-off.
+        </p>
 
-          <div className="group relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-600/20 to-emerald-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300" />
-            <div className="relative bg-slate-900/50 border border-slate-800 hover:border-slate-700 rounded-2xl p-8 transition-all duration-300">
-              <div className="text-5xl mb-6">⚡</div>
-              <h3 className="text-xl font-semibold text-white mb-3">Engineer Amplification</h3>
-              <p className="text-slate-400 leading-relaxed">Engineers review only escalations and sign off on outcomes, concentrating expertise where it moves the needle most.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* The Math / Scaling Story */}
-        <div className="relative mt-32 mb-24">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10 rounded-3xl blur-3xl" />
-          <div className="relative bg-slate-900/50 border border-slate-800 rounded-3xl p-12 md:p-16">
-            <h2 className="text-4xl font-bold text-white mb-12 text-center">The Scaling Math</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-center mb-12">
-              <div className="text-center">
-                <div className="text-6xl font-bold bg-gradient-to-br from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">3</div>
-                <p className="text-slate-400 font-medium">Engineers</p>
-              </div>
-
-              <div className="flex justify-center">
-                <div className="text-3xl text-slate-500">×</div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-6xl font-bold bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">10</div>
-                <p className="text-slate-400 font-medium">Multiplier</p>
-              </div>
-
-              <div className="flex justify-center">
-                <div className="text-3xl text-slate-500">=</div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-6xl font-bold bg-gradient-to-br from-green-400 to-emerald-400 bg-clip-text text-transparent mb-2">30</div>
-                <p className="text-slate-400 font-medium">Effective Coverage</p>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6 text-center mt-12 pt-12 border-t border-slate-800">
-              <div>
-                <div className="text-3xl font-bold text-green-400 mb-2">70%</div>
-                <p className="text-slate-400">Auto-clear at Tier 1</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-yellow-400 mb-2">20%</div>
-                <p className="text-slate-400">Verify via Tier 2 video</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-orange-400 mb-2">10%</div>
-                <p className="text-slate-400">In-person Tier 3 visits</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA Footer */}
-        <div className="text-center py-16">
-          <p className="text-slate-400 mb-8">Ready to amplify your audit capacity?</p>
-          <Link href="/dashboard">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200">
-              Get Started
-              <ArrowRight className="w-4 h-4 ml-2" />
+        <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link href="/dashboard" className="w-full sm:w-auto">
+            <Button size="lg" className="w-full gap-2 sm:w-auto">
+              I&apos;m an operator
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/queue" className="w-full sm:w-auto">
+            <Button
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              I&apos;m an NTI engineer
             </Button>
           </Link>
         </div>
-      </div>
+
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          {["AI vision analysis", "Trust & anti-gaming controls", "Human sign-off enforced"].map(
+            (item) => (
+              <span key={item} className="inline-flex items-center gap-1.5">
+                <Check className="h-4 w-4 text-primary" />
+                {item}
+              </span>
+            ),
+          )}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="mx-auto w-full max-w-6xl px-6 pb-8">
+        <div className="grid gap-4 md:grid-cols-3">
+          {features.map((f) => (
+            <div
+              key={f.title}
+              className="rounded-2xl border border-border bg-card p-6 transition-colors hover:border-foreground/15"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                <f.icon className="h-5 w-5" strokeWidth={2} />
+              </div>
+              <h3 className="mt-5 text-base font-semibold text-foreground">
+                {f.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {f.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* The funnel / scaling math */}
+      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+        <div className="overflow-hidden rounded-3xl border border-border bg-card">
+          <div className="grid items-center gap-10 p-10 md:grid-cols-[auto_1fr] md:p-12">
+            {/* Left: the multiplier */}
+            <div className="flex items-center gap-5">
+              <div className="text-center">
+                <div className="text-5xl font-semibold text-foreground">3</div>
+                <div className="mt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Engineers
+                </div>
+              </div>
+              <MoveRight className="h-6 w-6 shrink-0 text-muted-foreground/60" />
+              <div className="text-center">
+                <div className="text-5xl font-semibold text-primary">30</div>
+                <div className="mt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Operators covered
+                </div>
+              </div>
+            </div>
+
+            {/* Right: the split */}
+            <div className="grid gap-4 sm:grid-cols-3">
+              {tiers.map((t) => (
+                <div
+                  key={t.name}
+                  className="rounded-xl border border-border bg-background p-4"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${t.dot}`} />
+                    <span className="text-2xl font-semibold text-foreground">
+                      {t.pct}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-sm font-medium text-foreground">
+                    {t.name}
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {t.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="mt-auto border-t border-border">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
+          <Logo />
+          <p className="text-sm text-muted-foreground">
+            Everyone else automates the report. We change who runs the audit.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

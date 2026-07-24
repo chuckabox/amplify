@@ -1,205 +1,233 @@
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  Inbox,
+  CircleCheck,
+  Video,
+  MapPin,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { BarChart3, TrendingDown, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Logo } from "@/components/logo";
+import { TierBadge } from "@/components/tier-badge";
+
+const metrics = [
+  { icon: Inbox, label: "This week", value: "12", sub: "submissions" },
+  { icon: CircleCheck, label: "Auto-cleared", value: "8", sub: "67% · Tier 1", tone: "text-emerald-600" },
+  { icon: Video, label: "Video verified", value: "3", sub: "25% · Tier 2", tone: "text-amber-600" },
+  { icon: MapPin, label: "Visits needed", value: "1", sub: "8% · Tier 3", tone: "text-rose-600" },
+];
+
+const rows = [
+  {
+    operator: "Acme Transport",
+    fleet: "45",
+    tier: 1 as const,
+    score: "1.8",
+    scoreTone: "text-emerald-600",
+    reason: "All pillars within standard; high trust signals.",
+    status: "Cleared",
+    action: "Spot-check",
+    primary: false,
+  },
+  {
+    operator: "Northern Freight",
+    fleet: "120",
+    tier: 2 as const,
+    score: "2.9",
+    scoreTone: "text-amber-600",
+    reason: "Tyre tread on rig 12 near limit; video requested.",
+    status: "Video requested",
+    action: "Review video",
+    primary: true,
+  },
+  {
+    operator: "Highway Haulage",
+    fleet: "15",
+    tier: 3 as const,
+    score: "4.2",
+    scoreTone: "text-rose-600",
+    reason: "Load restraint non-conformance; GPS inconsistent.",
+    status: "Escalated",
+    action: "Assign visit",
+    primary: true,
+  },
+];
+
+const impact = [
+  { label: "Engineer hours saved", value: "24h", sub: "this month" },
+  { label: "Travel avoided", value: "1,200 km", sub: "approx." },
+  { label: "Throughput multiplier", value: "8.5×", sub: "vs. manual" },
+  { label: "Avg triage time", value: "3.2s", sub: "per submission" },
+];
+
+const filters = ["All", "Tier 1", "Tier 2", "Tier 3"];
 
 export default function EngineerQueue() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-lg shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">Engineer Dashboard</h1>
-              <p className="text-sm text-slate-600">Audit queue & portfolio analytics</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full">Live</span>
-            </div>
+    <div className="min-h-screen bg-background">
+      {/* App bar */}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <Logo href="/queue" />
+            <span className="hidden h-4 w-px bg-border sm:block" />
+            <span className="hidden text-sm text-muted-foreground sm:block">
+              NTI Risk Engineering
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+              Live
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+              EN
+            </span>
           </div>
         </div>
-      </nav>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* KPI Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 border-slate-200">
-            <div className="flex justify-between items-start mb-3">
-              <p className="text-sm font-medium text-slate-600">This Week</p>
-              <BarChart3 className="w-4 h-4 text-blue-600" />
-            </div>
-            <div className="text-3xl font-bold text-slate-900">12</div>
-            <p className="text-xs text-slate-600 mt-1">submissions</p>
-          </Card>
-
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 border-slate-200 bg-green-50/50">
-            <div className="flex justify-between items-start mb-3">
-              <p className="text-sm font-medium text-slate-600">Auto-Cleared</p>
-              <CheckCircle2 className="w-4 h-4 text-green-600" />
-            </div>
-            <div className="text-3xl font-bold text-green-600">8</div>
-            <p className="text-xs text-slate-600 mt-1">67% tier 1</p>
-          </Card>
-
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 border-slate-200 bg-blue-50/50">
-            <div className="flex justify-between items-start mb-3">
-              <p className="text-sm font-medium text-slate-600">Video Verified</p>
-              <AlertCircle className="w-4 h-4 text-blue-600" />
-            </div>
-            <div className="text-3xl font-bold text-blue-600">3</div>
-            <p className="text-xs text-slate-600 mt-1">25% tier 2</p>
-          </Card>
-
-          <Card className="p-6 hover:shadow-lg transition-all duration-300 border-slate-200 bg-orange-50/50">
-            <div className="flex justify-between items-start mb-3">
-              <p className="text-sm font-medium text-slate-600">Visits Needed</p>
-              <TrendingDown className="w-4 h-4 text-orange-600" />
-            </div>
-            <div className="text-3xl font-bold text-orange-600">1</div>
-            <p className="text-xs text-slate-600 mt-1">8% tier 3</p>
-          </Card>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        {/* Heading */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-foreground">Audit queue</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Every submission triaged and routed. You only touch the exceptions.
+          </p>
         </div>
 
-        {/* Queue Table Section */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Active Queue</h2>
-              <p className="text-sm text-slate-600">Submissions waiting for action</p>
+        {/* Metrics */}
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {metrics.map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border border-border bg-card p-5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {m.label}
+                </span>
+                <m.icon className="h-4 w-4 text-muted-foreground/70" />
+              </div>
+              <div
+                className={`mt-3 text-2xl font-semibold ${m.tone ?? "text-foreground"}`}
+              >
+                {m.value}
+              </div>
+              <div className="mt-0.5 text-xs text-muted-foreground">{m.sub}</div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="border-slate-300 hover:bg-slate-100">
-                Filter
-              </Button>
-              <Button variant="outline" size="sm" className="border-slate-300 hover:bg-slate-100">
-                Sort
-              </Button>
-            </div>
-          </div>
-
-          <Card className="border-slate-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-slate-200 bg-slate-50/50 hover:bg-slate-50">
-                    <TableHead className="font-semibold">Operator</TableHead>
-                    <TableHead className="font-semibold">Fleet Size</TableHead>
-                    <TableHead className="font-semibold">Tier</TableHead>
-                    <TableHead className="font-semibold">Risk Score</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="text-right font-semibold">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow className="border-slate-200 hover:bg-blue-50/30 transition-colors duration-150">
-                    <TableCell className="font-medium text-slate-900">Acme Transport</TableCell>
-                    <TableCell className="text-slate-600">45 vehicles</TableCell>
-                    <TableCell>
-                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Tier 1
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-green-600 font-semibold">1.8/5.0</span>
-                      <p className="text-xs text-slate-600">Low risk</p>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        Cleared
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" className="hover:bg-slate-100">
-                        Review
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow className="border-slate-200 hover:bg-yellow-50/30 transition-colors duration-150">
-                    <TableCell className="font-medium text-slate-900">Northern Freight</TableCell>
-                    <TableCell className="text-slate-600">120 vehicles</TableCell>
-                    <TableCell>
-                      <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100">
-                        <AlertCircle className="w-3 h-3 mr-1" />
-                        Tier 2
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-yellow-600 font-semibold">2.9/5.0</span>
-                      <p className="text-xs text-slate-600">Medium risk</p>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                        Video Requested
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700">
-                        Review
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow className="border-slate-200 hover:bg-orange-50/30 transition-colors duration-150">
-                    <TableCell className="font-medium text-slate-900">Highway Haulage</TableCell>
-                    <TableCell className="text-slate-600">15 vehicles</TableCell>
-                    <TableCell>
-                      <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">
-                        <AlertCircle className="w-3 h-3 mr-1" />
-                        Tier 3
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-orange-600 font-semibold">4.2/5.0</span>
-                      <p className="text-xs text-slate-600">High risk</p>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                        Escalated
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="default" size="sm" className="bg-orange-600 hover:bg-orange-700">
-                        Assign Visit
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
+          ))}
         </div>
 
-        {/* Portfolio Summary */}
-        <Card className="p-8 border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100/50">
-          <h3 className="text-lg font-bold text-slate-900 mb-6">Portfolio Impact</h3>
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <p className="text-sm text-slate-600 mb-2">Engineer Hours Saved</p>
-              <div className="text-3xl font-bold text-blue-600">24h</div>
-              <p className="text-xs text-slate-600 mt-1">This month</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-600 mb-2">Travel Distances Avoided</p>
-              <div className="text-3xl font-bold text-green-600">1,200km</div>
-              <p className="text-xs text-slate-600 mt-1">Approximate</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-600 mb-2">Throughput Multiplier</p>
-              <div className="text-3xl font-bold text-purple-600">8.5x</div>
-              <p className="text-xs text-slate-600 mt-1">vs. manual audits</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-600 mb-2">Avg Response Time</p>
-              <div className="text-3xl font-bold text-emerald-600">3.2s</div>
-              <p className="text-xs text-slate-600 mt-1">Triage engine</p>
-            </div>
+        {/* Queue */}
+        <div className="mt-8 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Active queue</h2>
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
+            {filters.map((f, i) => (
+              <button
+                key={f}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  i === 0
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
           </div>
-        </Card>
-      </div>
+        </div>
+
+        <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  {["Operator", "Fleet", "Tier", "Score", "Routed reason", "Status", ""].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {rows.map((r) => (
+                  <tr
+                    key={r.operator}
+                    className="transition-colors hover:bg-muted/40"
+                  >
+                    <td className="px-5 py-4 font-medium text-foreground">
+                      {r.operator}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground">
+                      {r.fleet}
+                    </td>
+                    <td className="px-5 py-4">
+                      <TierBadge tier={r.tier} />
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`font-semibold ${r.scoreTone}`}>
+                        {r.score}
+                      </span>
+                      <span className="text-muted-foreground"> / 5</span>
+                    </td>
+                    <td className="max-w-xs px-5 py-4 text-muted-foreground">
+                      {r.reason}
+                    </td>
+                    <td className="px-5 py-4 text-muted-foreground">
+                      {r.status}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <Button
+                        size="sm"
+                        variant={r.primary ? "default" : "ghost"}
+                      >
+                        {r.action}
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Impact */}
+        <div className="mt-8 rounded-2xl border border-border bg-card p-6">
+          <div className="mb-5 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">
+              Portfolio impact
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+            {impact.map((m, i) => (
+              <div
+                key={m.label}
+                className={
+                  i > 0 ? "lg:border-l lg:border-border lg:pl-6" : undefined
+                }
+              >
+                <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  {m.label}
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-foreground">
+                  {m.value}
+                </div>
+                <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {m.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
