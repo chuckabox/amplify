@@ -172,49 +172,36 @@ function Overview({ setView }: { setView: (view: View) => void }) {
 
       {/* Metrics bar */}
       <Reveal delay={0.06}>
-        <section className="mt-10">
-          <div className="plate">
-            <div className="plate-core grid gap-px overflow-hidden bg-rule lg:grid-cols-[1.25fr_repeat(4,0.7fr)]">
-              <div className="bg-ink px-6 py-6 text-paper lg:row-span-1">
-                <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.14em] text-paper/60">
-                  Portfolio risk
-                </p>
-                <div className="mt-4 flex items-end justify-between gap-6">
-                  <div>
-                    <span className="font-display text-6xl font-bold leading-none">
-                      {PASSPORT_SUMMARY.riskScore.toFixed(1)}
-                    </span>
-                    <span className="ml-2 font-mono text-xs text-paper/50">/ 5</span>
-                  </div>
-                  <span className="mb-1 font-mono text-[10px] font-semibold text-accent">
-                    ↓ {Math.abs(PASSPORT_SUMMARY.trend).toFixed(1)} SINCE REVIEW
-                  </span>
-                </div>
-              </div>
-              <Metric
-                value={String(PASSPORT_SUMMARY.documents)}
-                label="Source documents"
-                detail="+4 this month"
-              />
-              <Metric
-                value={PASSPORT_SUMMARY.linkedRecords.toLocaleString()}
-                label="Structured records"
-                detail="96% linked"
-              />
-              <Metric
-                value={String(PASSPORT_SUMMARY.openRisks)}
-                label="Open risks"
-                detail="1 critical"
-                tone="critical"
-              />
-              <Metric
-                value={String(PASSPORT_SUMMARY.expiringSoon)}
-                label="Expiring soon"
-                detail="Next 45 days"
-                tone="warning"
-              />
-            </div>
-          </div>
+        <section className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <Metric
+            value={PASSPORT_SUMMARY.riskScore.toFixed(1)}
+            label="Portfolio risk"
+            detail="/ 5 max"
+            trend={`↓ ${Math.abs(PASSPORT_SUMMARY.trend).toFixed(1)} trend`}
+            tone="accent"
+          />
+          <Metric
+            value={String(PASSPORT_SUMMARY.documents)}
+            label="Source documents"
+            detail="+4 this month"
+          />
+          <Metric
+            value={PASSPORT_SUMMARY.linkedRecords.toLocaleString()}
+            label="Structured records"
+            detail="96% linked"
+          />
+          <Metric
+            value={String(PASSPORT_SUMMARY.openRisks)}
+            label="Open risks"
+            detail="1 critical"
+            tone="critical"
+          />
+          <Metric
+            value={String(PASSPORT_SUMMARY.expiringSoon)}
+            label="Expiring soon"
+            detail="Next 45 days"
+            tone="warning"
+          />
         </section>
       </Reveal>
 
@@ -496,28 +483,49 @@ function Metric({
   value,
   label,
   detail,
+  trend,
   tone = "default",
 }: {
   value: string;
   label: string;
   detail: string;
-  tone?: "default" | "warning" | "critical";
+  trend?: string;
+  tone?: "default" | "warning" | "critical" | "accent";
 }) {
+  const textColor = 
+    tone === "critical"
+      ? "text-tier-3-ink"
+      : tone === "warning"
+        ? "text-tier-2-ink"
+        : tone === "accent"
+          ? "text-accent-deep"
+          : "text-ink";
+
+  const bgWash =
+    tone === "critical"
+      ? "bg-tier-3-wash/40"
+      : tone === "warning"
+        ? "bg-tier-2-wash/40"
+        : tone === "accent"
+          ? "bg-accent-wash/30"
+          : "bg-paper-raised";
+
   return (
-    <div className="bg-paper-raised px-5 py-5">
-      <p
-        className={`font-display text-3xl font-bold leading-none ${
-          tone === "critical"
-            ? "text-tier-3-ink"
-            : tone === "warning"
-              ? "text-tier-2-ink"
-              : "text-ink"
-        }`}
-      >
-        {value}
-      </p>
-      <p className="mt-3 text-xs font-semibold text-ink">{label}</p>
-      <p className="mt-1 font-mono text-[9px] text-ink-faint">{detail}</p>
+    <div className="plate">
+      <div className={`plate-core p-5 h-full flex flex-col justify-between ${bgWash}`}>
+        <div>
+          <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">{label}</span>
+          <p className={`font-display text-4xl font-bold leading-none mt-4 ${textColor}`}>
+            {value}
+          </p>
+        </div>
+        <div className="mt-4 border-t border-rule/50 pt-3 flex items-center justify-between gap-2">
+          <span className="font-mono text-[9px] text-ink-faint uppercase tracking-wide">{detail}</span>
+          {trend && (
+            <span className="font-mono text-[9px] font-bold text-accent-deep uppercase">{trend}</span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

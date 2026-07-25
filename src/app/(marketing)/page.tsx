@@ -256,10 +256,10 @@ export default function Home() {
             <div className="mt-28 border-t border-rule pt-20">
               <Reveal>
                 <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
-                  The capacity equation
+                  Stop sending engineers to tick boxes
                 </h2>
                 <p className="mt-3 text-lg leading-relaxed text-ink-muted font-display">
-                  Three engineers do the work of thirty.
+                  There aren't enough risk engineers. Stop wasting the ones you have.
                 </p>
               </Reveal>
 
@@ -279,19 +279,19 @@ export default function Home() {
                 <div className="flex flex-col justify-between gap-6">
                   {/* Before */}
                   <Reveal className="rounded-[4px] border border-rule bg-paper-sunk/20 p-6 flex-1 flex flex-col justify-center" delay={0.1}>
-                    <span className="field-label text-ink-muted">Before</span>
-                    <h4 className="font-display text-2xl font-bold mt-2 text-ink">30 assessors</h4>
+                    <span className="field-label text-ink-muted">Today</span>
+                    <h4 className="font-display text-2xl font-bold mt-2 text-ink">Every operator gets a site visit</h4>
                     <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                      Scheduled visits for everyone.
+                      Engineers drive hours to confirm what a photo could prove.
                     </p>
                   </Reveal>
 
                   {/* After */}
                   <Reveal className="rounded-[4px] border-[2px] border-accent bg-paper-raised p-6 flex-1 flex flex-col justify-center shadow-plate" delay={0.15}>
-                    <span className="field-label text-accent-deep">After</span>
-                    <h4 className="font-display text-2xl font-bold mt-2 text-ink">3 engineers</h4>
+                    <span className="field-label text-accent-deep">With Tonnage</span>
+                    <h4 className="font-display text-2xl font-bold mt-2 text-ink">Only real risk gets a visit</h4>
                     <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                      Remote checks clear the easy cases. Engineers focus where it matters.
+                      Evidence clears the straightforward cases remotely. Engineers only travel when something needs investigating.
                     </p>
                   </Reveal>
                 </div>
