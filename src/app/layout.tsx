@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Outfit, Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -18,10 +18,10 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
-// Every audit score, premium and odometer reading is set in this.
-const jetbrainsMono = JetBrains_Mono({
+const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -70,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${outfit.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${outfit.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <a

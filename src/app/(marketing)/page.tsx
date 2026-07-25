@@ -7,6 +7,8 @@ import { StepTabs, type Step } from "@/components/step-tabs";
 import { Reveal } from "@/components/motion";
 import { PhotoPlate } from "@/components/photo-plate";
 import { SpeedLines } from "@/components/speed-lines";
+import { LiquidBg } from "@/components/liquid-bg";
+import { WaveBg } from "@/components/wave-bg";
 import { asset } from "@/lib/asset";
 
 const LANES: Lane[] = [
@@ -126,8 +128,7 @@ export default function Home() {
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16 items-start">
               <Reveal>
-                <p className="field-label">Our story</p>
-                <h2 className="mt-4 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
                   We didn't know what a risk engineer was either.
                 </h2>
               </Reveal>
@@ -150,8 +151,9 @@ export default function Home() {
         </section>
 
         {/* ---------- How It Works ---------- */}
-        <section className="border-t border-rule bg-paper-raised">
-          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
+        <section className="relative border-t border-rule bg-paper-raised overflow-hidden">
+          <LiquidBg />
+          <div className="relative mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <Reveal>
               <div>
                 <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
@@ -337,17 +339,15 @@ export default function Home() {
         </section>
 
         {/* ---------- Closing / CTA ---------- */}
-        <section className="border-t border-rule bg-ink">
-          <div className="mx-auto max-w-[1240px] px-6 py-28 text-center md:py-40">
+        <section className="relative border-t border-rule bg-paper overflow-hidden">
+          <WaveBg />
+          <div className="relative mx-auto max-w-[1240px] px-6 py-28 text-center md:py-40">
             <Reveal>
-              <p className="field-label text-ink-faint tracking-[0.2em]">
-                Ready?
-              </p>
-              <h2 className="mt-6 text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.05] font-display font-bold text-paper">
+              <h2 className="text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.05] font-display font-bold text-ink">
                 Stop driving to things<br className="hidden sm:inline" /> a photo can prove.
               </h2>
-              <p className="mt-6 text-lg text-paper/60 max-w-[48ch] mx-auto">
-                Upload an operator's evidence. Tonnage reads it, flags risk, and routes the result — in minutes, not miles.
+              <p className="mt-6 text-lg text-ink-muted max-w-[48ch] mx-auto">
+                Upload evidence. Tonnage flags risk and routes the result in minutes, not miles.
               </p>
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

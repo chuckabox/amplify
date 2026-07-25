@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { asset } from "@/lib/asset";
@@ -17,7 +17,13 @@ export interface Step {
 
 export function StepTabs({ steps }: { steps: Step[] }) {
   const [active, setActive] = useState(0);
+  const dirRef = useRef(1);
   const step = steps[active];
+
+  function go(i: number) {
+    dirRef.current = i > active ? 1 : -1;
+    setActive(i);
+  }
 
   return (
     <div className="flex flex-col gap-10">
@@ -26,7 +32,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
         {steps.map((s, i) => (
           <button
             key={s.n}
-            onClick={() => setActive(i)}
+            onClick={() => go(i)}
             className={cn(
               "relative rounded-[4px] border px-5 py-4 text-left transition-colors",
               i === active
@@ -38,7 +44,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
               <motion.span
                 layoutId="step-indicator"
                 className="absolute inset-0 rounded-[4px] border-2 border-accent"
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
               />
             )}
             <span className="relative flex items-baseline gap-2">
@@ -54,13 +60,14 @@ export function StepTabs({ steps }: { steps: Step[] }) {
 
       {/* Content panel */}
       <div className="overflow-hidden rounded-[6px] border border-rule bg-paper-raised">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" custom={dirRef.current}>
           <motion.div
             key={active}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
+            custom={dirRef.current}
+            initial={(d: number) => ({ opacity: 0, x: d * 60 })}
+            animate={{ opacity: 1, x: 0 }}
+            exit={(d: number) => ({ opacity: 0, x: d * -60 })}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
             className="grid items-center gap-8 p-6 md:grid-cols-2 md:p-10"
           >
             <div>
