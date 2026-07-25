@@ -7,6 +7,7 @@ import { QUESTIONNAIRE } from "@/lib/data/questionnaire";
 import { PILLAR_LABEL, FINDING_STATUS_LABEL } from "@/lib/data/audit";
 import { scoreAudit, OUTCOME_LABEL, type ScoreResult } from "@/lib/score";
 import { Reveal } from "@/components/motion";
+import { PhotoAnalysis } from "@/components/photo-analysis";
 
 function analysisStages(hasFiles: boolean): string[] {
   const stages = [
@@ -29,6 +30,7 @@ export default function AuditPage() {
   const [evidence, setEvidence] = useState<Preview[]>([]);
   const [stageIdx, setStageIdx] = useState(0);
   const [result, setResult] = useState<ScoreResult | null>(null);
+  const [sampleTruck, setSampleTruck] = useState<"truckA" | "truckB">("truckA");
   const submitted = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropzoneRef = useRef<HTMLDivElement>(null);
@@ -423,7 +425,8 @@ export default function AuditPage() {
     const photoCount = evidence.length;
 
     return (
-      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1 text-center">
+      <main className="mx-auto w-full max-w-5xl px-6 py-12 flex-1">
+       <div className="mx-auto max-w-[640px] text-center">
         <Reveal>
           <span className="field-label">DONE</span>
           <h1 className="mt-3 text-4xl font-semibold leading-tight text-ink">
@@ -500,6 +503,46 @@ export default function AuditPage() {
             </div>
           </Reveal>
         )}
+
+       </div>
+
+        {/* AI vision analysis on real fleet photos */}
+        <Reveal delay={0.14} className="mt-12">
+          <div className="rounded-[4px] border border-rule bg-paper-raised overflow-hidden">
+            <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="field-label">AI vision analysis</span>
+                <p className="mt-1 text-xs text-ink-muted">
+                  What our model reads from a fleet&apos;s photos and video —
+                  boxes, plate, tyre tread and vehicle type.
+                </p>
+              </div>
+              <div className="flex items-center gap-1 self-start rounded-[3px] border border-rule-strong bg-paper p-1">
+                {(
+                  [
+                    ["truckA", "Fuso flatbed"],
+                    ["truckB", "Isuzu pantech"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <button
+                    key={id}
+                    onClick={() => setSampleTruck(id)}
+                    className={`rounded-[2px] px-2.5 py-1 text-xs font-semibold transition-colors ${
+                      sampleTruck === id
+                        ? "bg-ink text-paper"
+                        : "text-ink-muted hover:text-ink"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="p-5">
+              <PhotoAnalysis analysisId={sampleTruck} />
+            </div>
+          </div>
+        </Reveal>
 
         <Reveal delay={0.16} className="mt-10 flex justify-center items-center gap-4">
           <Button variant="outline" onClick={() => {

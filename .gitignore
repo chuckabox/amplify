@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large raw sample media (web-optimised copies live in public/samples)
+sample photo and video/
