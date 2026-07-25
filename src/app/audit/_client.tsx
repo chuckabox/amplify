@@ -702,3 +702,28 @@ function DocumentStackIcon() {
     </span>
   );
 }
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const pct = Math.round((current / total) * 100);
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
+        <span>Step {current} of {total}</span>
+        <span>{pct}%</span>
+      </div>
+      <div className="mt-3 flex gap-1.5" aria-hidden>
+        {Array.from({ length: total }).map((_, idx) => {
+          const active = idx < current;
+          return (
+            <div
+              key={idx}
+              className={`h-2 flex-1 rounded-[1px] transition-colors duration-300 ${
+                active ? "bg-accent" : "bg-paper-sunk"
+              }`}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
