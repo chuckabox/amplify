@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const dynamic = "force-static";
 
 export const alt =
-  "Tonnage: most trucks roll straight over. Only some get pulled aside.";
+  "TONNAGE: most trucks roll straight over. Only some get pulled aside.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -35,7 +35,7 @@ export default function OpengraphImage() {
             }}
           />
           <div style={{ fontSize: 30, letterSpacing: "-0.02em" }}>
-            Tonnage
+            TONNAGE
           </div>
           <div style={{ flex: 1, height: 1, background: "#C1B494" }} />
           <div style={{ fontSize: 18, color: "#575C4E", letterSpacing: "0.14em" }}>

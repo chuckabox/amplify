@@ -230,7 +230,7 @@ export default function VisualEvidenceClient() {
                       <div className="plate-core overflow-hidden">
                         <div className="flex items-center justify-between border-b border-rule bg-paper-sunk/40 px-4 py-3">
                           <span className="field-label">Ready to process</span>
-                          <span className="font-mono text-[10px] text-ink-muted">
+                          <span className="text-[10px] text-ink-muted">
                             {evidence.length} FILE{evidence.length === 1 ? "" : "S"}
                           </span>
                         </div>
@@ -240,7 +240,7 @@ export default function VisualEvidenceClient() {
                               key={`${file.name}-${index}`}
                               className="flex items-center gap-3 px-4 py-3"
                             >
-                              <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk font-mono text-[9px] font-semibold text-accent-deep">
+                              <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk text-[9px] font-semibold text-accent-deep">
                                 {file.isVideo ? "VIDEO" : "PHOTO"}
                               </span>
                               <div className="min-w-0 flex-1">
@@ -254,7 +254,7 @@ export default function VisualEvidenceClient() {
                               <button
                                 type="button"
                                 onClick={() => removeFile(index)}
-                                className="rounded-[2px] px-2 py-1 font-mono text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+                                className="rounded-[2px] px-2 py-1 text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
                                 aria-label={`Remove ${file.name}`}
                               >
                                 ×
@@ -396,7 +396,7 @@ export default function VisualEvidenceClient() {
                             }`}
                           >
                             <span>{label}</span>
-                            <span className="font-mono">
+                            <span>
                               {pending ? "PENDING" : active ? "RUNNING" : "DONE"}
                             </span>
                           </div>
@@ -424,7 +424,7 @@ export default function VisualEvidenceClient() {
             <div className="mx-auto max-w-[1240px] px-6">
               <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
-                  <span className="font-mono text-sm font-bold text-tier-1-ink">
+                  <span className="text-sm font-bold text-tier-1-ink">
                     ✓
                   </span>
                   <div>
@@ -511,135 +511,135 @@ export default function VisualEvidenceClient() {
               </div>
             </Reveal>
 
-            <div className="mt-8 grid gap-6 xl:grid-cols-[1.5fr_0.65fr]">
-              <Reveal delay={0.12}>
+            {/* Full-width analysis */}
+            <Reveal delay={0.12} className="mt-8">
+              <div className="plate">
+                <div className="plate-core overflow-hidden">
+                  <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="field-label">AI vision analysis</p>
+                      <p className="mt-1 text-xs text-ink-muted">
+                        Object detection, plate reading, condition and media
+                        consistency.
+                      </p>
+                    </div>
+                    <span className="self-start text-[10px] uppercase tracking-wider text-ink-faint sm:self-auto">
+                      {sample.evidence}
+                    </span>
+                  </div>
+                  <div className="p-5">
+                    <PhotoAnalysis analysisId={sampleId} />
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Info cards below */}
+            <Reveal delay={0.16} className="mt-8">
+              <div className="grid gap-6 lg:grid-cols-2">
+                {/* Entity resolution */}
                 <div className="plate">
                   <div className="plate-core overflow-hidden">
-                    <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="field-label">AI vision analysis</p>
-                        <p className="mt-1 text-xs text-ink-muted">
-                          Object detection, plate reading, condition and media
-                          consistency.
-                        </p>
-                      </div>
-                      <span className="self-start font-mono text-[10px] uppercase tracking-wider text-ink-faint sm:self-auto">
-                        {sample.evidence}
-                      </span>
+                    <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+                      <p className="field-label">Entity resolution</p>
                     </div>
                     <div className="p-5">
-                      <PhotoAnalysis analysisId={sampleId} />
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h2 className="text-xl font-semibold text-ink">
+                            {sample.entity}
+                          </h2>
+                          <p className="mt-1 text-xs leading-relaxed text-ink-muted">
+                            {sample.entityDetail}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-[10px] font-semibold text-tier-1-ink">
+                          {sample.entityConfidence}
+                        </span>
+                      </div>
+                      <dl className="mt-5 divide-y divide-rule border-y border-rule">
+                        {sample.facts.map((fact) => (
+                          <div
+                            key={fact.label}
+                            className="flex items-start justify-between gap-4 py-3"
+                          >
+                            <dt className="flex items-start gap-2 text-xs text-ink-muted">
+                              <EvidenceMark state={fact.state} />
+                              {fact.label}
+                            </dt>
+                            <dd className="max-w-[48%] text-right text-[10px] font-semibold text-ink">
+                              {fact.value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
                     </div>
                   </div>
                 </div>
-              </Reveal>
 
-              <Reveal delay={0.16}>
-                <aside className="space-y-5">
-                  {/* Entity resolution */}
-                  <div className="plate">
-                    <div className="plate-core overflow-hidden">
-                      <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-                        <p className="field-label">Entity resolution</p>
-                      </div>
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h2 className="text-xl font-semibold text-ink">
-                              {sample.entity}
-                            </h2>
-                            <p className="mt-1 text-xs leading-relaxed text-ink-muted">
-                              {sample.entityDetail}
-                            </p>
-                          </div>
-                          <span className="shrink-0 font-mono text-[10px] font-semibold text-tier-1-ink">
-                            {sample.entityConfidence}
+                {/* Evidence-to-control link */}
+                <div className="plate">
+                  <div className="plate-core overflow-hidden">
+                    <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+                      <p className="field-label">Evidence-to-control link</p>
+                    </div>
+                    <div className="p-5">
+                      <h2 className="text-sm font-semibold leading-relaxed text-ink">
+                        {sample.control}
+                      </h2>
+                      <div className="mt-5 flex items-end justify-between gap-4">
+                        <div>
+                          <span className="font-display text-5xl font-bold leading-none text-ink">
+                            {sample.coverage}
+                          </span>
+                          <span className="ml-1 text-xs text-ink-faint">
+                            %
                           </span>
                         </div>
-                        <dl className="mt-5 divide-y divide-rule border-y border-rule">
-                          {sample.facts.map((fact) => (
-                            <div
-                              key={fact.label}
-                              className="flex items-start justify-between gap-4 py-3"
-                            >
-                              <dt className="flex items-start gap-2 text-xs text-ink-muted">
-                                <EvidenceMark state={fact.state} />
-                                {fact.label}
-                              </dt>
-                              <dd className="max-w-[48%] text-right font-mono text-[10px] font-semibold text-ink">
-                                {fact.value}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-tier-2-ink">
+                          Partial evidence
+                        </span>
                       </div>
+                      <div className="mt-3 h-2 overflow-hidden rounded-[1px] bg-paper-sunk">
+                        <div
+                          className="h-full bg-accent"
+                          style={{ width: `${sample.coverage}%` }}
+                        />
+                      </div>
+                      <p className="mt-4 text-xs leading-relaxed text-ink-muted">
+                        The visual result is one proof layer. Policies, training,
+                        operating records and defect close-out remain independently
+                        visible in the passport.
+                      </p>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Evidence-to-control link */}
-                  <div className="plate">
-                    <div className="plate-core overflow-hidden">
-                      <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-                        <p className="field-label">Evidence-to-control link</p>
-                      </div>
-                      <div className="p-5">
-                        <h2 className="text-sm font-semibold leading-relaxed text-ink">
-                          {sample.control}
-                        </h2>
-                        <div className="mt-5 flex items-end justify-between gap-4">
-                          <div>
-                            <span className="font-display text-5xl font-bold leading-none text-ink">
-                              {sample.coverage}
-                            </span>
-                            <span className="ml-1 font-mono text-xs text-ink-faint">
-                              %
-                            </span>
-                          </div>
-                          <span className="font-mono text-[9px] font-semibold uppercase tracking-wider text-tier-2-ink">
-                            Partial evidence
-                          </span>
-                        </div>
-                        <div className="mt-3 h-2 overflow-hidden rounded-[1px] bg-paper-sunk">
-                          <div
-                            className="h-full bg-accent"
-                            style={{ width: `${sample.coverage}%` }}
-                          />
-                        </div>
-                        <p className="mt-4 text-xs leading-relaxed text-ink-muted">
-                          The visual result is one proof layer. Policies, training,
-                          operating records and defect close-out remain independently
-                          visible in the passport.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Button
-                      variant="accent"
-                      className="w-full"
-                      onClick={() => setAttached(true)}
-                    >
-                      Attach findings to passport
-                      <ButtonIconWell>
-                        <Arrow />
-                      </ButtonIconWell>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        setPhase("upload");
-                        setAttached(false);
-                        setEvidence([]);
-                      }}
-                    >
-                      Analyse another batch
-                    </Button>
-                  </div>
-                </aside>
-              </Reveal>
-            </div>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  variant="accent"
+                  className="sm:flex-1"
+                  onClick={() => setAttached(true)}
+                >
+                  Attach findings to passport
+                  <ButtonIconWell>
+                    <Arrow />
+                  </ButtonIconWell>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="sm:flex-1"
+                  onClick={() => {
+                    setPhase("upload");
+                    setAttached(false);
+                    setEvidence([]);
+                  }}
+                >
+                  Analyse another batch
+                </Button>
+              </div>
+            </Reveal>
           </div>
         </section>
       </main>
@@ -655,7 +655,7 @@ function EvidenceMark({
 }) {
   return (
     <span
-      className={`mt-px font-mono text-[10px] font-bold ${
+      className={`mt-px text-[10px] font-bold ${
         state === "proved"
           ? "text-tier-1-ink"
           : state === "partial"
@@ -701,7 +701,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   const pct = Math.round((current / total) * 100);
   return (
     <div>
-      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-ink-muted font-mono">
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
         <span>Step {current} of {total}</span>
         <span>{pct}%</span>
       </div>

@@ -16,7 +16,7 @@ export default function TermsPage() {
       <Reveal delay={0.08}>
         <div className="mt-10 space-y-8 text-sm leading-relaxed text-ink-muted">
           <p>
-            These Terms of Service govern your use of the Tonnage demonstration platform.
+            These Terms of Service govern your use of the TONNAGE demonstration platform.
             By entering the platform, you acknowledge that this is a simulated
             product environment created for demonstration purposes.
           </p>
@@ -26,7 +26,7 @@ export default function TermsPage() {
               1. Simulated Use Only
             </h2>
             <p>
-              Tonnage is provided &quot;as is&quot; to show the visual redesign of the heavy-vehicle
+              TONNAGE is provided &quot;as is&quot; to show the visual redesign of the heavy-vehicle
               risk-audit platform (formerly RiskGate). No real insurance coverage is offered,
               implied, or modified through the usage of this site.
             </p>
@@ -38,7 +38,7 @@ export default function TermsPage() {
             </h2>
             <p>
               The premium adjustments, mileage loadings, and audit outcome scores displayed in
-              Tonnage are simulated calculation routines running client-side. They do not reflect NTI
+              TONNAGE are simulated calculation routines running client-side. They do not reflect NTI
               underwriting policies or actual heavy vehicle premium schedules.
             </p>
           </section>
@@ -57,7 +57,7 @@ export default function TermsPage() {
 
       <Reveal delay={0.16}>
         <div className="mt-12 border-t border-rule pt-6 flex justify-between items-center">
-          <p className="font-mono text-xs text-ink-faint">
+          <p className="text-xs text-ink-faint">
             REF: REG-TERMS-v1
           </p>
           <Link href="/">

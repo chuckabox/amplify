@@ -42,7 +42,7 @@ const STEPS: Step[] = [
   },
   {
     n: "02",
-    title: "Tonnage reads evidence",
+    title: "TONNAGE reads evidence",
     body: "The system reviews answers, photos, and metadata against safety standards.",
     seed: "/samples/IMG_2322.jpg",
     alt: "Close inspection of a heavy-vehicle tyre during an assessment",
@@ -79,6 +79,45 @@ const TRUST_CHECKS = [
   },
 ];
 
+const OTHER_MARKETS = [
+  {
+    title: "Transport insurers",
+    company: "NTI",
+    logo: "/logos/nti.com.au.png",
+    desc: "Risk audits for any fleet or heavy motor portfolio.",
+  },
+  {
+    title: "Marine and cargo",
+    company: "Club Marine",
+    logo: "/logos/clubmarine.com.au.png",
+    desc: "Check vessels, load and safety gear from photos before sending a surveyor.",
+  },
+  {
+    title: "Mining and resources",
+    company: "BHP",
+    logo: "/logos/bhp.com.png",
+    desc: "Site safety checks where inspectors are few and sites are remote.",
+  },
+  {
+    title: "Logistics and warehousing",
+    company: "Linfox",
+    logo: "/logos/linfox.com.png",
+    desc: "Sites submit photos of exits, guarding and fire gear instead of waiting for an auditor.",
+  },
+  {
+    title: "Agriculture and rural",
+    company: "Nutrien",
+    logo: "/logos/nutrien.com.png",
+    desc: "Machinery, silos and chemical storage checks across long distances.",
+  },
+  {
+    title: "Property and building",
+    company: "Allianz",
+    logo: "/logos/allianz.com.au.png",
+    desc: "Roof, wiring and fire system condition checks before renewal.",
+  },
+];
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col relative">
@@ -99,7 +138,7 @@ export default function Home() {
 
               <Reveal delay={0.12}>
                 <p className="mt-8 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  Tonnage reviews every transport risk assessment, clears strong evidence, and escalates genuine risk to an engineer, without removing human judgement.
+                  TONNAGE reviews every transport risk assessment, clears strong evidence, and escalates genuine risk to an engineer, without removing human judgement.
                 </p>
               </Reveal>
 
@@ -107,7 +146,7 @@ export default function Home() {
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                   <Link href="/audit" className="sm:w-auto">
                     <Button variant="accent" size="lg" className="w-full sm:w-auto">
-                      Start an audit
+                      Upload records
                       <ButtonIconWell>
                         <Arrow />
                       </ButtonIconWell>
@@ -136,13 +175,13 @@ export default function Home() {
               <Reveal delay={0.12}>
                 <div className="space-y-5 text-[1.0625rem] leading-[1.7] text-ink-muted">
                   <p>
-                    We built Tonnage in a weekend. Friday to Sunday, at a hackathon at QUT. None of us are risk engineers.
+                    We built TONNAGE in a weekend. Friday to Sunday, at a hackathon at QUT. None of us are risk engineers.
                   </p>
                   <p>
                     We came up with the idea on Friday night. On Saturday morning we walked outside and talked to truck operators parked outside U Block to validate it. We asked what it was like when a risk engineer comes out. Same answer every time: someone drives out, checks the tyres, checks the restraints, looks at some paperwork, and leaves. Most of them already had the photos and certificates. Nobody asked for them ahead of time.
                   </p>
                   <p>
-                    So we spent the rest of the weekend building it. Tonnage lets operators submit that evidence up front, flags anything that looks wrong, and only sends an engineer when there is real risk. The rest clears remotely.
+                    So we spent the rest of the weekend building it. TONNAGE lets operators submit that evidence up front, flags anything that looks wrong, and only sends an engineer when there is real risk. The rest clears remotely.
                   </p>
                 </div>
               </Reveal>
@@ -191,6 +230,48 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ---------- Who this is for ---------- */}
+        <section className="border-t border-rule bg-paper-raised">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
+            <Reveal className="text-center">
+              <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                Who this is for
+              </h2>
+              <p className="mt-5 max-w-[60ch] text-[1.0625rem] leading-[1.7] text-ink-muted mx-auto">
+                Transport insurers are one user. The same pattern fits anywhere
+                a small team of experts has to travel to check evidence against
+                a standard.
+              </p>
+            </Reveal>
+
+            <div className="mt-16 grid gap-5 md:grid-cols-3">
+              {OTHER_MARKETS.map((m, i) => (
+                <Reveal key={m.title} className="plate bg-paper-sunk" delay={0.05 * (i + 1)}>
+                  <div className="plate-core p-6 h-full">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-rule bg-paper-raised">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={asset(m.logo)}
+                          alt={`${m.company} logo`}
+                          width={40}
+                          height={40}
+                          className="size-9 object-contain"
+                        />
+                      </span>
+                      <span className="font-display text-base font-semibold text-ink">
+                        {m.company}
+                      </span>
+                    </div>
+                    <h3 className="mt-4 text-sm font-semibold text-ink">{m.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">{m.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ---------- Research & Trust ---------- */}
         <section className="border-t border-rule bg-paper-sunk/35">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
@@ -224,7 +305,7 @@ export default function Home() {
                       <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[1].title}</h3>
                       <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[1].desc}</p>
                     </div>
-                    <div className="mt-4 flex flex-col gap-1.5 font-mono text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                    <div className="mt-4 flex flex-col gap-1.5 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
                       <div className="flex justify-between items-center bg-paper px-2 py-0.5 rounded-[2px] border border-rule">
                         <span>IMG_2314.jpg</span>
                         <span className="text-accent-deep font-semibold">ORIGINAL</span>
@@ -244,7 +325,7 @@ export default function Home() {
                       <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[2].title}</h3>
                       <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[2].desc}</p>
                     </div>
-                    <div className="mt-4 space-y-1 font-mono text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                    <div className="mt-4 space-y-1 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
                       <div className="flex items-center gap-1.5">
                         <span className="h-1 w-1 rounded-full bg-tier-1-ink" />
                         <span>Form: "Restraints certified"</span>
@@ -318,7 +399,7 @@ export default function Home() {
 
                   {/* After */}
                   <Reveal className="rounded-[4px] border-[2px] border-accent bg-paper-raised p-6 flex-1 flex flex-col justify-center shadow-plate" delay={0.15}>
-                    <span className="field-label text-accent-deep">With Tonnage</span>
+                    <span className="field-label text-accent-deep">With TONNAGE</span>
                     <h4 className="font-display text-2xl font-bold mt-2 text-ink">Only real risk gets a visit</h4>
                     <p className="mt-3 text-sm leading-relaxed text-ink-muted">
                       Evidence clears the straightforward cases remotely. Engineers only travel when something needs investigating.
@@ -347,13 +428,13 @@ export default function Home() {
                 Stop driving to things<br className="hidden sm:inline" /> a photo can prove.
               </h2>
               <p className="mt-6 text-lg text-ink-muted max-w-[48ch] mx-auto">
-                Upload evidence. Tonnage flags risk and routes the result in minutes, not miles.
+                Upload evidence. TONNAGE flags risk and routes the result in minutes, not miles.
               </p>
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link href="/audit">
                   <Button variant="accent" size="lg" className="py-6 px-12 text-base">
-                    Start an audit
+                    Upload records
                     <ButtonIconWell>
                       <Arrow />
                     </ButtonIconWell>
@@ -406,7 +487,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="mx-auto max-w-[1240px] px-6 pb-10">
-        <p className="font-mono text-[11px] tracking-[0.08em] text-ink-faint">
+        <p className="text-[11px] tracking-[0.08em] text-ink-faint">
           © {new Date().getFullYear()} TONNAGE · AUSTRALIA
         </p>
       </div>

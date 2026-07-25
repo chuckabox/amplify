@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export interface Lane {
-  share: number; // 0..1
+  share: number;
   tier: 1 | 2 | 3;
   name: string;
   detail: string;
@@ -26,6 +27,7 @@ export function TierSplit({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <div className={cn("flex flex-col gap-10", className)}>
@@ -36,12 +38,17 @@ export function TierSplit({
         aria-label={lanes
           .map((l) => `${Math.round(l.share * 100)}% ${l.name}`)
           .join(", ")}
+        onMouseLeave={() => setHovered(null)}
       >
         {lanes.map((lane, i) => (
           <motion.div
             key={lane.tier}
-            className="flex items-center justify-center font-mono text-sm font-semibold text-white"
-            style={{ backgroundColor: BG[lane.tier] }}
+            className="flex items-center justify-center text-sm font-semibold text-white cursor-default transition-opacity duration-200"
+            style={{
+              backgroundColor: BG[lane.tier],
+              opacity: hovered === null ? 1 : hovered === i ? 1 : 0.35,
+            }}
+            onMouseEnter={() => setHovered(i)}
             initial={reduced ? { width: `${lane.share * 100}%` } : { width: 0 }}
             whileInView={{ width: `${lane.share * 100}%` }}
             viewport={{ once: true, margin: "-60px" }}
@@ -53,13 +60,21 @@ export function TierSplit({
       </div>
 
       {/* Legend */}
-      <div className="grid gap-6 sm:grid-cols-3">
+      <div
+        className="grid gap-6 sm:grid-cols-3"
+        onMouseLeave={() => setHovered(null)}
+      >
         {lanes.map((lane, i) => (
           <motion.div
             key={lane.tier}
-            className="flex gap-3"
-            initial={reduced ? undefined : { opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            className="flex gap-3 cursor-default"
+            onMouseEnter={() => setHovered(i)}
+            style={{
+              opacity: hovered === null ? 1 : hovered === i ? 1 : 0.35,
+              transition: "opacity 200ms",
+            }}
+            initial={reduced ? undefined : { y: 12 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.4, delay: 0.3 + i * 0.1, ease: EASE }}
           >
@@ -77,7 +92,6 @@ export function TierSplit({
           </motion.div>
         ))}
       </div>
-
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       <Reveal delay={0.08}>
         <div className="mt-10 space-y-8 text-sm leading-relaxed text-ink-muted">
           <p>
-            This privacy notice is for demonstration purposes only. Tonnage is a
+            This privacy notice is for demonstration purposes only. TONNAGE is a
             simulation of a heavy-vehicle risk-audit platform for NTI. No actual
             personal data is stored or processed on behalf of any commercial entity.
           </p>
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
               1. Information We Demo
             </h2>
             <p>
-              For the purpose of showcasing the Tonnage user flow, we collect
+              For the purpose of showcasing the TONNAGE user flow, we collect
               simulated fleet metadata, audit responses, and demonstration photos.
               This data is persisted locally in your browser&apos;s local storage and is
               not transmitted to any external servers.
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
               2. Security & Verification
             </h2>
             <p>
-              In a production environment, Tonnage/NTI relies on multi-layered trust
+              In a production environment, TONNAGE/NTI relies on multi-layered trust
               controls including EXIF photo metadata, GPS checks, and telematics.
               In this demo, all uploaded files are processed only in-memory to simulate
               the triage engine.
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
 
       <Reveal delay={0.16}>
         <div className="mt-12 border-t border-rule pt-6 flex justify-between items-center">
-          <p className="font-mono text-xs text-ink-faint">
+          <p className="text-xs text-ink-faint">
             REF: REG-PRIVACY-v1
           </p>
           <Link href="/">

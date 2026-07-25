@@ -61,7 +61,7 @@ function BoxOverlay({ det, index }: { det: Detection; index: number }) {
       <span className="absolute -bottom-[3px] -right-[3px] h-2 w-2 border-b-2 border-r-2" style={{ borderColor: color }} />
       {/* label */}
       <span
-        className="absolute -top-[1px] left-0 -translate-y-full whitespace-nowrap px-1.5 py-0.5 font-mono text-[10px] font-medium leading-none text-white"
+        className="absolute -top-[1px] left-0 -translate-y-full whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium leading-none text-white"
         style={{ background: color }}
       >
         {det.label}
@@ -121,9 +121,9 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
   const showBoxes = img != null && scanned.has(active) && !scanning;
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+    <div className="flex flex-col gap-6">
       {/* ---------- Viewer ---------- */}
-      <div>
+      <div className="mx-auto w-full max-w-[640px]">
         <div className="relative overflow-hidden rounded-xl border border-border bg-black">
           {img ? (
             <div className="relative">
@@ -170,7 +170,7 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="absolute bottom-2 left-2 flex items-center gap-2 rounded-full bg-black/70 px-3 py-1.5 font-mono text-[11px] text-white backdrop-blur"
+                    className="absolute bottom-2 left-2 flex items-center gap-2 rounded-full bg-black/70 px-3 py-1.5 text-[11px] text-white backdrop-blur"
                   >
                     <ScanLine className="h-3.5 w-3.5 animate-pulse" />
                     {SCAN_STEPS[step]}
@@ -180,7 +180,7 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
 
               {/* detected count chip */}
               {showBoxes && (
-                <div className="absolute right-2 top-2 rounded-full bg-black/70 px-2.5 py-1 font-mono text-[11px] text-white backdrop-blur">
+                <div className="absolute right-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[11px] text-white backdrop-blur">
                   {img.detections.length} objects
                 </div>
               )}
@@ -196,7 +196,7 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
                   playsInline
                   className="block max-h-[460px] w-full bg-black object-contain"
                 />
-                <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-tier-1-ink/90 px-2.5 py-1 font-mono text-[11px] text-white">
+                <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-tier-1-ink/90 px-2.5 py-1 text-[11px] text-white">
                   <Sparkles className="h-3.5 w-3.5" />
                   Plate read: XB·25JG
                 </div>
@@ -243,15 +243,14 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
             </button>
           )}
         </div>
-        <p className="mt-2 font-mono text-[11px] text-ink-faint">
+        <p className="mt-2 text-[11px] text-ink-faint">
           {img ? img.caption : analysis.video?.caption}
         </p>
       </div>
 
       {/* ---------- Read-out ---------- */}
       <div className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-center gap-2 border-b border-rule pb-3">
-          <Sparkles className="h-4 w-4 text-accent-deep" />
+        <div className="border-b border-rule pb-3">
           <h3 className="text-sm font-semibold text-ink">What the AI saw</h3>
         </div>
 
@@ -283,7 +282,7 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
               <dd className="text-right">
                 <span className="text-sm font-medium text-ink">{a.value}</span>
                 {a.confidence != null && (
-                  <span className="ml-1.5 font-mono text-[10px] text-ink-faint">
+                  <span className="ml-1.5 text-[10px] text-ink-faint">
                     {(a.confidence * 100).toFixed(0)}%
                   </span>
                 )}

@@ -32,7 +32,7 @@ export function Wordmark({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={asset("/logo.webp")}
-      alt="Tonnage"
+      alt="TONNAGE"
       className={cn("w-auto object-contain", h, className)}
     />
   );
@@ -52,7 +52,7 @@ export function Logo({
   return (
     <Link
       href={href}
-      aria-label="Tonnage: home"
+      aria-label="TONNAGE: home"
       onClick={() => {
         if (window.location.pathname === href) {
           window.scrollTo({ top: 0, behavior: "smooth" });

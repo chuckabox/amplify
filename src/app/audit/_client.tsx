@@ -141,7 +141,7 @@ export default function AuditClient() {
                   </div>
                   <div className="lg:pb-1">
                     <p className="max-w-[46ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                      Tonnage extracts the important facts, connects them to the right
+                      TONNAGE extracts the important facts, connects them to the right
                       vehicle, driver, subcontractor or depot, and updates one living
                       risk profile.
                     </p>
@@ -225,7 +225,7 @@ export default function AuditClient() {
                       <div className="plate-core overflow-hidden">
                         <div className="flex items-center justify-between border-b border-rule bg-paper-sunk/40 px-4 py-3">
                           <span className="field-label">Ready to process</span>
-                          <span className="font-mono text-[10px] text-ink-muted">
+                          <span className="text-[10px] text-ink-muted">
                             {documents.length} FILE{documents.length === 1 ? "" : "S"}
                           </span>
                         </div>
@@ -239,7 +239,7 @@ export default function AuditClient() {
                                 key={`${document.name}-${index}`}
                                 className="flex items-center gap-3 px-4 py-3"
                               >
-                                <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk font-mono text-[9px] font-semibold text-accent-deep">
+                                <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk text-[9px] font-semibold text-accent-deep">
                                   {document.name.split(".").pop()?.toUpperCase()}
                                 </span>
                                 <div className="min-w-0 flex-1">
@@ -253,7 +253,7 @@ export default function AuditClient() {
                                 <button
                                   type="button"
                                   onClick={() => removeDocument(index)}
-                                  className="rounded-[2px] px-2 py-1 font-mono text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+                                  className="rounded-[2px] px-2 py-1 text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
                                   aria-label={`Remove ${document.name}`}
                                 >
                                   ×
@@ -334,7 +334,7 @@ export default function AuditClient() {
                           }`}
                         >
                           <span
-                            className={`mt-0.5 font-mono text-[10px] ${
+                            className={`mt-0.5 text-[10px] ${
                               selectedKind === type.kind
                                 ? "text-accent-deep"
                                 : "text-ink-faint"
@@ -371,27 +371,22 @@ export default function AuditClient() {
           <section className="border-b border-rule bg-paper-sunk/35">
             <div className="mx-auto flex w-full max-w-[540px] flex-col justify-center px-6 py-28 md:py-36">
               <Reveal>
-                <div className="flex items-start gap-5">
-                  <span className="flex size-14 shrink-0 items-center justify-center rounded-[4px] bg-accent font-mono text-xl font-semibold text-ink">
-                    <span className="animate-pulse">TXT</span>
-                  </span>
-                  <div>
-                    <p className="field-label">Document intelligence</p>
-                    <h1 className="mt-2 text-3xl font-display font-bold leading-tight text-ink">
-                      Building structured records
-                    </h1>
-                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                      Reading {documents.length} source file
-                      {documents.length === 1 ? "" : "s"} and connecting the facts to
-                      the existing Passport.
-                    </p>
-                  </div>
+                <div>
+                  <p className="field-label">Processing</p>
+                  <h1 className="mt-2 text-3xl font-display font-bold leading-tight text-ink">
+                    Building structured records
+                  </h1>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                    Reading {documents.length} source file
+                    {documents.length === 1 ? "" : "s"} and connecting the facts to
+                    the existing Passport.
+                  </p>
                 </div>
 
                 <div className="plate mt-10">
                   <div className="plate-core overflow-hidden">
                     <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-                      <span className="field-label">Extraction pipeline</span>
+                      <span className="field-label">Progress</span>
                     </div>
                     <div className="divide-y divide-rule px-5">
                       {EXTRACTION_STAGES.map((stage, index) => {
@@ -409,13 +404,13 @@ export default function AuditClient() {
                             }`}
                           >
                             <span className="flex items-center gap-3">
-                              <span className="font-mono text-[10px]">
-                                {String(index + 1).padStart(2, "0")}
+                              <span className="text-[11px] text-ink-faint">
+                                {index + 1}
                               </span>
                               {stage}
                             </span>
-                            <span className="font-mono text-[10px]">
-                              {done ? "✓ DONE" : active ? "● READING" : "PENDING"}
+                            <span className="text-[11px]">
+                              {done ? "✓ Done" : active ? "● Reading" : "Pending"}
                             </span>
                           </div>
                         );
@@ -452,7 +447,7 @@ export default function AuditClient() {
                     searchable records linked to {extraction.entityLabel}.
                   </p>
                 </div>
-                <span className="self-start rounded-[3px] border border-tier-3-ink bg-tier-3-wash px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-tier-3-ink md:self-auto">
+                <span className="self-start rounded-[3px] border border-tier-3-ink bg-tier-3-wash px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-tier-3-ink md:self-auto">
                   Critical item found
                 </span>
               </div>
@@ -477,15 +472,15 @@ export default function AuditClient() {
                             <p className="font-display text-xl font-bold text-ink">
                               Fleet Service Report
                             </p>
-                            <p className="mt-1 font-mono text-[9px] text-ink-faint">
+                            <p className="mt-1 text-[9px] text-ink-faint">
                               COORANBONG FREIGHT · WORK ORDER 88241
                             </p>
                           </div>
-                          <span className="font-mono text-xs font-bold text-accent-deep">
+                          <span className="text-xs font-bold text-accent-deep">
                             PDF
                           </span>
                         </div>
-                        <dl className="mt-6 space-y-4 font-mono text-[10px] leading-relaxed">
+                        <dl className="mt-6 space-y-4 text-[10px] leading-relaxed">
                           <SourceRow label="Vehicle" value="Truck 28" />
                           <SourceRow label="Registration" value="ABC123" />
                           <SourceRow label="Service date" value="12 June 2026" />
@@ -494,7 +489,7 @@ export default function AuditClient() {
                           <SourceRow label="Repair completed" value="NO" marked />
                           <SourceRow label="Next service" value="500,000 km" />
                         </dl>
-                        <div className="mt-auto border-t border-rule pt-3 font-mono text-[8px] leading-relaxed text-ink-faint">
+                        <div className="mt-auto border-t border-rule pt-3 text-[8px] leading-relaxed text-ink-faint">
                           Signed electronically · B. Morton · Workshop supervisor
                         </div>
                       </div>
@@ -520,7 +515,7 @@ export default function AuditClient() {
                             {extraction.entityLabel}
                           </h2>
                         </div>
-                        <span className="self-start font-mono text-[10px] text-ink-faint">
+                        <span className="self-start text-[10px] text-ink-faint">
                           LINKED TO {extraction.entityType.toUpperCase()} RECORD
                         </span>
                       </div>
@@ -532,7 +527,7 @@ export default function AuditClient() {
                           >
                             <div className="flex items-center justify-between gap-3">
                               <span className="field-label">{field.label}</span>
-                              <span className="font-mono text-[9px] text-ink-faint">
+                              <span className="text-[9px] text-ink-faint">
                                 {Math.round(field.confidence * 100)}%
                               </span>
                             </div>
@@ -562,7 +557,7 @@ export default function AuditClient() {
                   <div className="plate border border-tier-3-ink bg-tier-3-wash">
                     <div className="plate-core p-5">
                       <div className="flex items-start gap-4">
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-[2px] bg-tier-3-ink font-mono text-sm font-bold text-paper">
+                        <span className="flex size-8 shrink-0 items-center justify-center rounded-[2px] bg-tier-3-ink text-sm font-bold text-paper">
                           !
                         </span>
                         <div>
@@ -657,7 +652,7 @@ function MappingRow({
     <div className="flex items-center justify-between gap-4 text-sm">
       <span className="flex items-center gap-2 text-ink-muted">
         <span
-          className={`flex size-4 items-center justify-center rounded-[1px] font-mono text-[9px] font-bold ${
+          className={`flex size-4 items-center justify-center rounded-[1px] text-[9px] font-bold ${
             state === "good"
               ? "bg-tier-1-wash text-tier-1-ink"
               : "bg-tier-3-wash text-tier-3-ink"
@@ -667,7 +662,7 @@ function MappingRow({
         </span>
         {label}
       </span>
-      <span className="font-mono text-[10px] font-semibold text-ink">
+      <span className="text-[10px] font-semibold text-ink">
         {value}
       </span>
     </div>

@@ -50,7 +50,7 @@ export default function PassportClient() {
             <div className="mx-auto max-w-[1240px] px-6">
               <div className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
-                  <span className="font-mono text-sm font-bold text-tier-1-ink">✓</span>
+                  <span className="text-sm font-bold text-tier-1-ink">✓</span>
                   <div>
                     <p className="text-sm font-semibold text-ink">
                       Truck 28 was updated from the maintenance PDF
@@ -63,7 +63,7 @@ export default function PassportClient() {
                 </div>
                 <button
                   type="button"
-                  className="self-start rounded-[2px] px-2 py-1 font-mono text-[10px] text-ink-muted hover:bg-paper/50 hover:text-ink"
+                  className="self-start rounded-[2px] px-2 py-1 text-[10px] text-ink-muted hover:bg-paper/50 hover:text-ink"
                   onClick={() => setJustUpdated(false)}
                 >
                   DISMISS
@@ -79,9 +79,16 @@ export default function PassportClient() {
             <Reveal>
               <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
                 <div>
-                  <h1 className="text-[clamp(2.6rem,6vw,4.75rem)] font-display font-bold leading-[0.96] text-ink">
-                    {PASSPORT_SUMMARY.business}
-                  </h1>
+                  <button
+                    type="button"
+                    className="group flex items-baseline gap-3 text-left"
+                    onClick={() => {}}
+                  >
+                    <h1 className="text-[clamp(2.6rem,6vw,4.75rem)] font-display font-bold leading-[0.96] text-ink">
+                      {PASSPORT_SUMMARY.business}
+                    </h1>
+                    <span className="text-xl text-ink-faint transition-colors group-hover:text-ink">▾</span>
+                  </button>
                 </div>
                 <div className="lg:pb-1">
                   <p className="max-w-[48ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
@@ -145,6 +152,20 @@ function Overview({ setView }: { setView: (view: View) => void }) {
 
   return (
     <>
+      <Reveal>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between pt-10">
+          <div>
+            <h2 className="text-3xl font-display font-bold text-ink">
+              Overview
+            </h2>
+          </div>
+          <p className="max-w-[46ch] text-sm leading-relaxed text-ink-muted">
+            A snapshot of this operator's risk position, what changed since the
+            last engineer review, and what needs attention now.
+          </p>
+        </div>
+      </Reveal>
+
       {/* Metadata bar */}
       <Reveal delay={0.02}>
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-rule pb-5 text-xs text-ink-muted">
@@ -211,12 +232,11 @@ function Overview({ setView }: { setView: (view: View) => void }) {
           <section aria-labelledby="changes-heading">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="field-label">Since the last review</p>
-                <h2 id="changes-heading" className="mt-2 text-2xl font-semibold text-ink">
+                <h2 id="changes-heading" className="text-2xl font-semibold text-ink">
                   What changed
                 </h2>
               </div>
-              <span className="font-mono text-[10px] text-ink-faint">
+              <span className="text-[10px] text-ink-faint">
                 30 JUN → TODAY
               </span>
             </div>
@@ -229,7 +249,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
                       index < RECENT_CHANGES.length - 1 ? "border-b border-rule" : ""
                     }`}
                   >
-                    <time className="font-mono text-[10px] text-ink-faint">
+                    <time className="text-[10px] text-ink-faint">
                       {change.date}
                     </time>
                     <div>
@@ -245,7 +265,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
                                   : "bg-ink-faint"
                           }`}
                         />
-                        <span className="font-mono text-[9px] font-semibold uppercase tracking-wider text-ink-faint">
+                        <span className="text-[9px] font-semibold uppercase tracking-wider text-ink-faint">
                           {change.type}
                         </span>
                       </div>
@@ -265,8 +285,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
 
         <Reveal delay={0.14}>
           <section aria-labelledby="critical-heading">
-            <p className="field-label">Needs attention now</p>
-            <h2 id="critical-heading" className="mt-2 text-2xl font-semibold text-ink">
+            <h2 id="critical-heading" className="text-2xl font-semibold text-ink">
               Critical review
             </h2>
             <div className="plate mt-5">
@@ -274,7 +293,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
                 <div className="bg-tier-3-wash px-5 py-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <span className="font-mono text-[9px] font-semibold uppercase tracking-wider text-tier-3-ink">
+                      <span className="text-[9px] font-semibold uppercase tracking-wider text-tier-3-ink">
                         Open safety defect
                       </span>
                       <h3 className="mt-1 text-xl font-semibold text-ink">
@@ -284,7 +303,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
                         {criticalEntity.meta}
                       </p>
                     </div>
-                    <span className="flex size-9 items-center justify-center rounded-[2px] bg-tier-3-ink font-mono text-sm font-bold text-paper">
+                    <span className="flex size-9 items-center justify-center rounded-[2px] bg-tier-3-ink text-sm font-bold text-paper">
                       !
                     </span>
                   </div>
@@ -297,7 +316,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
                     >
                       <dt className="text-ink-muted">{fact.label}</dt>
                       <dd
-                        className={`font-mono text-xs font-semibold ${
+                        className={`text-xs font-semibold ${
                           fact.tone === "critical"
                             ? "text-tier-3-ink"
                             : fact.tone === "warning"
@@ -327,8 +346,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
         <section className="mt-12 border-t border-rule pt-10" aria-labelledby="coverage-heading">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="field-label">Evidence-to-control mapping</p>
-              <h2 id="coverage-heading" className="mt-2 text-2xl font-semibold text-ink">
+              <h2 id="coverage-heading" className="text-2xl font-semibold text-ink">
                 Are the controls actually happening?
               </h2>
             </div>
@@ -360,8 +378,7 @@ function EntitiesView() {
       <Reveal>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="field-label">Connected records</p>
-            <h2 id="entities-heading" className="mt-2 text-3xl font-display font-bold text-ink">
+            <h2 id="entities-heading" className="text-3xl font-display font-bold text-ink">
               People, assets and partners
             </h2>
           </div>
@@ -387,15 +404,14 @@ function ControlsView() {
   return (
     <section className="py-10" aria-labelledby="controls-heading">
       <Reveal>
-        <div className="grid gap-5 lg:grid-cols-[1fr_0.55fr] lg:items-end">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="field-label">Evidence-to-control mapping</p>
-            <h2 id="controls-heading" className="mt-2 text-3xl font-display font-bold text-ink">
-              Policy, training, practice, close-out.
+            <h2 id="controls-heading" className="text-3xl font-display font-bold text-ink">
+              Control evidence
             </h2>
           </div>
-          <p className="text-sm leading-relaxed text-ink-muted">
-            A document does not prove a control works. Tonnage looks for the
+          <p className="max-w-[46ch] text-sm leading-relaxed text-ink-muted">
+            A document does not prove a control works. TONNAGE looks for the
             rule, competency, operating evidence and corrective action.
           </p>
         </div>
@@ -418,14 +434,14 @@ function DocumentsView() {
       <Reveal>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="field-label">Evidence library</p>
-            <h2 id="documents-heading" className="mt-2 text-3xl font-display font-bold text-ink">
+            <h2 id="documents-heading" className="text-3xl font-display font-bold text-ink">
               Source documents
             </h2>
           </div>
-          <Link href="/audit">
-            <Button variant="accent">Upload more records</Button>
-          </Link>
+          <p className="max-w-[46ch] text-sm leading-relaxed text-ink-muted">
+            Every uploaded file stays attached to the records it produced, so
+            an engineer can always trace a fact back to its source.
+          </p>
         </div>
       </Reveal>
       <Reveal delay={0.08}>
@@ -450,15 +466,15 @@ function DocumentsView() {
                     </td>
                     <td className="px-5 py-4 text-ink-muted">{document.type}</td>
                     <td className="px-5 py-4 text-ink-muted">{document.linkedTo}</td>
-                    <td className="px-5 py-4 font-mono text-xs text-ink-faint">
+                    <td className="px-5 py-4 text-xs text-ink-faint">
                       {document.date}
                     </td>
-                    <td className="px-5 py-4 text-right font-mono text-xs text-ink">
+                    <td className="px-5 py-4 text-right text-xs text-ink">
                       {document.records}
                     </td>
                     <td className="px-5 py-4">
                       <span
-                        className={`font-mono text-[10px] font-semibold uppercase ${
+                        className={`text-[10px] font-semibold uppercase ${
                           document.status === "Review"
                             ? "text-tier-3-ink"
                             : "text-tier-1-ink"
@@ -524,11 +540,11 @@ function EntityCard({ entity }: { entity: PassportEntity }) {
         <div className="flex items-start justify-between gap-4 border-b border-rule bg-paper-sunk/35 px-5 py-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint">
+              <span className="text-[9px] uppercase tracking-wider text-ink-faint">
                 {entity.type}
               </span>
               {entity.changed && (
-                <span className="rounded-[2px] bg-accent px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase text-ink">
+                <span className="rounded-[2px] bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase text-ink">
                   Updated
                 </span>
               )}
@@ -537,7 +553,7 @@ function EntityCard({ entity }: { entity: PassportEntity }) {
             <p className="mt-1 text-xs text-ink-muted">{entity.meta}</p>
           </div>
           <span
-            className={`font-mono text-[9px] font-semibold uppercase tracking-wider ${
+            className={`text-[9px] font-semibold uppercase tracking-wider ${
               entity.status === "critical"
                 ? "text-tier-3-ink"
                 : entity.status === "watch"
@@ -595,7 +611,7 @@ function ControlCard({
           <div className="flex items-center justify-between gap-4">
             <span className="field-label">{PILLAR_LABEL[control.pillar]}</span>
             <span
-              className={`font-mono text-[9px] font-semibold uppercase ${
+              className={`text-[9px] font-semibold uppercase ${
                 control.status === "effective"
                   ? "text-tier-1-ink"
                   : control.status === "partial"
@@ -637,7 +653,7 @@ function ControlCard({
               >
                 <span className="flex items-center gap-2 text-ink-muted">
                   <span
-                    className={`font-mono text-[10px] font-bold ${
+                    className={`text-[10px] font-bold ${
                       evidence.state === "proved"
                         ? "text-tier-1-ink"
                         : evidence.state === "partial"
@@ -653,7 +669,7 @@ function ControlCard({
                   </span>
                   {evidence.label}
                 </span>
-                <span className="shrink-0 font-mono text-[9px] font-semibold text-ink">
+                <span className="shrink-0 text-[9px] font-semibold text-ink">
                   {evidence.value}
                 </span>
               </div>

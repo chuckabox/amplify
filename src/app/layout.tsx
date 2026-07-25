@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { MeshBg } from "@/components/mesh-bg";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -30,13 +31,13 @@ const SITE = "https://tonnage.au";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Tonnage: living Passports for transport",
-    template: "%s · Tonnage",
+    default: "TONNAGE: living Passports for transport",
+    template: "%s · TONNAGE",
   },
   description:
-    "Tonnage turns transport records into living Passports, links evidence to controls and shows engineers what changed since the last review.",
-  applicationName: "Tonnage",
-  authors: [{ name: "Tonnage" }],
+    "TONNAGE turns transport records into living Passports, links evidence to controls and shows engineers what changed since the last review.",
+  applicationName: "TONNAGE",
+  authors: [{ name: "TONNAGE" }],
   keywords: [
     "transport risk audit",
     "heavy vehicle insurance",
@@ -48,15 +49,15 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: SITE,
-    siteName: "Tonnage",
+    siteName: "TONNAGE",
     locale: "en_AU",
-    title: "Tonnage: living Passports for transport",
+    title: "TONNAGE: living Passports for transport",
     description:
       "Turn existing transport records into structured, searchable and actionable risk evidence.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tonnage: living Passports for transport",
+    title: "TONNAGE: living Passports for transport",
     description:
       "Existing records become a living Passport that shows what changed.",
   },
@@ -93,7 +94,13 @@ export default function RootLayout({
                 href="/visual-evidence"
                 className="hidden px-3 py-2 text-sm font-semibold text-ink-muted transition-colors hover:text-ink md:inline-flex"
               >
-                Vision
+                Analysis
+              </Link>
+              <Link
+                href="/pricing"
+                className="hidden px-3 py-2 text-sm font-semibold text-ink-muted transition-colors hover:text-ink sm:inline-flex"
+              >
+                Pricing
               </Link>
               <Link href="/audit">
                 <Button size="sm">Upload records</Button>
@@ -101,6 +108,7 @@ export default function RootLayout({
             </nav>
           </div>
         </header>
+        <ScrollToTop />
         {children}
         <MeshBg />
         <div className="grain-overlay" aria-hidden />

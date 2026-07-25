@@ -15,6 +15,16 @@ export interface Step {
   alt: string;
 }
 
+const variants = {
+  initial: (d: number) => {
+    return { opacity: 0, x: d * 60 };
+  },
+  animate: { opacity: 1, x: 0 },
+  exit: (d: number) => {
+    return { opacity: 0, x: d * -60 };
+  },
+};
+
 export function StepTabs({ steps }: { steps: Step[] }) {
   const [active, setActive] = useState(0);
   const dirRef = useRef(1);
@@ -34,24 +44,17 @@ export function StepTabs({ steps }: { steps: Step[] }) {
             key={s.n}
             onClick={() => go(i)}
             className={cn(
-              "relative rounded-[4px] border px-5 py-4 text-left transition-colors",
+              "rounded-[4px] border-2 px-5 py-4 text-left",
               i === active
                 ? "border-accent bg-accent/8"
                 : "border-rule bg-paper-raised hover:border-rule-strong",
             )}
           >
-            {i === active && (
-              <motion.span
-                layoutId="step-indicator"
-                className="absolute inset-0 rounded-[4px] border-2 border-accent"
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-              />
-            )}
-            <span className="relative flex items-baseline gap-2">
+            <span className="flex items-baseline gap-2">
               <span className="font-display text-sm font-bold text-ink-faint">{s.n}</span>
               <span className="text-sm font-semibold">{s.title}</span>
             </span>
-            <p className="relative mt-1 text-xs leading-relaxed text-ink-muted line-clamp-2">
+            <p className="mt-1 text-xs leading-relaxed text-ink-muted line-clamp-2">
               {s.body}
             </p>
           </button>
@@ -64,9 +67,10 @@ export function StepTabs({ steps }: { steps: Step[] }) {
           <motion.div
             key={active}
             custom={dirRef.current}
-            initial={(d: number) => ({ opacity: 0, x: d * 60 })}
-            animate={{ opacity: 1, x: 0 }}
-            exit={(d: number) => ({ opacity: 0, x: d * -60 })}
+            variants={variants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
             transition={{ duration: 0.25, ease: "easeInOut" }}
             className="grid items-center gap-8 p-6 md:grid-cols-2 md:p-10"
           >
