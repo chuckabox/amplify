@@ -6,6 +6,7 @@ import { TierSplit, type Lane } from "@/components/tier-split";
 import { StepTabs, type Step } from "@/components/step-tabs";
 import { Reveal } from "@/components/motion";
 import { PhotoPlate } from "@/components/photo-plate";
+import { SpeedLines } from "@/components/speed-lines";
 import { asset } from "@/lib/asset";
 
 const LANES: Lane[] = [
@@ -78,8 +79,9 @@ const TRUST_CHECKS = [
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <main id="main" className="flex-1">
+    <div className="flex min-h-screen flex-col relative">
+      <SpeedLines />
+      <main id="main" className="flex-1 relative z-10">
         {/* ---------- Hero ---------- */}
         <section className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-10">
