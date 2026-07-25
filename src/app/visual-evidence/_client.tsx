@@ -99,7 +99,13 @@ export default function VisualEvidenceClient() {
         (EXTRACTION_STAGES.length + 1) * 600,
       ),
     );
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      timers.forEach(clearTimeout);
+    };
+  }, [phase]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [phase]);
 
   function addFiles(files: FileList | null) {
@@ -634,6 +640,7 @@ export default function VisualEvidenceClient() {
                     setPhase("upload");
                     setAttached(false);
                     setEvidence([]);
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
                   }}
                 >
                   Analyse another batch

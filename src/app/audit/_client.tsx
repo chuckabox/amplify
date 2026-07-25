@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ButtonIconWell } from "@/components/ui/button";
@@ -70,6 +70,10 @@ function inferKind(name: string): DocumentKind {
 export default function AuditClient() {
   const router = useRouter();
   const [phase, setPhase] = useState<"upload" | "extracting" | "review">("upload");
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [phase]);
   const [documents, setDocuments] = useState<QueuedDocument[]>([]);
   const [stageIndex, setStageIndex] = useState(0);
   const [selectedKind, setSelectedKind] = useState<DocumentKind>("maintenance");
@@ -365,6 +369,8 @@ export default function AuditClient() {
   }
 
   if (phase === "extracting") {
+    const total = EXTRACTION_STAGES.length;
+    const progress = Math.min(stageIndex + 1, total);
     return (
       <div className="flex min-h-screen flex-col">
         <main id="main" className="flex-1">
@@ -372,45 +378,39 @@ export default function AuditClient() {
             <div className="mx-auto flex w-full max-w-[540px] flex-col justify-center px-6 py-28 md:py-36">
               <Reveal>
                 <div>
-                  <p className="field-label">Processing</p>
-                  <h1 className="mt-2 text-3xl font-display font-bold leading-tight text-ink">
+                  <p className="field-label text-center">DOCUMENT ENGINE</p>
+                  <h1 className="mt-4 text-center text-[clamp(1.75rem,4vw,2.25rem)] font-display font-bold leading-tight text-ink">
                     Building structured records
                   </h1>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                  <p className="mt-3 text-center text-sm text-ink-muted">
                     Reading {documents.length} source file
                     {documents.length === 1 ? "" : "s"} and connecting the facts to
                     the existing Passport.
                   </p>
                 </div>
 
-                <div className="plate mt-10">
-                  <div className="plate-core overflow-hidden">
-                    <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-                      <span className="field-label">Progress</span>
-                    </div>
-                    <div className="divide-y divide-rule px-5">
-                      {EXTRACTION_STAGES.map((stage, index) => {
-                        const done = index < stageIndex;
-                        const active = index === stageIndex;
+                <div className="plate mt-12">
+                  <div className="plate-core p-6">
+                    <ProgressBar current={progress} total={total} />
+
+                    <div className="mt-8 space-y-4">
+                      {EXTRACTION_STAGES.map((label, idx) => {
+                        const pending = idx > progress - 1;
+                        const active = idx === progress - 1;
                         return (
                           <div
-                            key={stage}
-                            className={`flex items-center justify-between py-4 text-sm ${
-                              done
-                                ? "text-ink"
-                                : active
-                                  ? "font-semibold text-accent-deep"
-                                  : "text-ink-faint"
+                            key={label}
+                            className={`flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
+                              active
+                                ? "text-accent-deep"
+                                : pending
+                                  ? "text-ink-faint opacity-40"
+                                  : "text-ink-muted"
                             }`}
                           >
-                            <span className="flex items-center gap-3">
-                              <span className="text-[11px] text-ink-faint">
-                                {index + 1}
-                              </span>
-                              {stage}
-                            </span>
-                            <span className="text-[11px]">
-                              {done ? "✓ Done" : active ? "● Reading" : "Pending"}
+                            <span>{label}</span>
+                            <span>
+                              {pending ? "PENDING" : active ? "RUNNING" : "DONE"}
                             </span>
                           </div>
                         );
@@ -601,7 +601,13 @@ export default function AuditClient() {
                 PDF and records this as a change since the last engineer review.
               </p>
               <div className="flex shrink-0 items-center gap-3">
-                <Button variant="outline" onClick={() => setPhase("upload")}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setPhase("upload");
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                  }}
+                >
                   Back
                 </Button>
                 <Button variant="accent" onClick={addToPassport}>
