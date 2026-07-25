@@ -30,7 +30,7 @@ const SITE = "https://tonnage.au";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Tonnage — living Risk Passports for transport",
+    default: "Tonnage: living Risk Passports for transport",
     template: "%s · Tonnage",
   },
   description:
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     url: SITE,
     siteName: "Tonnage",
     locale: "en_AU",
-    title: "Tonnage — living Risk Passports for transport",
+    title: "Tonnage: living Risk Passports for transport",
     description:
       "Turn existing transport records into structured, searchable and actionable risk evidence.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tonnage — living Risk Passports for transport",
+    title: "Tonnage: living Risk Passports for transport",
     description:
       "Existing records become a living Risk Passport that shows what changed.",
   },

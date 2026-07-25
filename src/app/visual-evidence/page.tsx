@@ -92,8 +92,8 @@ export default function VisualEvidencePage() {
           <div className="lg:pb-1">
             <p className="max-w-[48ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
               Photo and video analysis stays alongside document extraction.
-              Visual facts resolve to the same vehicle and strengthen—or
-              challenge—the same risk controls.
+              Visual facts resolve to the same vehicle and strengthen, or
+              challenge, the same risk controls.
             </p>
             <Link
               href="/audit"
