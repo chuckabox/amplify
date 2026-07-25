@@ -1,12 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, ButtonIconWell } from "@/components/ui/button";
 import { PhotoAnalysis } from "@/components/photo-analysis";
 import { Reveal } from "@/components/motion";
+import { asset } from "@/lib/asset";
 
 type SampleId = "truckA" | "truckB";
+type Phase = "upload" | "extracting" | "review";
+
+interface QueuedFile {
+  name: string;
+  size: string;
+  isVideo: boolean;
+}
+
+const EXTRACTION_STAGES = [
+  "Uploading media assets",
+  "Checking photo reuse and image metadata",
+  "Extracting license plates and registration",
+  "Running tyre tread depth estimation",
+  "Verifying evidence against safety controls",
+] as const;
+
+const SAMPLE_FILES: Record<SampleId, QueuedFile[]> = {
+  truckA: [
+    { name: "Mitsubishi_Fuso_SideProfile.jpg", size: "590 KB", isVideo: false },
+    { name: "Steer_Tyre_Tread_Inspection.jpg", size: "406 KB", isVideo: false },
+  ],
+  truckB: [
+    { name: "Isuzu_FRR_Windscreen.jpg", size: "693 KB", isVideo: false },
+    { name: "Walk-around_Front_Inspected.mp4", size: "2.1 MB", isVideo: true },
+  ],
+};
 
 const SAMPLE_META = {
   truckA: {
@@ -41,16 +68,311 @@ const SAMPLE_META = {
   },
 } as const;
 
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function VisualEvidencePage() {
+  const [phase, setPhase] = useState<Phase>("upload");
   const [sampleId, setSampleId] = useState<SampleId>("truckB");
   const [attached, setAttached] = useState(false);
+  const [evidence, setEvidence] = useState<QueuedFile[]>([]);
+  const [stageIndex, setStageIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const sample = SAMPLE_META[sampleId];
+
+  useEffect(() => {
+    if (phase !== "extracting") return;
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    EXTRACTION_STAGES.forEach((_, index) => {
+      timers.push(
+        setTimeout(() => setStageIndex(index + 1), (index + 1) * 600),
+      );
+    });
+    timers.push(
+      setTimeout(
+        () => setPhase("review"),
+        (EXTRACTION_STAGES.length + 1) * 600,
+      ),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [phase]);
+
+  function addFiles(files: FileList | null) {
+    if (!files?.length) return;
+    const next = Array.from(files).map((file) => ({
+      name: file.name,
+      size: formatBytes(file.size),
+      isVideo: file.type.startsWith("video/"),
+    }));
+    setEvidence((current) => [...current, ...next]);
+  }
+
+  function addSampleSet(id: SampleId) {
+    setSampleId(id);
+    setEvidence(SAMPLE_FILES[id]);
+  }
+
+  function removeFile(index: number) {
+    setEvidence((current) => current.filter((_, idx) => idx !== index));
+  }
+
+  function runVisionAnalysis() {
+    setStageIndex(0);
+    setPhase("extracting");
+  }
 
   function selectSample(id: SampleId) {
     setSampleId(id);
     setAttached(false);
   }
 
+  // ---------- Phase 1: Upload Dropzone ----------
+  if (phase === "upload") {
+    return (
+      <main id="main" className="mx-auto w-full max-w-[1180px] flex-1 px-6 py-12 md:py-16">
+        <Reveal>
+          <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
+            <div>
+              <p className="field-label">Risk Passport · visual evidence</p>
+              <h1 className="mt-4 max-w-[15ch] text-[clamp(2.6rem,6vw,4.75rem)] font-semibold leading-[0.96] text-ink">
+                Analyse photo and video evidence.
+              </h1>
+            </div>
+            <p className="max-w-[46ch] text-[1.0625rem] leading-[1.7] text-ink-muted lg:pb-1">
+              Upload truck profile shots, tyre inspection photos, or walk-around video clips. 
+              Tonnage scans image metadata, checks photo reuse, and estimates compliance controls.
+            </p>
+            <Link
+              href="/audit"
+              className="text-sm font-semibold text-accent-deep underline decoration-rule-strong underline-offset-4 hover:decoration-accent-deep lg:col-start-2"
+            >
+              Upload business records instead
+            </Link>
+          </div>
+        </Reveal>
+
+        <div className="mt-12 grid gap-8 lg:grid-cols-[1.22fr_0.78fr]">
+          <Reveal delay={0.08}>
+            <section aria-labelledby="upload-media-title">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="field-label">01 · Add media</p>
+                  <h2 id="upload-media-title" className="mt-2 text-2xl font-semibold text-ink">
+                    Drop photo or video files
+                  </h2>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-faint">
+                  MP4 · WebM · HEIC · JPG · PNG
+                </span>
+              </div>
+
+              <div
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                  addFiles(event.dataTransfer.files);
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                className={`mt-5 flex min-h-[245px] cursor-pointer flex-col items-center justify-center gap-4 rounded-[4px] border-2 border-dashed p-8 text-center transition-all ${
+                  dragging
+                    ? "border-accent-deep bg-accent-wash/50"
+                    : "border-rule-strong bg-paper-raised hover:border-accent-deep"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  className="hidden"
+                  onChange={(event) => addFiles(event.target.files)}
+                />
+                <DocumentStackIcon />
+                <div>
+                  <p className="text-base font-semibold text-ink">
+                    Drop media files here
+                  </p>
+                  <p className="mt-1 text-sm text-ink-muted">
+                    or click to browse from your computer
+                  </p>
+                </div>
+                <p className="max-w-[42ch] text-xs leading-relaxed text-ink-faint">
+                  Select raw photos or videos captured on-site. Bounding boxes and 
+                  AI detections are generated automatically.
+                </p>
+              </div>
+
+              {evidence.length > 0 && (
+                <div className="mt-4 overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+                  <div className="flex items-center justify-between border-b border-rule bg-paper-sunk/40 px-4 py-3">
+                    <span className="field-label">Ready to process</span>
+                    <span className="font-mono text-[10px] text-ink-muted">
+                      {evidence.length} FILE{evidence.length === 1 ? "" : "S"}
+                    </span>
+                  </div>
+                  <div className="divide-y divide-rule">
+                    {evidence.map((file, index) => (
+                      <div
+                        key={`${file.name}-${index}`}
+                        className="flex items-center gap-3 px-4 py-3"
+                      >
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk font-mono text-[9px] font-semibold text-accent-deep">
+                          {file.isVideo ? "VIDEO" : "PHOTO"}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-ink">
+                            {file.name}
+                          </p>
+                          <p className="mt-0.5 text-xs text-ink-faint">
+                            {file.size}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="rounded-[2px] px-2 py-1 font-mono text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+                          aria-label={`Remove ${file.name}`}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-col gap-4 border-t border-rule pt-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="field-label">For the hackathon demo</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => addSampleSet("truckA")}
+                      className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
+                    >
+                      + Truck A (Fuso flatbed)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addSampleSet("truckB")}
+                      className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
+                    >
+                      + Truck B (Isuzu pantech)
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link href="/">
+                    <Button variant="outline">Cancel</Button>
+                  </Link>
+                  <Button
+                    variant="accent"
+                    disabled={evidence.length === 0}
+                    onClick={runVisionAnalysis}
+                  >
+                    Analyse media
+                    <ButtonIconWell>
+                      <Arrow />
+                    </ButtonIconWell>
+                  </Button>
+                </div>
+              </div>
+            </section>
+          </Reveal>
+
+          <Reveal delay={0.16}>
+            <aside className="h-full rounded-[4px] border border-rule bg-paper-raised p-6">
+              <span className="field-label">HOW VISUAL VERIFICATION WORKS</span>
+              <h3 className="mt-4 font-display text-lg font-bold text-ink">
+                AI Vision Analysis
+              </h3>
+              <p className="mt-4 text-sm leading-relaxed text-ink-muted">
+                Our heavy rigid model reviews uploaded photos and video clips to extract evidence layers. It detects:
+              </p>
+              <ul className="mt-4 space-y-3 text-sm text-ink-muted">
+                <li className="flex items-start gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                  <span><strong>Plate matching:</strong> Cross-references license plates with registration documents.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                  <span><strong>Tread checks:</strong> Estimates tread depth values from direct steer tyre photographs.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                  <span><strong>Genuineness:</strong> Detects photo reuse and metadata mismatch warnings.</span>
+                </li>
+              </ul>
+            </aside>
+          </Reveal>
+        </div>
+      </main>
+    );
+  }
+
+  // ---------- Phase 2: Processing Loader ----------
+  if (phase === "extracting") {
+    const total = EXTRACTION_STAGES.length;
+    const progress = Math.min(stageIndex, total);
+    return (
+      <main id="main" className="mx-auto flex w-full max-w-[480px] flex-1 flex-col justify-center px-6 py-20">
+        <Reveal>
+          <div>
+            <p className="field-label text-center">AI VISION ENGINE</p>
+            <h1 className="mt-4 text-center text-3xl font-semibold leading-tight text-ink">
+              Running vision analysis
+            </h1>
+            <p className="mt-3 text-center text-sm text-ink-muted">
+              Detecting vehicles, estimating tyre tread and checking metadata.
+            </p>
+          </div>
+
+          <div className="mt-10 rounded-[4px] border border-rule bg-paper-raised p-6">
+            <ProgressBar current={progress} total={total} />
+
+            <div className="mt-8 space-y-4">
+              {EXTRACTION_STAGES.map((label, idx) => {
+                const pending = idx > progress - 1;
+                const active = idx === progress - 1;
+                return (
+                  <div
+                    key={label}
+                    className={`flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
+                      active
+                        ? "text-accent-deep"
+                        : pending
+                          ? "text-ink-faint opacity-40"
+                          : "text-ink-muted"
+                    }`}
+                  >
+                    <span>{label}</span>
+                    <span className="font-mono">
+                      {pending ? "PENDING" : active ? "RUNNING" : "DONE"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </Reveal>
+      </main>
+    );
+  }
+
+  // ---------- Phase 3: Results / Review ----------
   return (
     <main
       id="main"
@@ -235,16 +557,29 @@ export default function VisualEvidencePage() {
               </div>
             </section>
 
-            <Button
-              variant="accent"
-              className="w-full"
-              onClick={() => setAttached(true)}
-            >
-              Attach findings to passport
-              <ButtonIconWell>
-                <Arrow />
-              </ButtonIconWell>
-            </Button>
+            <div className="space-y-3">
+              <Button
+                variant="accent"
+                className="w-full"
+                onClick={() => setAttached(true)}
+              >
+                Attach findings to passport
+                <ButtonIconWell>
+                  <Arrow />
+                </ButtonIconWell>
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setPhase("upload");
+                  setAttached(false);
+                  setEvidence([]);
+                }}
+              >
+                Analyse another batch
+              </Button>
+            </div>
           </aside>
         </Reveal>
       </div>
@@ -283,5 +618,45 @@ function Arrow() {
         strokeLinecap="square"
       />
     </svg>
+  );
+}
+
+function DocumentStackIcon() {
+  return (
+    <span className="relative block h-14 w-12" aria-hidden>
+      <span className="absolute left-0 top-2 h-11 w-9 -rotate-6 rounded-[2px] border border-rule-strong bg-paper-sunk" />
+      <span className="absolute right-0 top-1 h-11 w-9 rotate-3 rounded-[2px] border border-rule-strong bg-paper" />
+      <span className="absolute left-1.5 top-0 flex h-11 w-9 flex-col gap-1.5 rounded-[2px] border border-ink bg-paper-raised p-2">
+        <span className="h-1 w-full bg-accent" />
+        <span className="h-px w-full bg-rule-strong" />
+        <span className="h-px w-3/4 bg-rule-strong" />
+        <span className="h-px w-5/6 bg-rule-strong" />
+      </span>
+    </span>
+  );
+}
+
+function ProgressBar({ current, total }: { current: number; total: number }) {
+  const pct = Math.round((current / total) * 100);
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-ink-muted font-mono">
+        <span>Step {current} of {total}</span>
+        <span>{pct}%</span>
+      </div>
+      <div className="mt-3 flex gap-1.5" aria-hidden>
+        {Array.from({ length: total }).map((_, idx) => {
+          const active = idx < current;
+          return (
+            <div
+              key={idx}
+              className={`h-2 flex-1 rounded-[1px] transition-colors duration-300 ${
+                active ? "bg-accent" : "bg-paper-sunk"
+              }`}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
 }
