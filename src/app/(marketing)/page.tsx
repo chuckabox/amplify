@@ -30,24 +30,24 @@ const LANES: Lane[] = [
 const STEPS: Step[] = [
   {
     n: "01",
-    title: "Answer the questions",
-    body: "Four topics, a few questions each, plus photos from the yard. Works on a phone.",
+    title: "Upload existing records",
+    body: "Drop in maintenance PDFs, driver credentials, incident reports, photos and walk-around videos. No forms to rebuild.",
     seed: "wb-depot-yard",
-    alt: "A driver photographing a trailer's load restraints in a depot yard",
+    alt: "Transport operator records ready for digital review",
   },
   {
     n: "02",
-    title: "We read the evidence",
-    body: "AI checks what the photos actually show — tread depth, tag dates, strap condition — and scores the answers against safety standards.",
+    title: "We structure the facts",
+    body: "Tonnage extracts vehicles, drivers, dates, defects and actions, then links each fact to the entity and control it proves.",
     seed: "wb-tyre-detail",
-    alt: "Close inspection of a heavy vehicle tyre showing tread depth",
+    alt: "Structured transport compliance information extracted from source records",
   },
   {
     n: "03",
-    title: "You get a result",
-    body: "Every audit lands in one of three lanes with a reason. An engineer signs every outcome — the AI routes, it doesn't decide.",
+    title: "The passport stays current",
+    body: "Every upload updates a living risk profile. Engineers see what changed, what is missing and which controls are actually working.",
     seed: "wb-engineer-desk",
-    alt: "A risk engineer reviewing audit evidence on screen",
+    alt: "A risk engineer reviewing a living business risk profile",
   },
 ];
 
@@ -76,9 +76,9 @@ export default function Home() {
 
               <Reveal delay={0.12}>
                 <p className="mt-8 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  Tonnage reads every transport risk audit, passes the ones that
-                  are fine, and pulls aside the few that aren&apos;t. Three
-                  engineers do the work of thirty.
+                  Tonnage turns existing records, photos and videos into a living
+                  Risk Passport, then pulls aside only the changes that need an
+                  engineer. Three engineers do the work of thirty.
                 </p>
               </Reveal>
 
@@ -86,7 +86,7 @@ export default function Home() {
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                   <Link href="/audit" className="sm:w-auto">
                     <Button variant="accent" size="lg" className="w-full sm:w-auto">
-                      Start an audit
+                      Upload records
                       <ButtonIconWell>
                         <Arrow />
                       </ButtonIconWell>
@@ -127,7 +127,7 @@ export default function Home() {
             <div className="text-center">
               <p className="field-label">How it works</p>
               <h2 className="mx-auto mt-5 max-w-[18ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                From the yard to the decision.
+                From source records to current risk.
               </h2>
             </div>
           </Reveal>
@@ -182,7 +182,7 @@ export default function Home() {
               <h2 className="mx-auto max-w-[20ch] text-[clamp(2rem,3.8vw,3rem)] leading-[1.05]">
                 Others automate the report.
                 <span className="block text-ink-muted">
-                  We change who runs the audit.
+                  We make the evidence reusable.
                 </span>
               </h2>
             </Reveal>
@@ -194,7 +194,7 @@ export default function Home() {
               <div className="mt-8 flex justify-center">
                 <Link href="/audit">
                   <Button variant="accent" size="lg">
-                    Start an audit
+                    Build a Risk Passport
                     <ButtonIconWell>
                       <Arrow />
                     </ButtonIconWell>

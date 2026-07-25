@@ -2,413 +2,400 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, ButtonIconWell } from "@/components/ui/button";
-import { QUESTIONNAIRE } from "@/lib/data/questionnaire";
-import { PILLAR_LABEL, FINDING_STATUS_LABEL } from "@/lib/data/audit";
-import { scoreAudit, OUTCOME_LABEL, type ScoreResult } from "@/lib/score";
 import { Reveal } from "@/components/motion";
-import { PhotoAnalysis } from "@/components/photo-analysis";
+import {
+  DOCUMENT_TYPES,
+  PASSPORT_STORAGE_KEY,
+  SAMPLE_EXTRACTION,
+  type DocumentKind,
+} from "@/lib/data/passport";
 
-function analysisStages(hasFiles: boolean): string[] {
-  const stages = [
-    "Checking answers against safety rules",
-    "Calculating risk score",
-    "Verifying photo authenticity",
-    "Determining outcome",
-  ];
-  if (hasFiles) {
-    return ["Uploading photos", ...stages];
-  }
-  return stages;
+type Phase = "upload" | "extracting" | "review";
+
+interface QueuedDocument {
+  name: string;
+  size: string;
+  kind: DocumentKind;
+  isSample?: boolean;
 }
 
-type Preview = { name: string; url: string; isVideo: boolean };
+const EXTRACTION_STAGES = [
+  "Reading document layout and text",
+  "Identifying vehicles, drivers and dates",
+  "Extracting defects, actions and expiries",
+  "Linking records to known entities",
+  "Mapping evidence to risk controls",
+] as const;
 
-export default function AuditPage() {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [evidence, setEvidence] = useState<Preview[]>([]);
-  const [stageIdx, setStageIdx] = useState(0);
-  const [result, setResult] = useState<ScoreResult | null>(null);
-  const [sampleTruck, setSampleTruck] = useState<"truckA" | "truckB">("truckA");
-  const submitted = useRef(false);
+const SAMPLE_DOCUMENTS: QueuedDocument[] = [
+  {
+    name: "Truck_28_Service_12-Jun-2026.pdf",
+    size: "1.8 MB",
+    kind: "maintenance",
+    isSample: true,
+  },
+  {
+    name: "Prestart_Logs_Q2-2026.xlsx",
+    size: "842 KB",
+    kind: "maintenance",
+    isSample: true,
+  },
+  {
+    name: "Driver_Credentials_Jul-2026.zip",
+    size: "12.4 MB",
+    kind: "driver",
+    isSample: true,
+  },
+];
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function inferKind(name: string): DocumentKind {
+  const value = name.toLowerCase();
+  if (value.includes("licen") || value.includes("medical") || value.includes("driver")) return "driver";
+  if (value.includes("incident") || value.includes("near-miss")) return "incident";
+  if (value.includes("fatigue") || value.includes("diary")) return "fatigue";
+  if (value.includes("rego") || value.includes("registration")) return "registration";
+  if (value.includes("subcontract")) return "subcontractor";
+  if (value.includes("training") || value.includes("induction")) return "training";
+  if (value.includes("emergency")) return "emergency";
+  if (value.includes("contract") || value.includes("insurance")) return "contract";
+  return "maintenance";
+}
+
+export default function RecordsIntakePage() {
+  const router = useRouter();
+  const [phase, setPhase] = useState<Phase>("upload");
+  const [documents, setDocuments] = useState<QueuedDocument[]>([]);
+  const [selectedKind, setSelectedKind] = useState<DocumentKind>("maintenance");
+  const [stageIndex, setStageIndex] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropzoneRef = useRef<HTMLDivElement>(null);
 
-  const pillarCount = QUESTIONNAIRE.length;
-  const totalSegments = pillarCount + 1;
-  const progressStep = Math.min(Math.max(step, 0), totalSegments);
-
-  function finalize() {
-    if (submitted.current) return;
-    submitted.current = true;
-    const scored = scoreAudit(answers, QUESTIONNAIRE);
-    setResult(scored);
-    setStep(7);
-  }
-
-  const stages = analysisStages(evidence.length > 0);
   useEffect(() => {
-    if (step !== 6) return;
+    if (phase !== "extracting") return;
+
     const timers: ReturnType<typeof setTimeout>[] = [];
-    stages.forEach((_, i) => {
-      timers.push(setTimeout(() => setStageIdx(i + 1), (i + 1) * 750));
+    EXTRACTION_STAGES.forEach((_, index) => {
+      timers.push(
+        setTimeout(() => setStageIndex(index + 1), (index + 1) * 600),
+      );
     });
     timers.push(
-      setTimeout(() => finalize(), (stages.length + 1) * 750),
+      setTimeout(
+        () => setPhase("review"),
+        (EXTRACTION_STAGES.length + 1) * 600,
+      ),
     );
     return () => timers.forEach(clearTimeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
-
-  function setAnswer(qid: string, value: string) {
-    setAnswers((a) => ({ ...a, [qid]: value }));
-  }
+  }, [phase]);
 
   function addFiles(files: FileList | null) {
-    if (!files) return;
-    const previews: Preview[] = Array.from(files).map((f) => ({
-      name: f.name,
-      url: URL.createObjectURL(f),
-      isVideo: f.type.startsWith("video/"),
+    if (!files?.length) return;
+    const next = Array.from(files).map((file) => ({
+      name: file.name,
+      size: formatBytes(file.size),
+      kind: inferKind(file.name),
     }));
-    setEvidence((e) => [...e, ...previews]);
+    setDocuments((current) => [...current, ...next]);
   }
 
-  function removeEvidence(idx: number) {
-    setEvidence((e) => e.filter((_, i) => i !== idx));
+  function addSample(sample: QueuedDocument) {
+    setDocuments((current) => {
+      if (current.some((item) => item.name === sample.name)) return current;
+      return [...current, sample];
+    });
+    setSelectedKind(sample.kind);
   }
 
-  function onDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (dropzoneRef.current) {
-      dropzoneRef.current.classList.add("border-accent", "bg-accent/5");
-    }
+  function removeDocument(index: number) {
+    setDocuments((current) =>
+      current.filter((_, itemIndex) => itemIndex !== index),
+    );
   }
 
-  function onDragLeave(e: React.DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (dropzoneRef.current) {
-      dropzoneRef.current.classList.remove("border-accent", "bg-accent/5");
-    }
+  function processDocuments() {
+    setStageIndex(0);
+    setPhase("extracting");
   }
 
-  function onDrop(e: React.DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (dropzoneRef.current) {
-      dropzoneRef.current.classList.remove("border-accent", "bg-accent/5");
-    }
-    addFiles(e.dataTransfer.files);
+  function addToPassport() {
+    window.localStorage.setItem(
+      PASSPORT_STORAGE_KEY,
+      JSON.stringify({
+        recordId: SAMPLE_EXTRACTION.id,
+        entityId: SAMPLE_EXTRACTION.entityId,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+    router.push("/passport?updated=truck-28");
   }
 
-  // ---------- Intro ----------
-  if (step === 0) {
+  if (phase === "upload") {
     return (
-      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1">
+      <main id="main" className="mx-auto w-full max-w-[1180px] flex-1 px-6 py-12 md:py-16">
         <Reveal>
-          <p className="field-label">SAFETY AUDIT</p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight text-ink">
-            Safety check
-          </h1>
-          <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-            Four topics, a few questions each, then upload photos. We score
-            it and tell you what happens next.
-          </p>
-
-          <div className="mt-8 border border-rule bg-paper-raised rounded-[4px] overflow-hidden">
-            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-              <span className="field-label">Topics</span>
+          <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
+            <div>
+              <p className="field-label">Risk Passport · document intake</p>
+              <h1 className="mt-4 max-w-[15ch] text-[clamp(2.6rem,6vw,4.75rem)] font-semibold leading-[0.96] text-ink">
+                Upload the records you already keep.
+              </h1>
             </div>
-            <div className="divide-y divide-rule">
-              {QUESTIONNAIRE.map((s, i) => (
-                <div
-                  key={s.pillar}
-                  className="flex items-center justify-between px-5 py-3.5 text-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-ink-faint">
-                      0{i + 1}
-                    </span>
-                    <span className="font-sans font-medium text-ink">
-                      {s.title}
+            <p className="max-w-[46ch] text-[1.0625rem] leading-[1.7] text-ink-muted lg:pb-1">
+              Tonnage extracts the important facts, connects them to the right
+              vehicle, driver, subcontractor or depot, and updates one living
+              risk profile.
+            </p>
+            <Link
+              href="/visual-evidence"
+              className="text-sm font-semibold text-accent-deep underline decoration-rule-strong underline-offset-4 hover:decoration-accent-deep lg:col-start-2"
+            >
+              Analyse photo and video evidence
+            </Link>
+          </div>
+        </Reveal>
+
+        <div className="mt-12 grid gap-8 lg:grid-cols-[1.22fr_0.78fr]">
+          <Reveal delay={0.08}>
+            <section aria-labelledby="upload-records-title">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="field-label">01 · Add records</p>
+                  <h2 id="upload-records-title" className="mt-2 text-2xl font-semibold text-ink">
+                    Drop a document batch
+                  </h2>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-faint">
+                  PDF · XLSX · DOCX · JPG · ZIP
+                </span>
+              </div>
+
+              <div
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setDragging(false);
+                  addFiles(event.dataTransfer.files);
+                }}
+                onClick={() => fileInputRef.current?.click()}
+                className={`mt-5 flex min-h-[245px] cursor-pointer flex-col items-center justify-center gap-4 rounded-[4px] border-2 border-dashed p-8 text-center transition-all ${
+                  dragging
+                    ? "border-accent-deep bg-accent-wash/50"
+                    : "border-rule-strong bg-paper-raised hover:border-accent-deep"
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.zip,image/*"
+                  className="hidden"
+                  onChange={(event) => addFiles(event.target.files)}
+                />
+                <DocumentStackIcon />
+                <div>
+                  <p className="text-base font-semibold text-ink">
+                    Drop records here
+                  </p>
+                  <p className="mt-1 text-sm text-ink-muted">
+                    or click to browse from your computer
+                  </p>
+                </div>
+                <p className="max-w-[42ch] text-xs leading-relaxed text-ink-faint">
+                  Mix document types in one batch. Source files stay attached
+                  to every extracted record.
+                </p>
+              </div>
+
+              {documents.length > 0 && (
+                <div className="mt-4 overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+                  <div className="flex items-center justify-between border-b border-rule bg-paper-sunk/40 px-4 py-3">
+                    <span className="field-label">Ready to process</span>
+                    <span className="font-mono text-[10px] text-ink-muted">
+                      {documents.length} FILE{documents.length === 1 ? "" : "S"}
                     </span>
                   </div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
-                    PENDING
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-8 flex items-center justify-start gap-4">
-            <Link href="/">
-              <Button variant="outline">Cancel</Button>
-            </Link>
-            <Button onClick={() => setStep(1)} variant="accent">
-              Start
-              <ButtonIconWell>
-                <span className="font-mono text-xs">→</span>
-              </ButtonIconWell>
-            </Button>
-          </div>
-        </Reveal>
-      </main>
-    );
-  }
-
-  // ---------- Pillar question steps ----------
-  if (step >= 1 && step <= pillarCount) {
-    const section = QUESTIONNAIRE[step - 1];
-    const allAnswered = section.questions.every((q) => answers[q.id]);
-
-    return (
-      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1">
-        <Reveal>
-          <ProgressBar current={progressStep} total={totalSegments} />
-        </Reveal>
-
-        <Reveal delay={0.08} className="mt-8">
-          <p className="field-label">Topic {step} of {pillarCount}</p>
-          <h1 className="mt-3 text-3xl font-semibold text-ink">
-            {section.title}
-          </h1>
-
-          <div className="mt-4 border border-rule-strong bg-paper-sunk/30 p-4 rounded-[3px] text-xs leading-relaxed text-ink-muted">
-            <span className="font-semibold text-ink uppercase tracking-wider text-[10px] block mb-1">
-              Why this matters:
-            </span>
-            {section.why}
-          </div>
-
-          <div className="mt-8 space-y-8">
-            {section.questions.map((q) => (
-              <div key={q.id} className="space-y-3">
-                <h3 className="text-sm font-semibold text-ink">
-                  {q.prompt}
-                </h3>
-                {q.help && (
-                  <p className="text-xs leading-relaxed text-ink-muted">
-                    {q.help}
-                  </p>
-                )}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {q.options.map((o) => {
-                    const active = answers[q.id] === o.value;
-                    return (
-                      <button
-                        key={o.value}
-                        type="button"
-                        onClick={() => setAnswer(q.id, o.value)}
-                        className={`flex items-center gap-3 rounded-[3px] border px-4 py-3 text-left text-sm transition-all cursor-pointer ${
-                          active
-                            ? "border-ink bg-paper-sunk text-ink font-medium shadow-press"
-                            : "border-rule-strong bg-paper-raised text-ink-muted hover:border-ink hover:text-ink"
-                        }`}
-                      >
-                        <span
-                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px] border ${
-                            active
-                              ? "border-ink bg-paper-raised text-ink"
-                              : "border-rule-strong bg-paper"
-                          }`}
+                  <div className="divide-y divide-rule">
+                    {documents.map((document, index) => {
+                      const type = DOCUMENT_TYPES.find(
+                        (item) => item.kind === document.kind,
+                      );
+                      return (
+                        <div
+                          key={`${document.name}-${index}`}
+                          className="flex items-center gap-3 px-4 py-3"
                         >
-                          {active && (
-                            <span className="h-2 w-2 bg-accent rounded-[1px]" />
-                          )}
-                        </span>
-                        {o.label}
+                          <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk font-mono text-[9px] font-semibold text-accent-deep">
+                            {document.name.split(".").pop()?.toUpperCase()}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-ink">
+                              {document.name}
+                            </p>
+                            <p className="mt-0.5 text-xs text-ink-faint">
+                              {type?.shortLabel} · {document.size}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(index)}
+                            className="rounded-[2px] px-2 py-1 font-mono text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+                            aria-label={`Remove ${document.name}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-col gap-4 border-t border-rule pt-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="field-label">For the hackathon demo</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {SAMPLE_DOCUMENTS.map((sample) => (
+                      <button
+                        key={sample.name}
+                        type="button"
+                        onClick={() => addSample(sample)}
+                        className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
+                      >
+                        + {sample.kind === "maintenance"
+                          ? sample.name.includes("Prestart")
+                            ? "Pre-start logs"
+                            : "Maintenance PDF"
+                          : "Driver records"}
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 border-t border-rule pt-6 flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => setStep(step - 1)}
-            >
-              <span className="font-mono mr-1.5">←</span>
-              Back
-            </Button>
-            <Button
-              disabled={!allAnswered}
-              onClick={() => setStep(step + 1)}
-              variant="default"
-            >
-              Continue
-              <ButtonIconWell>
-                <span className="font-mono text-xs">→</span>
-              </ButtonIconWell>
-            </Button>
-          </div>
-        </Reveal>
-      </main>
-    );
-  }
-
-  // ---------- Evidence step ----------
-  if (step === 5) {
-    const evidenceHints = QUESTIONNAIRE.map((s) => s.evidence);
-
-    return (
-      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1">
-        <Reveal>
-          <ProgressBar current={progressStep} total={totalSegments} />
-        </Reveal>
-
-        <Reveal delay={0.08} className="mt-8">
-          <p className="field-label">Last step</p>
-          <h1 className="mt-3 text-3xl font-semibold text-ink">
-            Upload photos
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-            Drop photos and videos into the box below. GPS and timestamps
-            are checked automatically.
-          </p>
-
-          <div className="mt-6 space-y-1.5">
-            <span className="field-label text-[10px]">What to capture:</span>
-            {evidenceHints.map((ev) => (
-              <div key={ev.id} className="flex items-start gap-2 text-xs text-ink-muted">
-                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
-                <span><span className="font-semibold text-ink">{ev.label}</span> — {ev.hint}</span>
-              </div>
-            ))}
-          </div>
-
-          <div
-            ref={dropzoneRef}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-6 flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-3 rounded-[4px] border-2 border-dashed border-rule-strong bg-paper-sunk/30 p-8 transition-colors hover:border-ink/40"
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*"
-              multiple
-              className="hidden"
-              onChange={(e) => addFiles(e.target.files)}
-            />
-            <svg className="size-8 text-ink-faint" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
-            </svg>
-            <p className="text-sm text-ink-muted">
-              <span className="font-semibold text-ink">Drop files here</span> or click to browse
-            </p>
-            <p className="text-xs text-ink-faint">Photos and videos</p>
-          </div>
-
-          {evidence.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-3">
-              {evidence.map((f, i) => (
-                <div
-                  key={i}
-                  className="group relative h-16 w-16 overflow-hidden rounded-[3px] border border-rule p-[2px] bg-paper"
-                >
-                  {f.isVideo ? (
-                    <video
-                      src={f.url}
-                      className="h-full w-full object-cover rounded-[1px]"
-                      muted
-                    />
-                  ) : (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={f.url}
-                      alt={f.name}
-                      className="h-full w-full object-cover rounded-[1px]"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeEvidence(i);
-                    }}
-                    className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-[2px] bg-ink/75 text-paper opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
+                <div className="flex items-center gap-3">
+                  <Link href="/">
+                    <Button variant="outline">Cancel</Button>
+                  </Link>
+                  <Button
+                    variant="accent"
+                    disabled={documents.length === 0}
+                    onClick={processDocuments}
                   >
-                    <span className="font-mono text-[9px]">✕</span>
-                  </button>
+                    Extract records
+                    <ButtonIconWell>
+                      <Arrow />
+                    </ButtonIconWell>
+                  </Button>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            </section>
+          </Reveal>
 
-          <div className="mt-8 border-t border-rule pt-6 flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => setStep(4)}
-            >
-              <span className="font-mono mr-1.5">←</span>
-              Back
-            </Button>
-            <Button onClick={() => { setStageIdx(0); submitted.current = false; setStep(6); }} variant="accent">
-              Submit
-              <ButtonIconWell>
-                <span className="font-mono text-xs">→</span>
-              </ButtonIconWell>
-            </Button>
-          </div>
-        </Reveal>
-      </main>
-    );
-  }
-
-  // ---------- Analyzing step ----------
-  if (step === 6) {
-    return (
-      <main className="mx-auto w-full max-w-[540px] px-6 py-20 flex-1 text-center">
-        <Reveal>
-          <div className="inline-flex size-14 items-center justify-center rounded-[4px] bg-accent text-ink">
-            <span className="animate-spin text-xl font-semibold font-mono">/</span>
-          </div>
-          <h1 className="mt-6 text-3xl font-semibold text-ink">
-            Analyzing
-          </h1>
-          <p className="mt-2 text-sm text-ink-muted max-w-[36ch] mx-auto">
-            Scoring your answers and checking photo metadata.
-          </p>
-
-          <div className="mt-10 border border-rule bg-paper-raised rounded-[4px] overflow-hidden text-left">
-            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-              <span className="field-label">Progress</span>
-            </div>
-            <div className="divide-y divide-rule px-5">
-              {stages.map((label, i) => {
-                const done = i < stageIdx;
-                const active = i === stageIdx;
-                return (
-                  <div
-                    key={label}
-                    className={`flex items-center justify-between py-3.5 text-sm ${
-                      done ? "text-ink" : active ? "text-accent-deep font-semibold" : "text-ink-faint"
+          <Reveal delay={0.14}>
+            <aside className="overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+              <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+                <p className="field-label">Understands these records</p>
+              </div>
+              <div className="max-h-[560px] divide-y divide-rule overflow-y-auto">
+                {DOCUMENT_TYPES.map((type, index) => (
+                  <button
+                    key={type.kind}
+                    type="button"
+                    onClick={() => setSelectedKind(type.kind)}
+                    className={`flex w-full items-start gap-3 px-5 py-3.5 text-left transition-colors ${
+                      selectedKind === type.kind
+                        ? "bg-accent-wash/45"
+                        : "hover:bg-paper-sunk/45"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs">
-                        0{i + 1}
+                    <span
+                      className={`mt-0.5 font-mono text-[10px] ${
+                        selectedKind === type.kind
+                          ? "text-accent-deep"
+                          : "text-ink-faint"
+                      }`}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold text-ink">
+                        {type.label}
                       </span>
-                      <span>{label}</span>
-                    </div>
-                    <div className="font-mono text-xs">
-                      {done ? (
-                        <span className="text-tier-1-ink font-semibold">✓ DONE</span>
-                      ) : active ? (
-                        <span className="animate-pulse text-accent-deep">● RUNNING</span>
-                      ) : (
-                        <span className="text-ink-faint">PENDING</span>
-                      )}
-                    </div>
+                      <span className="mt-0.5 block text-xs text-ink-faint">
+                        {type.accepts}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </aside>
+          </Reveal>
+        </div>
+      </main>
+    );
+  }
+
+  if (phase === "extracting") {
+    return (
+      <main id="main" className="mx-auto w-full max-w-[620px] flex-1 px-6 py-20">
+        <Reveal>
+          <div className="flex items-start gap-5">
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-[4px] bg-accent font-mono text-xl font-semibold text-ink">
+              <span className="animate-pulse">TXT</span>
+            </span>
+            <div>
+              <p className="field-label">Document intelligence</p>
+              <h1 className="mt-2 text-3xl font-semibold text-ink">
+                Building structured records
+              </h1>
+              <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                Reading {documents.length} source file
+                {documents.length === 1 ? "" : "s"} and connecting the facts to
+                the existing Risk Passport.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+              <span className="field-label">Extraction pipeline</span>
+            </div>
+            <div className="divide-y divide-rule px-5">
+              {EXTRACTION_STAGES.map((stage, index) => {
+                const done = index < stageIndex;
+                const active = index === stageIndex;
+                return (
+                  <div
+                    key={stage}
+                    className={`flex items-center justify-between py-4 text-sm ${
+                      done
+                        ? "text-ink"
+                        : active
+                          ? "font-semibold text-accent-deep"
+                          : "text-ink-faint"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="font-mono text-[10px]">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {stage}
+                    </span>
+                    <span className="font-mono text-[10px]">
+                      {done ? "✓ DONE" : active ? "● READING" : "PENDING"}
+                    </span>
                   </div>
                 );
               })}
@@ -419,178 +406,250 @@ export default function AuditPage() {
     );
   }
 
-  // ---------- Result step ----------
-  if (step === 7 && result) {
-    const actionItems = result.findings.filter((f) => f.status === "action");
-    const photoCount = evidence.length;
+  const extraction = SAMPLE_EXTRACTION;
 
-    return (
-      <main className="mx-auto w-full max-w-5xl px-6 py-12 flex-1">
-       <div className="mx-auto max-w-[640px] text-center">
-        <Reveal>
-          <span className="field-label">DONE</span>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-ink">
-            {OUTCOME_LABEL[result.outcome]}
-          </h1>
-
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-1.5 text-xs font-semibold text-ink">
-              <span className={`h-2 w-2 rounded-full ${
-                result.outcome === "cleared"
-                  ? "bg-tier-1"
-                  : result.outcome === "remote_video"
-                    ? "bg-tier-2"
-                    : "bg-tier-3"
-              }`} />
-              {OUTCOME_LABEL[result.outcome]}
-            </span>
-            <span className="font-mono text-xs text-ink-muted">
-              {result.score.toFixed(1)} / 5
-            </span>
+  return (
+    <main id="main" className="mx-auto w-full max-w-[1180px] flex-1 px-6 py-12 md:py-16">
+      <Reveal>
+        <div className="flex flex-col gap-6 border-b border-rule pb-8 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="field-label">Extraction complete · review before saving</p>
+            <h1 className="mt-3 text-[clamp(2.3rem,5vw,4rem)] font-semibold leading-none text-ink">
+              One document. Seven useful facts.
+            </h1>
+            <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-muted">
+              The source remains attached. The extracted values become
+              searchable records linked to {extraction.entityLabel}.
+            </p>
           </div>
-        </Reveal>
+          <span className="self-start rounded-[3px] border border-tier-3-ink bg-tier-3-wash px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-tier-3-ink md:self-auto">
+            Critical item found
+          </span>
+        </div>
+      </Reveal>
 
-        <Reveal delay={0.08} className="mt-8 text-left">
-          <div className="rounded-[4px] border border-rule bg-paper-raised overflow-hidden">
-            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5 flex items-center justify-between">
-              <span className="field-label">Findings</span>
-              {photoCount > 0 && (
-                <span className="font-mono text-[10px] text-ink-faint">
-                  {photoCount} PHOTO{photoCount !== 1 ? "S" : ""}
-                </span>
-              )}
-            </div>
-            <div className="divide-y divide-rule">
-              {result.findings.map((f, i) => (
-                <div key={i} className="flex items-start gap-3 px-5 py-4 text-sm leading-relaxed">
-                  <span className="mt-1 font-mono text-xs text-ink-faint">
-                    0{i + 1}
-                  </span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-ink">
-                        {PILLAR_LABEL[f.pillar]}
-                      </span>
-                      <span className={`inline-flex items-center gap-1 rounded-[2px] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                        f.status === "action"
-                          ? "bg-tier-3-wash text-tier-3-ink"
-                          : f.status === "advisory"
-                            ? "bg-tier-2-wash text-tier-2-ink"
-                            : "bg-tier-1-wash text-tier-1-ink"
-                      }`}>
-                        {FINDING_STATUS_LABEL[f.status]}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-ink-muted">{f.observation}</p>
-                    {f.status !== "clear" && (
-                      <p className="mt-1 text-xs text-ink-faint">{f.recommendation}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-
-        {actionItems.length > 0 && (
-          <Reveal delay={0.12} className="mt-4 text-left">
-            <div className="rounded-[3px] bg-paper-sunk/50 border border-rule px-5 py-3.5 text-xs text-ink-muted leading-relaxed">
-              {result.outcome === "remote_video"
-                ? "Send a short video for each flagged item so an engineer can verify."
-                : result.outcome === "site_visit"
-                  ? "An engineer will visit your site to check the flagged items."
-                  : null}
-            </div>
-          </Reveal>
-        )}
-
-       </div>
-
-        {/* AI vision analysis on real fleet photos */}
-        <Reveal delay={0.14} className="mt-12">
-          <div className="rounded-[4px] border border-rule bg-paper-raised overflow-hidden">
-            <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <span className="field-label">AI vision analysis</span>
-                <p className="mt-1 text-xs text-ink-muted">
-                  What our model reads from a fleet&apos;s photos and video —
-                  boxes, plate, tyre tread and vehicle type.
-                </p>
-              </div>
-              <div className="flex items-center gap-1 self-start rounded-[3px] border border-rule-strong bg-paper p-1">
-                {(
-                  [
-                    ["truckA", "Fuso flatbed"],
-                    ["truckB", "Isuzu pantech"],
-                  ] as const
-                ).map(([id, label]) => (
-                  <button
-                    key={id}
-                    onClick={() => setSampleTruck(id)}
-                    className={`rounded-[2px] px-2.5 py-1 text-xs font-semibold transition-colors ${
-                      sampleTruck === id
-                        ? "bg-ink text-paper"
-                        : "text-ink-muted hover:text-ink"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+      <div className="mt-8 grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
+        <Reveal delay={0.08}>
+          <aside className="overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+              <p className="field-label">Source evidence</p>
             </div>
             <div className="p-5">
-              <PhotoAnalysis analysisId={sampleTruck} />
+              <div className="flex aspect-[4/5] flex-col border border-rule-strong bg-[#fbfcfd] p-6 shadow-plate">
+                <div className="flex items-start justify-between border-b-2 border-ink pb-4">
+                  <div>
+                    <p className="font-display text-xl font-bold text-ink">
+                      Fleet Service Report
+                    </p>
+                    <p className="mt-1 font-mono text-[9px] text-ink-faint">
+                      COORANBONG FREIGHT · WORK ORDER 88241
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-accent-deep">
+                    PDF
+                  </span>
+                </div>
+                <dl className="mt-6 space-y-4 font-mono text-[10px] leading-relaxed">
+                  <SourceRow label="Vehicle" value="Truck 28" />
+                  <SourceRow label="Registration" value="ABC123" />
+                  <SourceRow label="Service date" value="12 June 2026" />
+                  <SourceRow label="Odometer" value="482,350 km" />
+                  <SourceRow label="Brake defect" value="YES" marked />
+                  <SourceRow label="Repair completed" value="NO" marked />
+                  <SourceRow label="Next service" value="500,000 km" />
+                </dl>
+                <div className="mt-auto border-t border-rule pt-3 font-mono text-[8px] leading-relaxed text-ink-faint">
+                  Signed electronically · B. Morton · Workshop supervisor
+                </div>
+              </div>
+              <p className="mt-4 break-all text-xs font-medium text-ink">
+                {extraction.sourceName}
+              </p>
+              <p className="mt-1 text-xs text-ink-faint">
+                Maintenance · uploaded today
+              </p>
             </div>
-          </div>
+          </aside>
         </Reveal>
 
-        <Reveal delay={0.16} className="mt-10 flex justify-center items-center gap-4">
-          <Button variant="outline" onClick={() => {
-            setStep(0);
-            setAnswers({});
-            setEvidence([]);
-            setResult(null);
-            submitted.current = false;
-          }}>
-            Start another
+        <Reveal delay={0.12}>
+          <section aria-labelledby="structured-record-title">
+            <div className="overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+              <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="field-label">Structured record</p>
+                  <h2 id="structured-record-title" className="mt-1 text-xl font-semibold text-ink">
+                    {extraction.entityLabel}
+                  </h2>
+                </div>
+                <span className="self-start font-mono text-[10px] text-ink-faint">
+                  LINKED TO {extraction.entityType.toUpperCase()} RECORD
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-2">
+                {extraction.fields.map((field) => (
+                  <div
+                    key={field.label}
+                    className="border-b border-rule px-5 py-4 sm:[&:nth-child(odd)]:border-r"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="field-label">{field.label}</span>
+                      <span className="font-mono text-[9px] text-ink-faint">
+                        {Math.round(field.confidence * 100)}%
+                      </span>
+                    </div>
+                    <p
+                      className={`mt-2 text-base font-semibold ${
+                        field.tone === "critical"
+                          ? "text-tier-3-ink"
+                          : field.tone === "warning"
+                            ? "text-tier-2-ink"
+                            : "text-ink"
+                      }`}
+                    >
+                      {field.value}
+                    </p>
+                  </div>
+                ))}
+                <div className="border-b border-rule px-5 py-4 sm:border-l">
+                  <span className="field-label">Entity match</span>
+                  <p className="mt-2 text-base font-semibold text-ink">
+                    99% · Existing vehicle
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-[4px] border border-tier-3-ink bg-tier-3-wash p-5">
+              <div className="flex items-start gap-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-[2px] bg-tier-3-ink font-mono text-sm font-bold text-paper">
+                  !
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-tier-3-ink">
+                    {extraction.alert.label}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-muted">
+                    {extraction.alert.detail}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-[4px] border border-rule bg-paper-raised">
+              <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+                <p className="field-label">Evidence-to-control mapping</p>
+              </div>
+              <div className="px-5 py-5">
+                <p className="text-sm font-semibold text-ink">
+                  Control: Safety-critical defects are repaired and closed
+                </p>
+                <div className="mt-4 space-y-3">
+                  <MappingRow label="Defect identified in service record" value="Found" state="good" />
+                  <MappingRow label="Vehicle matched" value="Truck 28" state="good" />
+                  <MappingRow label="Repair completion recorded" value="No" state="bad" />
+                  <MappingRow label="Separate repair evidence found" value="Missing" state="bad" />
+                </div>
+              </div>
+            </div>
+          </section>
+        </Reveal>
+      </div>
+
+      <Reveal delay={0.16} className="mt-8 flex flex-col gap-4 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="max-w-[58ch] text-xs leading-relaxed text-ink-muted">
+          Saving updates Truck 28, creates an open defect, attaches the source
+          PDF and records this as a change since the last engineer review.
+        </p>
+        <div className="flex shrink-0 items-center gap-3">
+          <Button variant="outline" onClick={() => setPhase("upload")}>
+            Back
           </Button>
-          <Link href="/">
-            <Button variant="default">
-              Back home
-              <ButtonIconWell>
-                <span className="font-mono text-xs">→</span>
-              </ButtonIconWell>
-            </Button>
-          </Link>
-        </Reveal>
-      </main>
-    );
-  }
-
-  return null;
+          <Button variant="accent" onClick={addToPassport}>
+            Add to Risk Passport
+            <ButtonIconWell>
+              <Arrow />
+            </ButtonIconWell>
+          </Button>
+        </div>
+      </Reveal>
+    </main>
+  );
 }
 
-function ProgressBar({ current, total }: { current: number; total: number }) {
-  const pct = Math.round((current / total) * 100);
+function SourceRow({
+  label,
+  value,
+  marked = false,
+}: {
+  label: string;
+  value: string;
+  marked?: boolean;
+}) {
   return (
-    <div>
-      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-ink-muted font-mono">
-        <span>Step {current} of {total}</span>
-        <span>{pct}%</span>
-      </div>
-      <div className="mt-3 flex gap-1.5" aria-hidden>
-        {Array.from({ length: total }).map((_, idx) => {
-          const active = idx < current;
-          return (
-            <div
-              key={idx}
-              className={`h-2 flex-1 rounded-[1px] transition-colors duration-300 ${
-                active ? "bg-accent" : "bg-paper-sunk"
-              }`}
-            />
-          );
-        })}
-      </div>
+    <div className="grid grid-cols-[1fr_auto] gap-4 border-b border-dotted border-rule pb-2">
+      <dt className="text-ink-faint">{label}</dt>
+      <dd className={marked ? "bg-accent-wash px-1 font-bold text-ink" : "font-semibold text-ink"}>
+        {value}
+      </dd>
     </div>
+  );
+}
+
+function MappingRow({
+  label,
+  value,
+  state,
+}: {
+  label: string;
+  value: string;
+  state: "good" | "bad";
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 text-sm">
+      <span className="flex items-center gap-2 text-ink-muted">
+        <span
+          className={`flex size-4 items-center justify-center rounded-[1px] font-mono text-[9px] font-bold ${
+            state === "good"
+              ? "bg-tier-1-wash text-tier-1-ink"
+              : "bg-tier-3-wash text-tier-3-ink"
+          }`}
+        >
+          {state === "good" ? "✓" : "×"}
+        </span>
+        {label}
+      </span>
+      <span className="font-mono text-[10px] font-semibold text-ink">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" className="size-3.5" aria-hidden>
+      <path
+        d="M3 8h10M9 4l4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+function DocumentStackIcon() {
+  return (
+    <span className="relative block h-14 w-12" aria-hidden>
+      <span className="absolute left-0 top-2 h-11 w-9 -rotate-6 rounded-[2px] border border-rule-strong bg-paper-sunk" />
+      <span className="absolute right-0 top-1 h-11 w-9 rotate-3 rounded-[2px] border border-rule-strong bg-paper" />
+      <span className="absolute left-1.5 top-0 flex h-11 w-9 flex-col gap-1.5 rounded-[2px] border border-ink bg-paper-raised p-2">
+        <span className="h-1 w-full bg-accent" />
+        <span className="h-px w-full bg-rule-strong" />
+        <span className="h-px w-3/4 bg-rule-strong" />
+        <span className="h-px w-5/6 bg-rule-strong" />
+      </span>
+    </span>
   );
 }

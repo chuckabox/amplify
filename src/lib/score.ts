@@ -1,14 +1,8 @@
-// Real scoring engine. Uses the riskWeight (1..5) baked into every questionnaire
-// option to compute a score and per-pillar findings, replacing the old
-// FORCED_TIER lookup.
-
-import type { Pillar, Finding, FindingStatus } from "@/lib/data/audit";
-import { PILLAR_LABEL } from "@/lib/data/audit";
-import type { PillarSection, AnswerOption } from "@/lib/data/questionnaire";
-
-// ---------- Types ----------
+import type { Finding } from "@/lib/data/audit";
 
 export type Outcome = "cleared" | "remote_video" | "site_visit";
+
+export type EvidenceSource = "upload" | "truckA" | "truckB";
 
 export const OUTCOME_LABEL: Record<Outcome, string> = {
   cleared: "Cleared on evidence",
@@ -17,91 +11,134 @@ export const OUTCOME_LABEL: Record<Outcome, string> = {
 };
 
 export interface ScoreResult {
-  /** Mean riskWeight across all answers, 1..5. */
+  /** Mean evidence risk, 1 (low) to 5 (high). */
   score: number;
-  /** Which outcome band the score falls into. */
   outcome: Outcome;
-  /** One finding per pillar. */
   findings: Finding[];
 }
 
-// ---------- Scoring logic ----------
+const RESULTS: Record<EvidenceSource, ScoreResult> = {
+  truckA: {
+    score: 2.8,
+    outcome: "remote_video",
+    findings: [
+      {
+        pillar: "asset_management",
+        observation:
+          "Steer tyre tread is approximately 7.4 mm and comfortably above the minimum.",
+        severity: 1,
+        recommendation: "No action needed.",
+        status: "clear",
+      },
+      {
+        pillar: "site_safety_security",
+        observation:
+          "Load restraints are visible, but one rear corner is obscured in the supplied photo.",
+        severity: 3,
+        recommendation:
+          "Send a short walk-around clip that clearly shows the rear restraint point.",
+        status: "advisory",
+      },
+      {
+        pillar: "people_capability",
+        observation:
+          "The vehicle images do not include a readable driver or training record.",
+        severity: 2,
+        recommendation:
+          "Include the current driver credential in the verification clip.",
+        status: "advisory",
+      },
+      {
+        pillar: "emergency_incident",
+        observation:
+          "No emergency-equipment defect is visible in the supplied vehicle evidence.",
+        severity: 1,
+        recommendation: "No action needed.",
+        status: "clear",
+      },
+    ],
+  },
+  truckB: {
+    score: 1.9,
+    outcome: "cleared",
+    findings: [
+      {
+        pillar: "asset_management",
+        observation:
+          "Vehicle identity, axle configuration and registration plate are consistent across the photo and video.",
+        severity: 1,
+        recommendation: "No action needed.",
+        status: "clear",
+      },
+      {
+        pillar: "site_safety_security",
+        observation:
+          "The walk-around video is consistent with the still image and shows no sign of reused evidence.",
+        severity: 1,
+        recommendation: "No action needed.",
+        status: "clear",
+      },
+      {
+        pillar: "people_capability",
+        observation:
+          "The submitted evidence is complete enough for an engineer to review without an interview.",
+        severity: 1,
+        recommendation: "No action needed.",
+        status: "clear",
+      },
+      {
+        pillar: "emergency_incident",
+        observation:
+          "No emergency-equipment defect is visible in the submitted walk-around.",
+        severity: 2,
+        recommendation: "No action needed.",
+        status: "clear",
+      },
+    ],
+  },
+  upload: {
+    score: 2.6,
+    outcome: "remote_video",
+    findings: [
+      {
+        pillar: "asset_management",
+        observation:
+          "Vehicle-condition evidence was received and is ready for engineer review.",
+        severity: 2,
+        recommendation:
+          "Keep close-up tyre and registration images in the evidence set.",
+        status: "clear",
+      },
+      {
+        pillar: "site_safety_security",
+        observation:
+          "The supplied media requires a brief remote verification before it can clear.",
+        severity: 3,
+        recommendation:
+          "Join a short video check so an engineer can confirm the visible safety controls.",
+        status: "advisory",
+      },
+      {
+        pillar: "people_capability",
+        observation:
+          "No written answers are required; supporting records can be provided as images.",
+        severity: 2,
+        recommendation:
+          "Add a clear image of any credential an engineer requests.",
+        status: "clear",
+      },
+      {
+        pillar: "emergency_incident",
+        observation:
+          "Emergency-equipment details will be confirmed from the submitted imagery.",
+        severity: 2,
+        recommendation: "Keep service tags legible and fully in frame.",
+        status: "clear",
+      },
+    ],
+  },
+};
 
-/**
- * Score an audit from the answers and the questionnaire structure.
- *
- * @param answers  Record<questionId, selectedValue>
- * @param sections The QUESTIONNAIRE array.
- */
-export function scoreAudit(
-  answers: Record<string, string>,
-  sections: PillarSection[],
-): ScoreResult {
-  let totalWeight = 0;
-  let totalQuestions = 0;
-  const findings: Finding[] = [];
-
-  for (const section of sections) {
-    let worstWeight = 0;
-    let worstQuestion = section.questions[0];
-
-    for (const q of section.questions) {
-      const selected = answers[q.id];
-      const opt: AnswerOption | undefined = q.options.find(
-        (o) => o.value === selected,
-      );
-      const w = opt ? opt.riskWeight : 1; // default to best if unanswered
-      totalWeight += w;
-      totalQuestions += 1;
-
-      if (w > worstWeight) {
-        worstWeight = w;
-        worstQuestion = q;
-      }
-    }
-
-    // Determine finding status from worst answered weight in this pillar.
-    let status: FindingStatus;
-    if (worstWeight >= 4) {
-      status = "action";
-    } else if (worstWeight === 3) {
-      status = "advisory";
-    } else {
-      status = "clear";
-    }
-
-    const topic = worstQuestion.prompt.toLowerCase().replace(/\?$/, "");
-
-    findings.push({
-      pillar: section.pillar as Pillar,
-      observation:
-        status === "action"
-          ? `${PILLAR_LABEL[section.pillar as Pillar]}: "${topic}" scored high-risk and needs attention.`
-          : status === "advisory"
-            ? `${PILLAR_LABEL[section.pillar as Pillar]}: "${topic}" is borderline — keep an eye on it.`
-            : `${PILLAR_LABEL[section.pillar as Pillar]} meets safety standards.`,
-      severity: worstWeight as Finding["severity"],
-      recommendation:
-        status === "action"
-          ? "Needs fixing before this area can clear."
-          : status === "advisory"
-            ? "Keep an eye on this before your next check."
-            : "No action needed.",
-      status,
-    });
-  }
-
-  const score =
-    totalQuestions > 0 ? Math.round((totalWeight / totalQuestions) * 10) / 10 : 1;
-
-  let outcome: Outcome;
-  if (score < 2.5) {
-    outcome = "cleared";
-  } else if (score < 3.5) {
-    outcome = "remote_video";
-  } else {
-    outcome = "site_visit";
-  }
-
-  return { score, outcome, findings };
+export function scoreEvidence(source: EvidenceSource): ScoreResult {
+  return RESULTS[source];
 }
