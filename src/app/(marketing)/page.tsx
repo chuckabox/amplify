@@ -163,7 +163,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Our Story ---------- */}
-        <section className="border-t border-rule bg-paper">
+        <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16 items-start">
               <Reveal>
@@ -190,7 +190,7 @@ export default function Home() {
         </section>
 
         {/* ---------- How It Works ---------- */}
-        <section className="relative border-t border-rule bg-paper-raised overflow-hidden">
+        <section className="relative border-t border-rule bg-transparent overflow-hidden">
           <LiquidBg />
           <div className="relative mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <Reveal>
@@ -211,7 +211,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Statistics ---------- */}
-        <section className="border-t border-rule bg-paper">
+        <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <Reveal className="text-center">
               <div>
@@ -231,7 +231,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Who this is for ---------- */}
-        <section className="border-t border-rule bg-paper-raised">
+        <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <Reveal className="text-center">
               <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
@@ -273,7 +273,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Research & Trust ---------- */}
-        <section className="border-t border-rule bg-paper-sunk/35">
+        <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <Reveal className="text-center">
               <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
@@ -318,9 +318,9 @@ export default function Home() {
                     <div className="mt-4 flex flex-col gap-1.5 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
                       <div className="flex justify-between items-center bg-paper px-2 py-0.5 rounded-[2px] border border-rule">
                         <span>IMG_2314.jpg</span>
-                        <span className="text-accent-deep font-semibold">ORIGINAL</span>
+                        <span className="text-ink font-semibold">ORIGINAL</span>
                       </div>
-                      <div className="flex justify-between items-center bg-accent/5 px-2 py-0.5 rounded-[2px] border border-accent/20">
+                      <div className="flex justify-between items-center bg-ink/5 px-2 py-0.5 rounded-[2px] border border-ink/20">
                         <span>IMG_2314_crop.jpg</span>
                         <span className="text-tier-3-ink font-semibold">FLAGGED</span>
                       </div>
@@ -363,7 +363,7 @@ export default function Home() {
                         <span>Tyre tread normal</span>
                         <span className="text-tier-1-ink font-semibold">PASSED</span>
                       </div>
-                      <div className="flex justify-between items-center bg-accent/5 px-2 py-0.5 rounded-[2px] border border-accent/20">
+                      <div className="flex justify-between items-center bg-ink/5 px-2 py-0.5 rounded-[2px] border border-ink/20">
                         <span>Severe chassis rust</span>
                         <span className="text-tier-3-ink font-semibold">HALTED</span>
                       </div>
@@ -380,7 +380,7 @@ export default function Home() {
                     </div>
                     <div className="mt-4 space-y-1 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
                       <div className="flex items-center gap-1.5">
-                        <span className="h-1 w-1 rounded-full bg-accent" />
+                        <span className="h-1 w-1 rounded-full bg-ink" />
                         <span>Escalated to senior engineer</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -450,7 +450,7 @@ export default function Home() {
         </section>
 
         {/* ---------- Closing / CTA ---------- */}
-        <section className="relative border-t border-rule bg-paper overflow-hidden">
+        <section className="relative border-t border-rule bg-transparent overflow-hidden">
           <WaveBg />
           <div className="relative mx-auto max-w-[1240px] px-6 py-28 text-center md:py-40">
             <Reveal>
@@ -504,21 +504,10 @@ export function SiteFooter() {
             Risk-audit routing for heavy motor portfolios.
           </p>
         </div>
-        <nav
-          aria-label="Footer"
-          className="flex flex-wrap gap-x-8 gap-y-3 text-sm"
-        >
-          <Link href="/privacy" className="text-ink-muted hover:text-ink">
-            Privacy
-          </Link>
-          <Link href="/terms" className="text-ink-muted hover:text-ink">
-            Terms
-          </Link>
-        </nav>
       </div>
       <div className="mx-auto max-w-[1240px] px-6 pb-10">
         <p className="text-[11px] tracking-[0.08em] text-ink-faint">
-          © {new Date().getFullYear()} TONNAGE · AUSTRALIA
+          © {new Date().getFullYear()} TONNAGE, AUSTRALIA
         </p>
       </div>
     </footer>

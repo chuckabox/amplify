@@ -44,8 +44,8 @@ const PLANS: Plan[] = [
   {
     name: "Insurer",
     tagline: "For the risk engineering team",
-    price: "By throughput",
-    unit: "platform fee plus a seat per engineer",
+    price: "$299",
+    unit: "per engineer, per month",
     cta: "Book a pilot",
     href: "/audit",
     featured: true,
@@ -82,7 +82,7 @@ export default function PricingPage() {
     <div className="flex min-h-screen flex-col">
       <main id="main" className="flex-1">
         {/* Hero */}
-        <section className="border-b border-rule bg-paper-raised">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
             <Reveal>
               <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
@@ -110,7 +110,7 @@ export default function PricingPage() {
         </section>
 
         {/* Plans */}
-        <section className="border-b border-rule bg-paper">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-28">
             <div className="grid gap-6 lg:grid-cols-3">
               {PLANS.map((plan, i) => (
@@ -150,7 +150,7 @@ export default function PricingPage() {
                       <div className="mt-8 flex flex-1 flex-col justify-end">
                         <Link href={plan.href}>
                           <Button
-                            variant={plan.featured ? "accent" : "outline"}
+                            variant={plan.featured ? "default" : "outline"}
                             className="w-full"
                           >
                             {plan.cta}

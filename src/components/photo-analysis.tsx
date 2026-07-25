@@ -65,7 +65,7 @@ function BoxOverlay({ det, index }: { det: Detection; index: number }) {
         style={{ background: color }}
       >
         {det.label}
-        <span className="opacity-70"> · {(det.confidence * 100).toFixed(0)}%</span>
+        <span className="opacity-70"> / {(det.confidence * 100).toFixed(0)}%</span>
       </span>
     </motion.div>
   );
@@ -198,7 +198,7 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
                 />
                 <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-tier-1-ink/90 px-2.5 py-1 text-[11px] text-white">
                   <Sparkles className="h-3.5 w-3.5" />
-                  Plate read: XB·25JG
+                  Plate read: XB 25JG
                 </div>
               </div>
             )

@@ -39,12 +39,12 @@ const SAMPLE_META = {
   truckA: {
     label: "Fuso flatbed",
     evidence: "2 photos",
-    entity: "Truck 14 · 763KLT",
-    entityDetail: "2019 Fuso Fighter · existing vehicle",
+    entity: "Truck 14 / 763KLT",
+    entityDetail: "2019 Fuso Fighter (existing vehicle)",
     entityConfidence: "92% match",
     facts: [
       { label: "Vehicle identity", value: "Fuso rigid flatbed", state: "proved" },
-      { label: "Steer tyre tread", value: "~7.4 mm · healthy", state: "proved" },
+      { label: "Steer tyre tread", value: "~7.4 mm / healthy", state: "proved" },
       { label: "Load restraint", value: "One corner unclear", state: "partial" },
       { label: "Registration plate", value: "Not in frame", state: "missing" },
     ],
@@ -53,13 +53,13 @@ const SAMPLE_META = {
   },
   truckB: {
     label: "Isuzu pantech",
-    evidence: "1 photo · 1 video",
-    entity: "Truck 28 · ABC123",
-    entityDetail: "2021 Isuzu FYJ · existing vehicle",
+    evidence: "1 photo, 1 video",
+    entity: "Truck 28 / ABC123",
+    entityDetail: "2021 Isuzu FYJ (existing vehicle)",
     entityConfidence: "96% match",
     facts: [
       { label: "Vehicle identity", value: "Isuzu rigid pantech", state: "proved" },
-      { label: "Registration plate", value: "XB·25JG read", state: "proved" },
+      { label: "Registration plate", value: "XB 25JG read", state: "proved" },
       { label: "Photo/video consistency", value: "Confirmed", state: "proved" },
       { label: "Steer tyre condition", value: "Closer image needed", state: "partial" },
     ],
@@ -143,7 +143,7 @@ export default function VisualEvidenceClient() {
       <div className="flex min-h-screen flex-col">
         <main id="main" className="flex-1">
           {/* Hero */}
-          <section className="border-b border-rule bg-paper-raised">
+          <section className="border-b border-rule bg-transparent">
             <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
               <Reveal>
                 <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
@@ -169,8 +169,8 @@ export default function VisualEvidenceClient() {
           </section>
 
           {/* Upload area */}
-          <section className="border-b border-rule bg-paper">
-            <div className="mx-auto max-w-[840px] px-6 py-20 md:py-28">
+          <section className="border-b border-rule bg-transparent">
+            <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-28">
               <Reveal delay={0.08}>
                 <section aria-labelledby="upload-media-title">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -314,7 +314,7 @@ export default function VisualEvidenceClient() {
           </section>
 
           {/* How it works — full width below upload */}
-          <section className="border-b border-rule bg-paper-sunk/35">
+          <section className="border-b border-rule bg-transparent">
             <div className="mx-auto max-w-[1240px] px-6 py-16 md:py-20">
               <Reveal delay={0.16}>
                 <div className="grid gap-10 lg:grid-cols-[0.4fr_1fr] lg:items-start">
@@ -369,7 +369,7 @@ export default function VisualEvidenceClient() {
     return (
       <div className="flex min-h-screen flex-col">
         <main id="main" className="flex-1">
-          <section className="border-b border-rule bg-paper-sunk/35">
+          <section className="border-b border-rule bg-transparent">
             <div className="mx-auto flex w-full max-w-[540px] flex-col justify-center px-6 py-28 md:py-36">
               <Reveal>
                 <div>
@@ -395,7 +395,7 @@ export default function VisualEvidenceClient() {
                             key={label}
                             className={`flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
                               active
-                                ? "text-accent-deep"
+                                ? "text-ink font-bold"
                                 : pending
                                   ? "text-ink-faint opacity-40"
                                   : "text-ink-muted"
@@ -455,7 +455,7 @@ export default function VisualEvidenceClient() {
         )}
 
         {/* Hero header */}
-        <section className="border-b border-rule bg-paper-raised">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-24 md:pb-28">
             <Reveal>
               <div className="grid gap-7 lg:grid-cols-[1fr_0.55fr] lg:items-end">
@@ -483,7 +483,7 @@ export default function VisualEvidenceClient() {
         </section>
 
         {/* Sample selector + analysis results */}
-        <section className="border-b border-rule bg-paper">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-24">
             <Reveal delay={0.08}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -496,11 +496,11 @@ export default function VisualEvidenceClient() {
                 <div className="flex items-center gap-1 self-start rounded-[3px] border border-rule-strong bg-paper-raised p-1 sm:self-auto">
                   {(
                     [
-                      ["truckA", "Fuso · photos"],
-                      ["truckB", "Isuzu · photo + video"],
+                      ["truckA", "Fuso / photos"],
+                      ["truckB", "Isuzu / photo + video"],
                     ] as const
                   ).map(([id, label]) => (
-                    <button
+                     <button
                       key={id}
                       type="button"
                       onClick={() => selectSample(id)}
@@ -542,7 +542,7 @@ export default function VisualEvidenceClient() {
 
             {/* Info cards below */}
             <Reveal delay={0.16} className="mt-8">
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="space-y-8">
                 {/* Entity resolution */}
                 <div className="plate">
                   <div className="plate-core overflow-hidden">
@@ -608,7 +608,7 @@ export default function VisualEvidenceClient() {
                       </div>
                       <div className="mt-3 h-2 overflow-hidden rounded-[1px] bg-paper-sunk">
                         <div
-                          className="h-full bg-accent"
+                          className="h-full bg-ink"
                           style={{ width: `${sample.coverage}%` }}
                         />
                       </div>
@@ -622,20 +622,10 @@ export default function VisualEvidenceClient() {
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button
                   variant="default"
-                  className="sm:flex-1"
-                  onClick={() => setAttached(true)}
-                >
-                  Attach findings to passport
-                  <ButtonIconWell>
-                    <Arrow />
-                  </ButtonIconWell>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="sm:flex-1"
+                  className="w-full"
                   onClick={() => {
                     setPhase("upload");
                     setAttached(false);
@@ -695,7 +685,7 @@ function DocumentStackIcon() {
       <span className="absolute left-0 top-2 h-11 w-9 -rotate-6 rounded-[2px] border border-rule-strong bg-paper-sunk" />
       <span className="absolute right-0 top-1 h-11 w-9 rotate-3 rounded-[2px] border border-rule-strong bg-paper" />
       <span className="absolute left-1.5 top-0 flex h-11 w-9 flex-col gap-1.5 rounded-[2px] border border-ink bg-paper-raised p-2">
-        <span className="h-1 w-full bg-accent" />
+        <span className="h-1 w-full bg-ink" />
         <span className="h-px w-full bg-rule-strong" />
         <span className="h-px w-3/4 bg-rule-strong" />
         <span className="h-px w-5/6 bg-rule-strong" />
@@ -719,7 +709,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
             <div
               key={idx}
               className={`h-2 flex-1 rounded-[1px] transition-colors duration-300 ${
-                active ? "bg-accent" : "bg-paper-sunk"
+                active ? "bg-ink" : "bg-paper-sunk"
               }`}
             />
           );

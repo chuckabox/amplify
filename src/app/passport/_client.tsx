@@ -74,7 +74,7 @@ export default function PassportClient() {
         )}
 
         {/* Hero header */}
-        <section className="border-b border-rule bg-paper-raised">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-24 md:pb-28">
             <Reveal>
               <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
@@ -107,7 +107,7 @@ export default function PassportClient() {
         </section>
 
         {/* Tab navigation */}
-        <section className="border-b border-rule bg-paper">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6">
             <nav
               aria-label="Passport sections"
@@ -126,7 +126,7 @@ export default function PassportClient() {
                 >
                   {item.label}
                   {view === item.id && (
-                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-accent" />
+                    <span className="absolute inset-x-0 bottom-0 h-0.5 bg-ink" />
                   )}
                 </button>
               ))}
@@ -176,7 +176,7 @@ function Overview({ setView }: { setView: (view: View) => void }) {
           <div className="h-8 w-px bg-rule hidden sm:block" />
           <div>
             <span className="text-[10px] font-semibold text-ink-faint block">Operating Sector</span>
-            <span className="font-bold text-ink">Heavy motor transport · QLD</span>
+            <span className="font-bold text-ink">Heavy motor transport, QLD</span>
           </div>
           <div className="h-8 w-px bg-rule hidden sm:block" />
           <div>
@@ -544,7 +544,7 @@ function EntityCard({ entity }: { entity: PassportEntity }) {
                 {entity.type}
               </span>
               {entity.changed && (
-                <span className="rounded-[2px] bg-accent px-1.5 py-0.5 text-[8px] font-bold uppercase text-ink">
+                <span className="rounded-[2px] bg-ink px-1.5 py-0.5 text-[8px] font-bold uppercase text-paper">
                   Updated
                 </span>
               )}

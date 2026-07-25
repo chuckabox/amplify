@@ -22,7 +22,7 @@ export default function NotFound() {
         />
         <div className="mt-8 text-center">
           <p className="text-xs text-ink-faint">
-            REF: ERR-404-NOT-FOUND · TONNAGE
+            REF: ERR-404-NOT-FOUND / TONNAGE
           </p>
         </div>
       </div>

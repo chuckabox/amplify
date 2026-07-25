@@ -134,7 +134,7 @@ export default function AuditClient() {
       <div className="flex min-h-screen flex-col">
         <main id="main" className="flex-1">
           {/* Hero */}
-          <section className="border-b border-rule bg-paper-raised">
+          <section className="border-b border-rule bg-transparent">
             <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
               <Reveal>
                 <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
@@ -162,8 +162,8 @@ export default function AuditClient() {
           </section>
 
           {/* Upload area */}
-          <section className="border-b border-rule bg-paper">
-            <div className="mx-auto max-w-[840px] px-6 py-20 md:py-28">
+          <section className="border-b border-rule bg-transparent">
+            <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-28">
               <Reveal delay={0.08}>
                 <section aria-labelledby="upload-records-title">
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -251,7 +251,7 @@ export default function AuditClient() {
                                     {document.name}
                                   </p>
                                   <p className="mt-0.5 text-xs text-ink-faint">
-                                    {type?.shortLabel} · {document.size}
+                                    {type?.shortLabel} / {document.size}
                                   </p>
                                 </div>
                                 <button
@@ -312,8 +312,8 @@ export default function AuditClient() {
           </section>
 
           {/* Understood record types listing */}
-          <section className="border-b border-rule bg-paper-sunk/35">
-            <div className="mx-auto max-w-[840px] px-6 py-16 md:py-20">
+          <section className="border-b border-rule bg-transparent">
+            <div className="mx-auto max-w-[1240px] px-6 py-16 md:py-20">
               <Reveal delay={0.14}>
                 <div className="grid gap-10 lg:grid-cols-[0.4fr_1fr] lg:items-start">
                   <div>
@@ -374,7 +374,7 @@ export default function AuditClient() {
     return (
       <div className="flex min-h-screen flex-col">
         <main id="main" className="flex-1">
-          <section className="border-b border-rule bg-paper-sunk/35">
+          <section className="border-b border-rule bg-transparent">
             <div className="mx-auto flex w-full max-w-[540px] flex-col justify-center px-6 py-28 md:py-36">
               <Reveal>
                 <div>
@@ -402,7 +402,7 @@ export default function AuditClient() {
                             key={label}
                             className={`flex items-center justify-between text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
                               active
-                                ? "text-accent-deep"
+                                ? "text-ink font-bold"
                                 : pending
                                   ? "text-ink-faint opacity-40"
                                   : "text-ink-muted"
@@ -433,12 +433,12 @@ export default function AuditClient() {
     <div className="flex min-h-screen flex-col">
       <main id="main" className="flex-1">
         {/* Extraction Complete Hero */}
-        <section className="border-b border-rule bg-paper-raised">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-24 md:pb-28">
             <Reveal>
               <div className="flex flex-col gap-6 border-b border-rule pb-8 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="field-label">Extraction complete · review before saving</p>
+                  <p className="field-label">Extraction complete / review before saving</p>
                   <h1 className="mt-3 text-[clamp(2.3rem,5vw,4rem)] font-display font-bold leading-none text-ink">
                     One document. Seven useful facts.
                   </h1>
@@ -456,27 +456,122 @@ export default function AuditClient() {
         </section>
 
         {/* Content detail layout */}
-        <section className="border-b border-rule bg-paper">
+        <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-24">
-            <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr]">
+            <div className="space-y-8">
+              {/* Row 1: Critical review required */}
               <Reveal delay={0.08}>
-                <aside className="plate">
+                <div className="plate border border-tier-3-ink bg-tier-3-wash">
+                  <div className="plate-core p-5">
+                    <div className="flex items-start gap-4">
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[2px] bg-tier-3-ink text-sm font-bold text-paper">
+                        !
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-tier-3-ink">
+                          {extraction.alert.label}
+                        </p>
+                        <p className="mt-1 text-sm leading-relaxed text-ink-muted">
+                          {extraction.alert.detail}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+
+              {/* Row 2: Structured record */}
+              <Reveal delay={0.12}>
+                <div className="plate">
+                  <div className="plate-core overflow-hidden">
+                    <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="field-label">Structured record</p>
+                        <h2 id="structured-record-title" className="mt-1 text-xl font-semibold text-ink">
+                          {extraction.entityLabel}
+                        </h2>
+                      </div>
+                      <span className="self-start text-[10px] text-ink-faint">
+                        LINKED TO {extraction.entityType.toUpperCase()} RECORD
+                      </span>
+                    </div>
+                    <div className="grid sm:grid-cols-2">
+                      {extraction.fields.map((field) => (
+                        <div
+                          key={field.label}
+                          className="border-b border-rule px-5 py-4 sm:[&:nth-child(odd)]:border-r"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="field-label">{field.label}</span>
+                            <span className="text-[9px] text-ink-faint">
+                              {Math.round(field.confidence * 100)}%
+                            </span>
+                          </div>
+                          <p
+                            className={`mt-2 text-base font-semibold ${
+                              field.tone === "critical"
+                                ? "text-tier-3-ink"
+                                : field.tone === "warning"
+                                  ? "text-tier-2-ink"
+                                  : "text-ink"
+                            }`}
+                          >
+                            {field.value}
+                          </p>
+                        </div>
+                      ))}
+                      <div className="border-b border-rule px-5 py-4">
+                        <span className="field-label">Entity match</span>
+                        <p className="mt-2 text-base font-semibold text-ink">
+                          99% (Existing vehicle)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+
+              {/* Row 3: Evidence-to-control mapping */}
+              <Reveal delay={0.16}>
+                <div className="plate">
+                  <div className="plate-core overflow-hidden">
+                    <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+                      <p className="field-label">Evidence-to-control mapping</p>
+                    </div>
+                    <div className="px-5 py-5">
+                      <p className="text-sm font-semibold text-ink">
+                        Control: Safety-critical defects are repaired and closed
+                      </p>
+                      <div className="mt-4 space-y-3">
+                        <MappingRow label="Defect identified in service record" value="Found" state="good" />
+                        <MappingRow label="Vehicle matched" value="Truck 28" state="good" />
+                        <MappingRow label="Repair completion recorded" value="No" state="bad" />
+                        <MappingRow label="Separate repair evidence found" value="Missing" state="bad" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+
+              {/* Row 4: Source evidence */}
+              <Reveal delay={0.2}>
+                <div className="plate">
                   <div className="plate-core overflow-hidden">
                     <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
                       <p className="field-label">Source evidence</p>
                     </div>
                     <div className="p-5">
-                      <div className="flex aspect-[4/5] flex-col border border-rule-strong bg-[#fbfcfd] p-6 shadow-plate">
+                      <div className="flex flex-col border border-rule-strong bg-[#fbfcfd] p-6 shadow-plate">
                         <div className="flex items-start justify-between border-b-2 border-ink pb-4">
                           <div>
                             <p className="font-display text-xl font-bold text-ink">
                               Fleet Service Report
                             </p>
                             <p className="mt-1 text-[9px] text-ink-faint">
-                              COORANBONG FREIGHT · WORK ORDER 88241
+                              COORANBONG FREIGHT / WORK ORDER 88241
                             </p>
                           </div>
-                          <span className="text-xs font-bold text-accent-deep">
+                          <span className="text-xs font-bold text-ink">
                             PDF
                           </span>
                         </div>
@@ -489,134 +584,40 @@ export default function AuditClient() {
                           <SourceRow label="Repair completed" value="NO" marked />
                           <SourceRow label="Next service" value="500,000 km" />
                         </dl>
-                        <div className="mt-auto border-t border-rule pt-3 text-[8px] leading-relaxed text-ink-faint">
-                          Signed electronically · B. Morton · Workshop supervisor
+                        <div className="mt-6 border-t border-rule pt-3 text-[8px] leading-relaxed text-ink-faint">
+                          Signed electronically / B. Morton / Workshop supervisor
                         </div>
                       </div>
-                      <p className="mt-4 break-all text-xs font-medium text-ink">
-                        {extraction.sourceName}
-                      </p>
-                      <p className="mt-1 text-xs text-ink-faint">
-                        Maintenance · uploaded today
-                      </p>
-                    </div>
-                  </div>
-                </aside>
-              </Reveal>
-
-              <Reveal delay={0.12}>
-                <section aria-labelledby="structured-record-title" className="space-y-6">
-                  <div className="plate">
-                    <div className="plate-core overflow-hidden">
-                      <div className="flex flex-col gap-3 border-b border-rule bg-paper-sunk/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="field-label">Structured record</p>
-                          <h2 id="structured-record-title" className="mt-1 text-xl font-semibold text-ink">
-                            {extraction.entityLabel}
-                          </h2>
-                        </div>
-                        <span className="self-start text-[10px] text-ink-faint">
-                          LINKED TO {extraction.entityType.toUpperCase()} RECORD
-                        </span>
-                      </div>
-                      <div className="grid sm:grid-cols-2">
-                        {extraction.fields.map((field) => (
-                          <div
-                            key={field.label}
-                            className="border-b border-rule px-5 py-4 sm:[&:nth-child(odd)]:border-r"
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="field-label">{field.label}</span>
-                              <span className="text-[9px] text-ink-faint">
-                                {Math.round(field.confidence * 100)}%
-                              </span>
-                            </div>
-                            <p
-                              className={`mt-2 text-base font-semibold ${
-                                field.tone === "critical"
-                                  ? "text-tier-3-ink"
-                                  : field.tone === "warning"
-                                    ? "text-tier-2-ink"
-                                    : "text-ink"
-                              }`}
-                            >
-                              {field.value}
-                            </p>
-                          </div>
-                        ))}
-                        <div className="border-b border-rule px-5 py-4 sm:border-l">
-                          <span className="field-label">Entity match</span>
-                          <p className="mt-2 text-base font-semibold text-ink">
-                            99% · Existing vehicle
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="plate border border-tier-3-ink bg-tier-3-wash">
-                    <div className="plate-core p-5">
-                      <div className="flex items-start gap-4">
-                        <span className="flex size-8 shrink-0 items-center justify-center rounded-[2px] bg-tier-3-ink text-sm font-bold text-paper">
-                          !
-                        </span>
-                        <div>
-                          <p className="text-sm font-semibold text-tier-3-ink">
-                            {extraction.alert.label}
-                          </p>
-                          <p className="mt-1 text-sm leading-relaxed text-ink-muted">
-                            {extraction.alert.detail}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="plate">
-                    <div className="plate-core overflow-hidden">
-                      <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
-                        <p className="field-label">Evidence-to-control mapping</p>
-                      </div>
-                      <div className="px-5 py-5">
-                        <p className="text-sm font-semibold text-ink">
-                          Control: Safety-critical defects are repaired and closed
+                      <div className="mt-4">
+                        <p className="break-all text-xs font-medium text-ink">
+                          {extraction.sourceName}
                         </p>
-                        <div className="mt-4 space-y-3">
-                          <MappingRow label="Defect identified in service record" value="Found" state="good" />
-                          <MappingRow label="Vehicle matched" value="Truck 28" state="good" />
-                          <MappingRow label="Repair completion recorded" value="No" state="bad" />
-                          <MappingRow label="Separate repair evidence found" value="Missing" state="bad" />
-                        </div>
+                        <p className="mt-1 text-xs text-ink-faint">
+                          Maintenance / uploaded today
+                        </p>
                       </div>
                     </div>
                   </div>
-                </section>
+                </div>
               </Reveal>
             </div>
 
             {/* Bottom save bar */}
-            <Reveal delay={0.16} className="mt-8 flex flex-col gap-4 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-[58ch] text-xs leading-relaxed text-ink-muted">
+            <Reveal delay={0.16} className="mt-8 flex flex-col gap-4 border-t border-rule pt-6">
+              <p className="text-xs leading-relaxed text-ink-muted">
                 Saving updates Truck 28, creates an open defect, attaches the source
                 PDF and records this as a change since the last engineer review.
               </p>
-              <div className="flex shrink-0 items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setPhase("upload");
-                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-                  }}
-                >
-                  Back
-                </Button>
-                <Button variant="default" onClick={addToPassport}>
-                  Add to Passport
-                  <ButtonIconWell>
-                    <Arrow />
-                  </ButtonIconWell>
-                </Button>
-              </div>
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={() => {
+                  setPhase("upload");
+                  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                }}
+              >
+                Analyse another batch
+              </Button>
             </Reveal>
           </div>
         </section>
@@ -694,7 +695,7 @@ function DocumentStackIcon() {
       <span className="absolute left-0 top-2 h-11 w-9 -rotate-6 rounded-[2px] border border-rule-strong bg-paper-sunk" />
       <span className="absolute right-0 top-1 h-11 w-9 rotate-3 rounded-[2px] border border-rule-strong bg-paper" />
       <span className="absolute left-1.5 top-0 flex h-11 w-9 flex-col gap-1.5 rounded-[2px] border border-ink bg-paper-raised p-2">
-        <span className="h-1 w-full bg-accent" />
+        <span className="h-1 w-full bg-ink" />
         <span className="h-px w-full bg-rule-strong" />
         <span className="h-px w-3/4 bg-rule-strong" />
         <span className="h-px w-5/6 bg-rule-strong" />
@@ -718,7 +719,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
             <div
               key={idx}
               className={`h-2 flex-1 rounded-[1px] transition-colors duration-300 ${
-                active ? "bg-accent" : "bg-paper-sunk"
+                active ? "bg-ink" : "bg-paper-sunk"
               }`}
             />
           );

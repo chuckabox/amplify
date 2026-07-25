@@ -94,11 +94,11 @@
   --rule: #d0d6e0;
   --rule-strong: #b5bdc9;
 
-  /* Steel blue accent */
-  --accent: #2b7ec9;
-  --accent-deep: #1a5a94; /* text-safe on paper */
+  /* Navy blue accent */
+  --accent: #062A49;
+  --accent-deep: #062A49; /* text-safe on paper */
   --accent-wash: #d4e4f4;
-  --accent-ink: #14476e;
+  --accent-ink: #062A49;
 
   /* Tier inks — cool monochrome ramp */
   --tier-1: #3b82b8;

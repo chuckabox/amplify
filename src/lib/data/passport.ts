@@ -106,8 +106,8 @@ export const SAMPLE_EXTRACTION: ExtractedRecord = {
   documentKind: "maintenance",
   entityType: "Vehicle",
   entityId: "vehicle-28",
-  entityLabel: "Truck 28 · ABC123",
-  extractedAt: "25 Jul 2026 · 10:42",
+  entityLabel: "Truck 28 / ABC123",
+  extractedAt: "25 Jul 2026, 10:42",
   fields: [
     { label: "Vehicle", value: "Truck 28", confidence: 0.99 },
     { label: "Registration", value: "ABC123", confidence: 0.98 },
@@ -156,7 +156,7 @@ export const PASSPORT_ENTITIES: PassportEntity[] = [
     id: "vehicle-28",
     type: "vehicle",
     label: "Truck 28",
-    meta: "ABC123 · 2021 Isuzu FYJ",
+    meta: "ABC123 / 2021 Isuzu FYJ",
     status: "critical",
     statusLabel: "Critical review",
     changed: true,
@@ -171,7 +171,7 @@ export const PASSPORT_ENTITIES: PassportEntity[] = [
     id: "vehicle-14",
     type: "vehicle",
     label: "Truck 14",
-    meta: "763KLT · 2019 Fuso Fighter",
+    meta: "763KLT / 2019 Fuso Fighter",
     status: "clear",
     statusLabel: "Current",
     facts: [
@@ -185,7 +185,7 @@ export const PASSPORT_ENTITIES: PassportEntity[] = [
     id: "driver-ravi",
     type: "driver",
     label: "Ravi Sandhu",
-    meta: "MC licence · Brisbane depot",
+    meta: "MC licence / Brisbane depot",
     status: "watch",
     statusLabel: "Expiry approaching",
     facts: [
@@ -199,7 +199,7 @@ export const PASSPORT_ENTITIES: PassportEntity[] = [
     id: "subco-coastal",
     type: "subcontractor",
     label: "Coastal Linehaul Pty Ltd",
-    meta: "12 vehicles · 9 drivers",
+    meta: "12 vehicles, 9 drivers",
     status: "watch",
     statusLabel: "Evidence gap",
     facts: [
@@ -274,14 +274,14 @@ export const RECENT_CHANGES = [
     date: "25 Jul",
     type: "Critical",
     title: "Open brake defect linked to Truck 28",
-    detail: "Service record added · repair evidence not found",
+    detail: "Service record added / repair evidence not found",
     tone: "critical",
   },
   {
     date: "23 Jul",
     type: "Expiry",
     title: "Ravi Sandhu medical expires in 27 days",
-    detail: "Medical clearance · Brisbane depot",
+    detail: "Medical clearance / Brisbane depot",
     tone: "warning",
   },
   {
@@ -295,7 +295,7 @@ export const RECENT_CHANGES = [
     date: "11 Jul",
     type: "New evidence",
     title: "Emergency plan review completed",
-    detail: "Rocklea depot · version 4.2",
+    detail: "Rocklea depot / version 4.2",
     tone: "neutral",
   },
 ] as const;

@@ -46,7 +46,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
             className={cn(
               "rounded-[4px] border-2 px-5 py-4 text-left",
               i === active
-                ? "border-accent bg-accent/8"
+                ? "border-ink bg-ink/5"
                 : "border-rule bg-paper-raised hover:border-rule-strong",
             )}
           >
@@ -86,7 +86,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
                 <ul className="mt-4 space-y-2 max-w-[42ch]">
                   {step.bullets.map((bullet, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm text-ink-muted">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
                       <span>{bullet}</span>
                     </li>
                   ))}

@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
     default: "TONNAGE: living Passports for transport",
-    template: "%s · TONNAGE",
+    template: "%s | TONNAGE",
   },
   description:
     "TONNAGE turns transport records into living Passports, links evidence to controls and shows engineers what changed since the last review.",
