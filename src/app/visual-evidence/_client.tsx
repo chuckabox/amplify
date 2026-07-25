@@ -164,149 +164,146 @@ export default function VisualEvidenceClient() {
 
           {/* Upload area */}
           <section className="border-b border-rule bg-paper">
-            <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-28">
-              <div className="grid gap-8 lg:grid-cols-[1.22fr_0.78fr]">
-                <Reveal delay={0.08}>
-                  <section aria-labelledby="upload-media-title">
-                    <div className="flex items-end justify-between gap-4">
-                      <div>
-                        <h2 id="upload-media-title" className="text-2xl font-semibold text-ink">
-                          Drop photo or video files
-                        </h2>
-                      </div>
-                      <span className="text-xs text-ink-faint">
-                        Accepts mp4, webm, heic, jpg, png
-                      </span>
+            <div className="mx-auto max-w-[840px] px-6 py-20 md:py-28">
+              <Reveal delay={0.08}>
+                <section aria-labelledby="upload-media-title">
+                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <div>
+                      <h2 id="upload-media-title" className="text-2xl font-display font-bold text-ink">
+                        Drop photo or video files
+                      </h2>
                     </div>
+                    <span className="text-xs text-ink-faint">
+                      Accepts mp4, webm, heic, jpg, png
+                    </span>
+                  </div>
 
-                    {/* Dropzone — plate/plate-core nested */}
-                    <div className="plate mt-5">
-                      <div
-                        onDragOver={(event) => {
-                          event.preventDefault();
-                          setDragging(true);
-                        }}
-                        onDragLeave={(event) => {
-                          event.preventDefault();
-                          setDragging(false);
-                        }}
-                        onDrop={(event) => {
-                          event.preventDefault();
-                          setDragging(false);
-                          addFiles(event.dataTransfer.files);
-                        }}
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`plate-core flex min-h-[245px] cursor-pointer flex-col items-center justify-center gap-4 border-2 border-dashed p-8 text-center transition-all ${
-                          dragging
-                            ? "border-accent-deep bg-accent-wash/50"
-                            : "border-rule-strong bg-paper-raised hover:border-accent-deep"
-                        }`}
-                      >
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          multiple
-                          accept="image/*,video/*"
-                          className="hidden"
-                          onChange={(event) => addFiles(event.target.files)}
-                        />
-                        <DocumentStackIcon />
-                        <div>
-                          <p className="text-base font-semibold text-ink">
-                            Drop media files here
-                          </p>
-                          <p className="mt-1 text-sm text-ink-muted">
-                            or click to browse from your computer
-                          </p>
-                        </div>
-                        <p className="max-w-[42ch] text-xs leading-relaxed text-ink-faint">
-                          Select raw photos or videos captured on-site. Bounding boxes and
-                          AI detections are generated automatically.
+                  {/* Dropzone — plate/plate-core nested */}
+                  <div className="plate mt-5">
+                    <div
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setDragging(true);
+                      }}
+                      onDragLeave={(event) => {
+                        event.preventDefault();
+                        setDragging(false);
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        setDragging(false);
+                        addFiles(event.dataTransfer.files);
+                      }}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`plate-core flex min-h-[360px] cursor-pointer flex-col items-center justify-center gap-6 border-2 border-dashed p-10 text-center transition-all ${
+                        dragging
+                          ? "border-accent-deep bg-accent-wash/50"
+                          : "border-rule-strong bg-paper-raised hover:border-accent-deep"
+                      }`}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/*,video/*"
+                        className="hidden"
+                        onChange={(event) => addFiles(event.target.files)}
+                      />
+                      <DocumentStackIcon />
+                      <div className="space-y-1">
+                        <p className="text-lg font-semibold text-ink">
+                          Drop media files here
+                        </p>
+                        <p className="text-sm text-ink-muted">
+                          or click to browse from your computer
                         </p>
                       </div>
+                      <p className="max-w-[46ch] text-xs leading-relaxed text-ink-faint">
+                        Select raw photos or videos captured on-site. Bounding boxes and
+                        AI detections are generated automatically.
+                      </p>
                     </div>
+                  </div>
 
-                    {evidence.length > 0 && (
-                      <div className="plate mt-5">
-                        <div className="plate-core overflow-hidden">
-                          <div className="flex items-center justify-between border-b border-rule bg-paper-sunk/40 px-4 py-3">
-                            <span className="field-label">Ready to process</span>
-                            <span className="font-mono text-[10px] text-ink-muted">
-                              {evidence.length} FILE{evidence.length === 1 ? "" : "S"}
-                            </span>
-                          </div>
-                          <div className="divide-y divide-rule">
-                            {evidence.map((file, index) => (
-                              <div
-                                key={`${file.name}-${index}`}
-                                className="flex items-center gap-3 px-4 py-3"
-                              >
-                                <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk font-mono text-[9px] font-semibold text-accent-deep">
-                                  {file.isVideo ? "VIDEO" : "PHOTO"}
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-medium text-ink">
-                                    {file.name}
-                                  </p>
-                                  <p className="mt-0.5 text-xs text-ink-faint">
-                                    {file.size}
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => removeFile(index)}
-                                  className="rounded-[2px] px-2 py-1 font-mono text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
-                                  aria-label={`Remove ${file.name}`}
-                                >
-                                  ×
-                                </button>
+                  {evidence.length > 0 && (
+                    <div className="plate mt-5">
+                      <div className="plate-core overflow-hidden">
+                        <div className="flex items-center justify-between border-b border-rule bg-paper-sunk/40 px-4 py-3">
+                          <span className="field-label">Ready to process</span>
+                          <span className="font-mono text-[10px] text-ink-muted">
+                            {evidence.length} FILE{evidence.length === 1 ? "" : "S"}
+                          </span>
+                        </div>
+                        <div className="divide-y divide-rule">
+                          {evidence.map((file, index) => (
+                            <div
+                              key={`${file.name}-${index}`}
+                              className="flex items-center gap-3 px-4 py-3"
+                            >
+                              <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk font-mono text-[9px] font-semibold text-accent-deep">
+                                {file.isVideo ? "VIDEO" : "PHOTO"}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-ink">
+                                  {file.name}
+                                </p>
+                                <p className="mt-0.5 text-xs text-ink-faint">
+                                  {file.size}
+                                </p>
                               </div>
-                            ))}
-                          </div>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(index)}
+                                className="rounded-[2px] px-2 py-1 font-mono text-xs text-ink-faint transition-colors hover:bg-paper-sunk hover:text-ink"
+                                aria-label={`Remove ${file.name}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                    )}
-
-                    <div className="mt-8 flex flex-col gap-4 border-t border-rule pt-6 sm:flex-row sm:items-end sm:justify-between">
-                      <div>
-                        <p className="field-label">For the hackathon demo</p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => addSampleSet("truckA")}
-                            className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
-                          >
-                            + Truck A (Fuso flatbed)
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => addSampleSet("truckB")}
-                            className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
-                          >
-                            + Truck B (Isuzu pantech)
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Link href="/">
-                          <Button variant="outline">Cancel</Button>
-                        </Link>
-                        <Button
-                          variant="accent"
-                          disabled={evidence.length === 0}
-                          onClick={runVisionAnalysis}
-                        >
-                          Analyse media
-                          <ButtonIconWell>
-                            <Arrow />
-                          </ButtonIconWell>
-                        </Button>
                       </div>
                     </div>
-                  </section>
-                </Reveal>
+                  )}
 
-              </div>
+                  <div className="mt-8 flex flex-col gap-6 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="field-label">For the hackathon demo</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => addSampleSet("truckA")}
+                          className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
+                        >
+                          + Truck A (Fuso flatbed)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => addSampleSet("truckB")}
+                          className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
+                        >
+                          + Truck B (Isuzu pantech)
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Link href="/">
+                        <Button variant="outline">Cancel</Button>
+                      </Link>
+                      <Button
+                        variant="accent"
+                        disabled={evidence.length === 0}
+                        onClick={runVisionAnalysis}
+                      >
+                        Analyse media
+                        <ButtonIconWell>
+                          <Arrow />
+                        </ButtonIconWell>
+                      </Button>
+                    </div>
+                  </div>
+                </section>
+              </Reveal>
             </div>
           </section>
 
