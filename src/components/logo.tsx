@@ -20,7 +20,6 @@ const SIZES = {
 export function Wordmark({
   className,
   size = "md",
-  tone = "ink",
 }: {
   className?: string;
   size?: keyof typeof SIZES;

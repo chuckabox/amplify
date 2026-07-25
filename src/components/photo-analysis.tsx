@@ -189,7 +189,6 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
             // video view
             analysis.video && (
               <div className="relative">
-                {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                 <video
                   src={asset(analysis.video.src)}
                   poster={asset(analysis.video.poster)}

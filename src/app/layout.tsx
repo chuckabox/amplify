@@ -30,11 +30,11 @@ const SITE = "https://tonnage.au";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Tonnage: risk audits that route themselves",
+    default: "Tonnage — living Risk Passports for transport",
     template: "%s · Tonnage",
   },
   description:
-    "Tonnage triages every transport risk audit and sends it to the cheapest tier that can safely clear it, so a handful of engineers can cover a portfolio that would otherwise need thirty.",
+    "Tonnage turns transport records into living Risk Passports, links evidence to controls and shows engineers what changed since the last review.",
   applicationName: "Tonnage",
   authors: [{ name: "Tonnage" }],
   keywords: [
@@ -50,15 +50,15 @@ export const metadata: Metadata = {
     url: SITE,
     siteName: "Tonnage",
     locale: "en_AU",
-    title: "Tonnage: risk audits that route themselves",
+    title: "Tonnage — living Risk Passports for transport",
     description:
-      "Most trucks roll straight over the weighbridge. Only some get pulled aside. We do that for risk audits.",
+      "Turn existing transport records into structured, searchable and actionable risk evidence.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tonnage: risk audits that route themselves",
+    title: "Tonnage — living Risk Passports for transport",
     description:
-      "Most trucks roll straight over the weighbridge. Only some get pulled aside.",
+      "Existing records become a living Risk Passport that shows what changed.",
   },
 };
 
@@ -82,11 +82,23 @@ export default function RootLayout({
         <header className="sticky top-0 z-40 border-b-[3px] border-double border-rule-strong bg-paper/95 backdrop-blur-sm">
           <div className="mx-auto flex max-w-[1240px] flex-wrap items-end justify-between gap-4 px-6 py-4">
             <Logo size="md" />
-            <div className="flex items-center gap-2">
-              <Link href="/audit">
-                <Button size="sm">Start an audit</Button>
+            <nav aria-label="Primary" className="flex items-center gap-2">
+              <Link
+                href="/passport"
+                className="hidden px-3 py-2 text-sm font-semibold text-ink-muted transition-colors hover:text-ink sm:inline-flex"
+              >
+                Risk Passport
               </Link>
-            </div>
+              <Link
+                href="/visual-evidence"
+                className="hidden px-3 py-2 text-sm font-semibold text-ink-muted transition-colors hover:text-ink md:inline-flex"
+              >
+                Visual evidence
+              </Link>
+              <Link href="/audit">
+                <Button size="sm">Upload records</Button>
+              </Link>
+            </nav>
           </div>
         </header>
         {children}
