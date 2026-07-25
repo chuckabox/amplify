@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Cormorant, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Outfit, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { MeshBg } from "@/components/mesh-bg";
 
-const cormorant = Cormorant({
-  variable: "--font-cormorant",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
   display: "swap",
 });
@@ -70,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${cormorant.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${outfit.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <a

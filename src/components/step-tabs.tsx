@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { PhotoPlate } from "@/components/photo-plate";
 import { cn } from "@/lib/utils";
+import { asset } from "@/lib/asset";
 
 export interface Step {
   n: string;
   title: string;
   body: string;
+  bullets?: string[];
+  subtext?: string;
   seed: string;
   alt: string;
 }
@@ -69,13 +71,29 @@ export function StepTabs({ steps }: { steps: Step[] }) {
               <p className="mt-4 max-w-[42ch] leading-[1.7] text-ink-muted">
                 {step.body}
               </p>
+              {step.bullets && (
+                <ul className="mt-4 space-y-2 max-w-[42ch]">
+                  {step.bullets.map((bullet, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-ink-muted">
+                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {step.subtext && (
+                <p className="mt-4 max-w-[42ch] text-[13px] leading-[1.6] text-ink-muted font-medium border-t border-rule pt-3">
+                  {step.subtext}
+                </p>
+              )}
             </div>
-            <PhotoPlate
-              seed={step.seed}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={asset(step.seed)}
               alt={step.alt}
               width={800}
               height={560}
-              imageClassName="aspect-[10/7]"
+              className="aspect-[10/7] w-full object-cover rounded-[3px]"
             />
           </motion.div>
         </AnimatePresence>
