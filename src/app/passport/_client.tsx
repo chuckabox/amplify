@@ -82,42 +82,17 @@ export default function PassportClient() {
                   <h1 className="text-[clamp(2.6rem,6vw,4.75rem)] font-display font-bold leading-[0.96] text-ink">
                     {PASSPORT_SUMMARY.business}
                   </h1>
-                  <p className="mt-4 max-w-[42ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                </div>
+                <div className="lg:pb-1">
+                  <p className="max-w-[48ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
                     A living ledger matching transport operations to risk controls, showing engineers what changed since the last review.
                   </p>
-                </div>
-                <div className="lg:pb-1 space-y-5">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Link href="/visual-evidence">
-                      <Button variant="outline">Vision</Button>
-                    </Link>
-                    <Link href="/audit">
-                      <Button variant="accent">
-                        Upload records
-                        <ButtonIconWell>
-                          <Arrow />
-                        </ButtonIconWell>
-                      </Button>
-                    </Link>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t border-rule pt-4 text-[11px] text-ink-muted">
-                    <div>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">ABN</span>
-                      <span className="font-semibold text-ink">{PASSPORT_SUMMARY.abn.replace("ABN ", "")}</span>
-                    </div>
-                    <div>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Last review</span>
-                      <span className="font-semibold text-ink">{PASSPORT_SUMMARY.lastReviewed}</span>
-                    </div>
-                    <div>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Sector</span>
-                      <span className="font-semibold text-ink">Heavy motor</span>
-                    </div>
-                    <div>
-                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Updated</span>
-                      <span className="font-semibold text-accent-deep">25 Jul 2026, 10:42</span>
-                    </div>
-                  </div>
+                  <Link
+                    href="/audit"
+                    className="mt-4 inline-flex text-sm font-semibold text-accent-deep underline decoration-rule-strong underline-offset-4 hover:decoration-accent-deep"
+                  >
+                    Upload business records instead
+                  </Link>
                 </div>
               </div>
             </Reveal>
@@ -170,6 +145,31 @@ function Overview({ setView }: { setView: (view: View) => void }) {
 
   return (
     <>
+      {/* Metadata bar */}
+      <Reveal delay={0.02}>
+        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-rule pb-5 text-xs text-ink-muted">
+          <div>
+            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Business ABN</span>
+            <span className="font-semibold text-ink">{PASSPORT_SUMMARY.abn.replace("ABN ", "")}</span>
+          </div>
+          <div className="h-8 w-px bg-rule hidden sm:block" />
+          <div>
+            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Operating Sector</span>
+            <span className="font-semibold text-ink">Heavy motor transport · QLD</span>
+          </div>
+          <div className="h-8 w-px bg-rule hidden sm:block" />
+          <div>
+            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Last review</span>
+            <span className="font-semibold text-ink">{PASSPORT_SUMMARY.lastReviewed}</span>
+          </div>
+          <div className="h-8 w-px bg-rule hidden sm:block" />
+          <div>
+            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Updated</span>
+            <span className="font-semibold text-accent-deep">25 Jul 2026, 10:42</span>
+          </div>
+        </div>
+      </Reveal>
+
       {/* Metrics bar */}
       <Reveal delay={0.06}>
         <section className="mt-10">
