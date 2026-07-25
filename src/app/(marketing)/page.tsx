@@ -145,7 +145,7 @@ export default function Home() {
               <Reveal delay={0.18}>
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                   <Link href="/audit" className="sm:w-auto">
-                    <Button variant="accent" size="lg" className="w-full sm:w-auto">
+                    <Button variant="default" size="lg" className="w-full sm:w-auto">
                       Upload records
                       <ButtonIconWell>
                         <Arrow />
@@ -238,9 +238,9 @@ export default function Home() {
                 Who this is for
               </h2>
               <p className="mt-5 max-w-[60ch] text-[1.0625rem] leading-[1.7] text-ink-muted mx-auto">
-                Transport insurers are one user. The same pattern fits anywhere
-                a small team of experts has to travel to check evidence against
-                a standard.
+                Right now we focus on trucks. But the same pattern fits anywhere
+                a small team of experts has to travel to check evidence against a
+                standard, so all of these are possible.
               </p>
             </Reveal>
 
@@ -433,7 +433,7 @@ export default function Home() {
 
               <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link href="/audit">
-                  <Button variant="accent" size="lg" className="py-6 px-12 text-base">
+                  <Button variant="default" size="lg" className="py-6 px-12 text-base">
                     Upload records
                     <ButtonIconWell>
                       <Arrow />
