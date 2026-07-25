@@ -244,30 +244,68 @@ export default function Home() {
               </p>
             </Reveal>
 
-            <div className="mt-16 grid gap-5 md:grid-cols-3">
+            <div className="mt-16 grid gap-x-8 gap-y-12 sm:grid-cols-2 md:grid-cols-3">
               {OTHER_MARKETS.map((m, i) => (
-                <Reveal key={m.title} className="plate bg-paper-sunk" delay={0.05 * (i + 1)}>
-                  <div className="plate-core p-6 h-full">
-                    <div className="flex items-center gap-3">
-                      <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[6px] border border-rule bg-paper-raised">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={asset(m.logo)}
-                          alt={`${m.company} logo`}
-                          width={40}
-                          height={40}
-                          className="size-9 object-contain"
-                        />
-                      </span>
-                      <span className="font-display text-base font-semibold text-ink">
-                        {m.company}
-                      </span>
-                    </div>
-                    <h3 className="mt-4 text-sm font-semibold text-ink">{m.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">{m.desc}</p>
-                  </div>
+                <Reveal key={m.title} className="text-center" delay={0.05 * (i + 1)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={asset(m.logo)}
+                    alt={`${m.company} logo`}
+                    width={56}
+                    height={56}
+                    className="mx-auto size-14 object-contain"
+                  />
+                  <h3 className="mt-4 font-display text-base font-semibold text-ink">
+                    {m.company}
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-[34ch] text-sm leading-relaxed text-ink-muted">
+                    {m.desc}
+                  </p>
                 </Reveal>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- What makes us different ---------- */}
+        <section className="border-t border-rule bg-transparent">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
+            <Reveal className="text-center">
+              <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                What makes us different
+              </h2>
+              <p className="mt-5 max-w-[62ch] text-[1.0625rem] leading-[1.7] text-ink-muted mx-auto">
+                Others make the visit faster. We skip it when it is not needed.
+              </p>
+            </Reveal>
+
+            <div className="mt-16 grid gap-5 md:grid-cols-3">
+              <Reveal className="plate bg-paper-sunk" delay={0.05}>
+                <div className="plate-core p-6 h-full">
+                  <h3 className="text-lg font-semibold text-ink">We skip the drive</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                    Most audits clear from the photos. No one has to drive out.
+                  </p>
+                </div>
+              </Reveal>
+
+              <Reveal className="plate bg-paper-sunk" delay={0.1}>
+                <div className="plate-core p-6 h-full">
+                  <h3 className="text-lg font-semibold text-ink">We catch cheating</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                    We check the photos are real, so the evidence can be trusted.
+                  </p>
+                </div>
+              </Reveal>
+
+              <Reveal className="plate bg-paper-sunk" delay={0.15}>
+                <div className="plate-core p-6 h-full">
+                  <h3 className="text-lg font-semibold text-ink">A person decides</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                    An engineer signs off on every result. The app never decides alone.
+                  </p>
+                </div>
+              </Reveal>
             </div>
           </div>
         </section>

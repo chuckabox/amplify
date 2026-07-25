@@ -7,7 +7,7 @@ import { SiteFooter } from "@/app/(marketing)/page";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "TONNAGE is priced on the audits it clears without a site visit. One plan for operators, one for insurers, one for larger risk teams.",
+    "TONNAGE is priced on the audits it clears without a site visit. One plan for insurers, one for larger risk teams.",
 };
 
 type Plan = {
@@ -25,22 +25,6 @@ type Plan = {
 // Illustrative AUD figures. Replace with the validation-call numbers noted in
 // docs/nti-riskgate-business-model.md before the pitch.
 const PLANS: Plan[] = [
-  {
-    name: "Operator",
-    tagline: "For the transport company",
-    price: "$49",
-    unit: "per operator, per month",
-    cta: "Run a guided audit",
-    href: "/audit",
-    features: [
-      "Guided self-audit across all risk areas",
-      "Live result: cleared, remote, or in person",
-      "Findings with severity and how to fix them",
-      "Benchmarks against similar fleets",
-      "Track fixes and past audits",
-    ],
-    foot: "Or the insurer pays and includes it in the policy.",
-  },
   {
     name: "Insurer",
     tagline: "For the risk engineering team",
@@ -61,13 +45,13 @@ const PLANS: Plan[] = [
   },
   {
     name: "Enterprise",
-    tagline: "For more audit types and data",
+    tagline: "For larger risk teams",
     price: "Custom",
     unit: "let us talk",
     cta: "Contact us",
     href: "/audit",
     features: [
-      "Everything in Insurer, across more audit types",
+      "Everything in Insurer, plus custom risk models",
       "Authorised workshop partner network",
       "Fleet wide risk data for underwriters",
       "Custom risk areas and standards packs",
@@ -112,22 +96,17 @@ export default function PricingPage() {
         {/* Plans */}
         <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-28">
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="mx-auto max-w-[960px] grid gap-8 md:grid-cols-2">
               {PLANS.map((plan, i) => (
                 <Reveal key={plan.name} delay={0.08 * (i + 1)}>
                   <div className="plate h-full">
                     <div className="plate-core flex h-full flex-col p-7">
                       <p className="field-label">
-                        {plan.featured ? "Anchor plan" : plan.tagline}
+                        {plan.tagline}
                       </p>
                       <h2 className="mt-3 font-display text-2xl font-bold text-ink">
                         {plan.name}
                       </h2>
-                      {plan.featured && (
-                        <p className="mt-1 text-sm text-ink-muted">
-                          {plan.tagline}
-                        </p>
-                      )}
 
                       <div className="mt-6 flex items-baseline gap-2">
                         <span className={`font-display font-bold text-ink ${plan.price.startsWith("$") ? "text-3xl" : "text-xl"}`}>
