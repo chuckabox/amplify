@@ -30,11 +30,11 @@ const SITE = "https://tonnage.au";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Tonnage: living Risk Passports for transport",
+    default: "Tonnage: living Passports for transport",
     template: "%s · Tonnage",
   },
   description:
-    "Tonnage turns transport records into living Risk Passports, links evidence to controls and shows engineers what changed since the last review.",
+    "Tonnage turns transport records into living Passports, links evidence to controls and shows engineers what changed since the last review.",
   applicationName: "Tonnage",
   authors: [{ name: "Tonnage" }],
   keywords: [
@@ -50,15 +50,15 @@ export const metadata: Metadata = {
     url: SITE,
     siteName: "Tonnage",
     locale: "en_AU",
-    title: "Tonnage: living Risk Passports for transport",
+    title: "Tonnage: living Passports for transport",
     description:
       "Turn existing transport records into structured, searchable and actionable risk evidence.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tonnage: living Risk Passports for transport",
+    title: "Tonnage: living Passports for transport",
     description:
-      "Existing records become a living Risk Passport that shows what changed.",
+      "Existing records become a living Passport that shows what changed.",
   },
 };
 
@@ -87,13 +87,13 @@ export default function RootLayout({
                 href="/passport"
                 className="hidden px-3 py-2 text-sm font-semibold text-ink-muted transition-colors hover:text-ink sm:inline-flex"
               >
-                Risk Passport
+                Passport
               </Link>
               <Link
                 href="/visual-evidence"
                 className="hidden px-3 py-2 text-sm font-semibold text-ink-muted transition-colors hover:text-ink md:inline-flex"
               >
-                Visual evidence
+                Vision
               </Link>
               <Link href="/audit">
                 <Button size="sm">Upload records</Button>

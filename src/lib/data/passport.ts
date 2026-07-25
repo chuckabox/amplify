@@ -303,7 +303,7 @@ export const RECENT_CHANGES = [
 export const SOURCE_DOCUMENTS = [
   {
     name: "Truck_28_Walkaround.mp4",
-    type: "Visual evidence",
+    type: "Vision",
     linkedTo: "Truck 28",
     date: "25 Jul 2026",
     records: 8,

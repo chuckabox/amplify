@@ -42,7 +42,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
               />
             )}
             <span className="relative flex items-baseline gap-2">
-              <span className="font-mono text-xs text-ink-faint">{s.n}</span>
+              <span className="font-display text-sm font-bold text-ink-faint">{s.n}</span>
               <span className="text-sm font-semibold">{s.title}</span>
             </span>
             <p className="relative mt-1 text-xs leading-relaxed text-ink-muted line-clamp-2">
@@ -64,7 +64,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
             className="grid items-center gap-8 p-6 md:grid-cols-2 md:p-10"
           >
             <div>
-              <span className="font-mono text-xs text-ink-faint">
+              <span className="font-display text-lg font-bold text-ink-faint">
                 Step {step.n}
               </span>
               <h3 className="mt-2 text-2xl leading-tight">{step.title}</h3>

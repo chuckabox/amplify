@@ -142,7 +142,7 @@ export default function RecordsIntakePage() {
         <Reveal>
           <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
             <div>
-              <p className="field-label">Risk Passport · document intake</p>
+              <p className="field-label">Passport · document intake</p>
               <h1 className="mt-4 max-w-[15ch] text-[clamp(2.6rem,6vw,4.75rem)] font-semibold leading-[0.96] text-ink">
                 Upload the records you already keep.
               </h1>
@@ -363,7 +363,7 @@ export default function RecordsIntakePage() {
               <p className="mt-2 text-sm leading-relaxed text-ink-muted">
                 Reading {documents.length} source file
                 {documents.length === 1 ? "" : "s"} and connecting the facts to
-                the existing Risk Passport.
+                the existing Passport.
               </p>
             </div>
           </div>
@@ -566,7 +566,7 @@ export default function RecordsIntakePage() {
             Back
           </Button>
           <Button variant="accent" onClick={addToPassport}>
-            Add to Risk Passport
+            Add to Passport
             <ButtonIconWell>
               <Arrow />
             </ButtonIconWell>
