@@ -295,7 +295,7 @@ export default function AuditClient() {
                         <Button variant="outline">Cancel</Button>
                       </Link>
                       <Button
-                        variant="accent"
+                        variant="default"
                         disabled={documents.length === 0}
                         onClick={processDocuments}
                       >
@@ -610,7 +610,7 @@ export default function AuditClient() {
                 >
                   Back
                 </Button>
-                <Button variant="accent" onClick={addToPassport}>
+                <Button variant="default" onClick={addToPassport}>
                   Add to Passport
                   <ButtonIconWell>
                     <Arrow />

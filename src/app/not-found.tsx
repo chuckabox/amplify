@@ -12,7 +12,7 @@ export default function NotFound() {
           action={
             <div className="flex flex-wrap gap-3">
               <Link href="/audit">
-                <Button variant="accent">Start an audit</Button>
+                <Button variant="default">Start an audit</Button>
               </Link>
               <Link href="/">
                 <Button variant="outline">Back to Homepage</Button>

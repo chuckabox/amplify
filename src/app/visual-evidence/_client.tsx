@@ -297,7 +297,7 @@ export default function VisualEvidenceClient() {
                         <Button variant="outline">Cancel</Button>
                       </Link>
                       <Button
-                        variant="accent"
+                        variant="default"
                         disabled={evidence.length === 0}
                         onClick={runVisionAnalysis}
                       >
@@ -624,7 +624,7 @@ export default function VisualEvidenceClient() {
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Button
-                  variant="accent"
+                  variant="default"
                   className="sm:flex-1"
                   onClick={() => setAttached(true)}
                 >

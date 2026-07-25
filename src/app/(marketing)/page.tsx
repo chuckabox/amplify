@@ -295,6 +295,16 @@ export default function Home() {
                       <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[0].title}</h3>
                       <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[0].desc}</p>
                     </div>
+                    <div className="mt-4 flex flex-col gap-1.5 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                      <div className="flex justify-between items-center bg-paper px-2 py-0.5 rounded-[2px] border border-rule">
+                        <span>GPS Coordinates</span>
+                        <span className="font-mono text-ink">51.5074 N, 0.1278 W</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-paper px-2 py-0.5 rounded-[2px] border border-rule">
+                        <span>Timestamp</span>
+                        <span className="font-mono text-ink">Today, 08:42 AM</span>
+                      </div>
+                    </div>
                   </div>
                 </Reveal>
 
@@ -348,6 +358,16 @@ export default function Home() {
                       <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[3].title}</h3>
                       <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[3].desc}</p>
                     </div>
+                    <div className="mt-4 flex flex-col gap-1.5 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                      <div className="flex justify-between items-center bg-paper px-2 py-0.5 rounded-[2px] border border-rule">
+                        <span>Tyre tread normal</span>
+                        <span className="text-tier-1-ink font-semibold">PASSED</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-accent/5 px-2 py-0.5 rounded-[2px] border border-accent/20">
+                        <span>Severe chassis rust</span>
+                        <span className="text-tier-3-ink font-semibold">HALTED</span>
+                      </div>
+                    </div>
                   </div>
                 </Reveal>
 
@@ -357,6 +377,16 @@ export default function Home() {
                     <div>
                       <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[4].title}</h3>
                       <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[4].desc}</p>
+                    </div>
+                    <div className="mt-4 space-y-1 text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1 w-1 rounded-full bg-accent" />
+                        <span>Escalated to senior engineer</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1 w-1 rounded-full bg-tier-1-ink" />
+                        <span>Approved with maintenance note</span>
+                      </div>
                     </div>
                   </div>
                 </Reveal>
