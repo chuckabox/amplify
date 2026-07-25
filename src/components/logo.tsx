@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { asset } from "@/lib/asset";
 
 /*
   The Weighbridge wordmark.
@@ -29,7 +30,7 @@ export function Wordmark({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/logo.webp"
+      src={asset("/logo.webp")}
       alt="Tonnage"
       className={cn("w-auto object-contain", h, className)}
     />

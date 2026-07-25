@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
+import { asset } from "@/lib/asset";
 
 export interface Step {
   n: string;
@@ -88,7 +89,7 @@ export function StepTabs({ steps }: { steps: Step[] }) {
             </div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={step.seed}
+              src={asset(step.seed)}
               alt={step.alt}
               width={800}
               height={560}

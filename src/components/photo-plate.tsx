@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { asset } from "@/lib/asset";
 
 /*
   Placeholder photography, mounted.
@@ -46,7 +47,7 @@ export function PhotoPlate({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={imgSrc}
+          src={asset(imgSrc)}
           alt={alt}
           width={width}
           height={height}

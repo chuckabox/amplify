@@ -6,6 +6,7 @@ import { TierSplit, type Lane } from "@/components/tier-split";
 import { StepTabs, type Step } from "@/components/step-tabs";
 import { Reveal } from "@/components/motion";
 import { PhotoPlate } from "@/components/photo-plate";
+import { asset } from "@/lib/asset";
 
 const LANES: Lane[] = [
   {
@@ -266,7 +267,7 @@ export default function Home() {
                 <Reveal className="flex items-center justify-center" delay={0.05}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/samples/group-communicating.svg"
+                    src={asset("/samples/group-communicating.svg")}
                     alt="Supporting visual representing engineering capacity allocation"
                     className="max-w-full h-auto object-contain"
                   />
