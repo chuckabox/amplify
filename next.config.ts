@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "export",
+  // Deployed to https://chuckabox.github.io/amplify/
+  basePath: "/amplify",
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;
