@@ -4,6 +4,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
+import { MeshBg } from "@/components/mesh-bg";
 
 const cormorant = Cormorant({
   variable: "--font-cormorant",
@@ -89,6 +90,7 @@ export default function RootLayout({
           </div>
         </header>
         {children}
+        <MeshBg />
         <div className="grain-overlay" aria-hidden />
       </body>
     </html>
