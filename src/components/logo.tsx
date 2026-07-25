@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 */
 
 const SIZES = {
-  sm: "h-[18px]",
-  md: "h-[24px]",
-  lg: "h-[32px]",
+  sm: "h-[36px]",
+  md: "h-[48px]",
+  lg: "h-[64px]",
 } as const;
 
 export function Wordmark({
