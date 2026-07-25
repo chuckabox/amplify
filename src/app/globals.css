@@ -122,6 +122,15 @@
     @apply border-rule;
   }
 
+  a,
+  button,
+  [role="button"],
+  select,
+  input[type="submit"],
+  input[type="button"] {
+    cursor: pointer;
+  }
+
   html {
     @apply font-sans;
     scroll-behavior: smooth;

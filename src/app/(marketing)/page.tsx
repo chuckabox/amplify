@@ -11,43 +11,43 @@ const LANES: Lane[] = [
     tier: 1,
     count: "1,284 of 1,888",
     name: "Cleared on evidence",
-    detail: "Clean submission, metadata checks out, straight through.",
+    detail: "Clean submission. Straight through.",
   },
   {
     share: 0.22,
     tier: 2,
     count: "416 of 1,888",
     name: "Verified remotely",
-    detail: "One thing is unclear. We ask for a clip instead of a visit.",
+    detail: "One thing unclear. Send a clip, not a person.",
   },
   {
     share: 0.1,
     tier: 3,
     count: "188 of 1,888",
     name: "Seen in person",
-    detail: "Genuine risk, or evidence we do not believe. Send someone.",
+    detail: "Real risk. Send someone.",
   },
 ];
 
 const STEPS = [
   {
     n: "01",
-    title: "The operator fills in the docket",
-    body: "Four pillars, a handful of questions each, and photographs taken on the spot. It runs on a phone in a yard, not on a laptop in an office, because that is where the evidence is.",
+    title: "Answer the questions",
+    body: "Four topics, a few questions each, plus photos from the yard. Works on a phone.",
     seed: "wb-depot-yard",
     alt: "A driver photographing a trailer's load restraints in a depot yard",
   },
   {
     n: "02",
-    title: "The submission is read, not just received",
-    body: "Vision analysis measures what the photographs actually show — tread depth, tag dates, strap condition — and the answers are scored against the insurer's own standards. Metadata is checked for the things people do when they would rather not re-do the work.",
+    title: "We read the evidence",
+    body: "AI checks what the photos actually show — tread depth, tag dates, strap condition — and scores the answers against safety standards.",
     seed: "wb-tyre-detail",
     alt: "Close inspection of a heavy vehicle tyre showing tread depth",
   },
   {
     n: "03",
-    title: "It gets routed, and a person signs it",
-    body: "Every audit lands in one of three lanes with a written reason attached. No outcome reaches an operator without an engineer putting their name to it — the routing decides where attention goes, never what the finding is.",
+    title: "You get a result",
+    body: "Every audit lands in one of three lanes with a reason. An engineer signs every outcome — the AI routes, it doesn't decide.",
     seed: "wb-engineer-desk",
     alt: "A risk engineer reviewing audit evidence on screen",
   },
@@ -56,45 +56,25 @@ const STEPS = [
 const CHECKS = [
   {
     label: "Metadata",
-    body: "GPS, capture time and device are read off every photograph and compared against the depot and the submission window.",
+    body: "GPS, time, and device are checked against the depot and submission window.",
   },
   {
     label: "Re-use",
-    body: "Images that have appeared in an earlier submission are flagged, including re-crops and re-saves.",
+    body: "Photos from earlier submissions are flagged, including re-crops.",
   },
   {
     label: "Hard gates",
-    body: "Some findings cannot be cleared by a score. Restraint failures and lapsed accreditation go to a person regardless of what the rest of the audit looks like.",
+    body: "Some findings always go to a person, no matter what the score says.",
   },
   {
     label: "Sign-off",
-    body: "An engineer signs every adverse outcome. The model routes; it does not decide.",
+    body: "An engineer signs every adverse outcome. The AI routes, not decides.",
   },
 ];
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Masthead — set as a printed head, not a floating glass bar */}
-      <header className="border-b-[3px] border-double border-rule-strong">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-end justify-between gap-4 px-6 py-6">
-          <Logo size="md" />
-          <div className="flex items-center gap-2">
-            <span className="mr-3 hidden font-mono text-[11px] tracking-[0.1em] text-ink-muted sm:block">
-              EST. FOR HEAVY MOTOR RISK
-            </span>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="sm">Start an audit</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
       <main id="main" className="flex-1">
         {/* ---------- Hero ---------- */}
         <section className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
@@ -111,37 +91,27 @@ export default function Home() {
               </Reveal>
 
               <Reveal delay={0.12}>
-                <p className="mt-8 max-w-[58ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  A weighbridge does not stop every vehicle. It reads each one,
-                  passes the ones that are fine, and pulls aside the few that
-                  are not. Tonnage does the same thing for transport risk
-                  audits — so a team of three can carry a portfolio that would
-                  otherwise need thirty, without anyone losing the right to
-                  overrule it.
+                <p className="mt-8 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                  Tonnage reads every transport risk audit, passes the ones that
+                  are fine, and pulls aside the few that aren&apos;t. Three
+                  engineers do the work of thirty.
                 </p>
               </Reveal>
 
               <Reveal delay={0.2}>
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                  <Link href="/login" className="sm:w-auto">
+                  <Link href="/audit" className="sm:w-auto">
                     <Button variant="accent" size="lg" className="w-full sm:w-auto">
-                      I run a fleet
+                      Start an audit
                       <ButtonIconWell>
                         <Arrow />
                       </ButtonIconWell>
-                    </Button>
-                  </Link>
-                  <Link href="/queue" className="sm:w-auto">
-                    <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                      I&apos;m a risk engineer
                     </Button>
                   </Link>
                 </div>
               </Reveal>
             </div>
 
-            {/* Photograph offset below the headline baseline, deliberately not
-                aligned to the top of the text column. */}
             <Reveal delay={0.28} className="lg:col-span-5 lg:mt-16">
               <PhotoPlate
                 seed="wb-hero-road-train"
@@ -150,17 +120,17 @@ export default function Home() {
                 height={1120}
                 priority
                 imageClassName="aspect-[4/5]"
-                caption="Berrimah, NT — 04:12. Submitted from the yard, cleared in eleven seconds."
+                caption="Berrimah, NT — 04:12. Submitted from the yard, cleared in 11 seconds."
               />
             </Reveal>
           </div>
 
-          {/* Docket meta strip */}
+          {/* Stats strip */}
           <Reveal delay={0.34}>
             <dl className="mt-20 grid grid-cols-2 gap-x-8 gap-y-8 border-t border-rule pt-8 md:grid-cols-4">
               {[
-                { k: "Median triage", v: "8.4", u: "seconds" },
-                { k: "Portfolio audited", v: "1,888", u: "submissions" },
+                { k: "Triage time", v: "8.4", u: "seconds" },
+                { k: "Audits run", v: "1,888", u: "total" },
                 { k: "Sent to a person", v: "10", u: "per cent" },
                 { k: "Engineer sign-off", v: "100", u: "per cent" },
               ].map((s) => (
@@ -188,15 +158,14 @@ export default function Home() {
               <Reveal className="lg:col-span-4">
                 <p className="field-label">Where the work goes</p>
                 <h2 className="mt-5 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  Three lanes, and only one of them costs a day.
+                  Three lanes. Only one costs a day.
                 </h2>
               </Reveal>
               <Reveal delay={0.1} className="lg:col-span-8 lg:pt-3">
-                <p className="max-w-[62ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  The expensive part of an audit has never been the assessment.
-                  It is the drive. Routing on evidence quality rather than on a
-                  calendar means the site visits that do happen are the ones
-                  that were always going to matter.
+                <p className="max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                  The expensive part of an audit is the drive, not the
+                  assessment. Route on evidence quality and the site visits that
+                  happen are the ones that matter.
                 </p>
               </Reveal>
             </div>
@@ -207,12 +176,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------- How it works: zig-zag, not three equal cards ---------- */}
+        {/* ---------- How it works ---------- */}
         <section className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
           <Reveal>
-            <p className="field-label">The pass</p>
+            <p className="field-label">How it works</p>
             <h2 className="mt-5 max-w-[18ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-              What happens between the yard and the decision.
+              From the yard to the decision.
             </h2>
           </Reveal>
 
@@ -235,7 +204,7 @@ export default function Home() {
                     <h3 className="mt-4 max-w-[22ch] text-2xl leading-tight">
                       {step.title}
                     </h3>
-                    <p className="mt-4 max-w-[54ch] leading-[1.7] text-ink-muted">
+                    <p className="mt-4 max-w-[48ch] leading-[1.7] text-ink-muted">
                       {step.body}
                     </p>
                   </div>
@@ -258,15 +227,13 @@ export default function Home() {
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <div className="grid gap-12 lg:grid-cols-12">
               <Reveal className="lg:col-span-5">
-                <p className="field-label">On being gamed</p>
+                <p className="field-label">Trust</p>
                 <h2 className="mt-5 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  Assume some submissions are trying it on.
+                  Built for the submissions that try it on.
                 </h2>
-                <p className="mt-6 max-w-[46ch] leading-[1.7] text-ink-muted">
-                  A system that prices risk on self-reported evidence invites
-                  people to improve the evidence. That is a design constraint,
-                  not an edge case, so it is handled in the routing rather than
-                  in a disclaimer.
+                <p className="mt-6 max-w-[42ch] leading-[1.7] text-ink-muted">
+                  Self-reported evidence invites people to improve it. That&apos;s
+                  a design constraint, not an edge case.
                 </p>
               </Reveal>
 
@@ -294,15 +261,13 @@ export default function Home() {
           <Reveal>
             <div className="grid items-end gap-12 lg:grid-cols-12">
               <div className="lg:col-span-7">
-                <p className="field-label">The arithmetic</p>
+                <p className="field-label">The maths</p>
                 <h2 className="mt-5 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  Three engineers, thirty operators&apos; worth of coverage.
+                  3 engineers. 30 operators&apos; worth of coverage.
                 </h2>
-                <p className="mt-6 max-w-[54ch] leading-[1.7] text-ink-muted">
-                  At ten per cent in-person, a portfolio that needed thirty
-                  assessors needs three — and those three spend their week on
-                  the audits where their judgement changes the outcome, instead
-                  of confirming that a well-run fleet is still well run.
+                <p className="mt-6 max-w-[48ch] leading-[1.7] text-ink-muted">
+                  At 10% in-person, those three spend their time on audits where
+                  their judgement changes the outcome.
                 </p>
               </div>
 
@@ -337,8 +302,8 @@ export default function Home() {
                     </div>
                     <div className="mt-7 border-t border-rule pt-5">
                       <p className="text-sm leading-relaxed text-ink-muted">
-                        Same portfolio. Same standards. Same requirement that a
-                        person signs the outcome.
+                        Same portfolio. Same standards. A person still signs
+                        every outcome.
                       </p>
                     </div>
                   </div>
@@ -353,7 +318,7 @@ export default function Home() {
           <div className="mx-auto grid max-w-[1240px] gap-10 px-6 py-24 md:grid-cols-12 md:py-32">
             <Reveal className="md:col-span-7">
               <h2 className="text-[clamp(2rem,3.8vw,3rem)] leading-[1.05] text-paper">
-                Everyone else automates the report.
+                Others automate the report.
                 <span className="block text-paper/55">
                   We change who runs the audit.
                 </span>
@@ -361,26 +326,16 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.12} className="md:col-span-5 md:pt-4">
               <p className="max-w-[42ch] leading-[1.7] text-paper/70">
-                Tonnage is built for insurers carrying more heavy-motor risk
-                than they have people to inspect. NTI runs it across their
-                transport book.
+                Built for insurers with more heavy-motor risk than people to
+                inspect it.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/login">
+                <Link href="/audit">
                   <Button variant="accent" size="lg" className="w-full sm:w-auto">
                     Start an audit
                     <ButtonIconWell>
                       <Arrow />
                     </ButtonIconWell>
-                  </Button>
-                </Link>
-                <Link href="/queue">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full border-paper/25 bg-transparent text-paper hover:border-paper hover:bg-paper/10 sm:w-auto"
-                  >
-                    See the engineer queue
                   </Button>
                 </Link>
               </div>
@@ -414,19 +369,13 @@ export function SiteFooter() {
         <div>
           <Wordmark size="sm" />
           <p className="mt-4 max-w-[38ch] text-sm leading-relaxed text-ink-muted">
-            Tiered risk-audit routing for heavy motor portfolios.
+            Risk-audit routing for heavy motor portfolios.
           </p>
         </div>
         <nav
           aria-label="Footer"
           className="flex flex-wrap gap-x-8 gap-y-3 text-sm"
         >
-          <Link href="/login" className="text-ink-muted hover:text-ink">
-            Operator portal
-          </Link>
-          <Link href="/queue" className="text-ink-muted hover:text-ink">
-            Engineer queue
-          </Link>
           <Link href="/privacy" className="text-ink-muted hover:text-ink">
             Privacy
           </Link>

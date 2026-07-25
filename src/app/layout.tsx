@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Fraunces, Archivo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { OperatorProvider } from "@/lib/operator-store";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 
 // Display. The SOFT/WONK axes are what keep this off the shelf.
 const fraunces = Fraunces({
@@ -78,7 +80,17 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <OperatorProvider>{children}</OperatorProvider>
+        <header className="sticky top-0 z-40 border-b-[3px] border-double border-rule-strong bg-paper/95 backdrop-blur-sm">
+          <div className="mx-auto flex max-w-[1240px] flex-wrap items-end justify-between gap-4 px-6 py-4">
+            <Logo size="md" />
+            <div className="flex items-center gap-2">
+              <Link href="/audit">
+                <Button size="sm">Start an audit</Button>
+              </Link>
+            </div>
+          </div>
+        </header>
+        {children}
         <div className="grain-overlay" aria-hidden />
       </body>
     </html>

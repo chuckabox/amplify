@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils"
   hierarchy instead of radius. Press gives a physical 1px drop.
 */
 const buttonVariants = cva(
-  "group/button relative inline-flex shrink-0 items-center justify-center rounded-[3px] border border-transparent text-sm font-medium whitespace-nowrap transition-[background-color,color,border-color,box-shadow,transform] duration-200 ease-docket outline-none select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button relative inline-flex shrink-0 items-center justify-center rounded-[3px] border border-transparent text-sm font-medium whitespace-nowrap cursor-pointer transition-[background-color,color,border-color,box-shadow,transform] duration-200 ease-docket outline-none select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
