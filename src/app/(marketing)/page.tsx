@@ -230,43 +230,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------- Who this is for ---------- */}
-        <section className="border-t border-rule bg-transparent">
-          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-            <Reveal className="text-center">
-              <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
-                Who this is for
-              </h2>
-              <p className="mt-5 max-w-[60ch] text-[1.0625rem] leading-[1.7] text-ink-muted mx-auto">
-                Right now we focus on trucks. But the same pattern fits anywhere
-                a small team of experts has to travel to check evidence against a
-                standard, so all of these are possible.
-              </p>
-            </Reveal>
-
-            <div className="mt-16 grid gap-x-8 gap-y-12 sm:grid-cols-2 md:grid-cols-3">
-              {OTHER_MARKETS.map((m, i) => (
-                <Reveal key={m.title} className="text-center" delay={0.05 * (i + 1)}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={asset(m.logo)}
-                    alt={`${m.company} logo`}
-                    width={56}
-                    height={56}
-                    className="mx-auto size-14 object-contain"
-                  />
-                  <h3 className="mt-4 font-display text-base font-semibold text-ink">
-                    {m.company}
-                  </h3>
-                  <p className="mx-auto mt-2 max-w-[34ch] text-sm leading-relaxed text-ink-muted">
-                    {m.desc}
-                  </p>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ---------- What makes us different ---------- */}
         <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
@@ -306,6 +269,43 @@ export default function Home() {
                   </p>
                 </div>
               </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ---------- Who this is for ---------- */}
+        <section className="border-t border-rule bg-transparent">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
+            <Reveal className="text-center">
+              <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                Who this is for
+              </h2>
+              <p className="mt-5 max-w-[60ch] text-[1.0625rem] leading-[1.7] text-ink-muted mx-auto">
+                Right now we focus on trucks. But the same pattern fits anywhere
+                a small team of experts has to travel to check evidence against a
+                standard, so all of these are possible.
+              </p>
+            </Reveal>
+
+            <div className="mt-16 grid gap-x-8 gap-y-12 sm:grid-cols-2 md:grid-cols-3">
+              {OTHER_MARKETS.map((m, i) => (
+                <Reveal key={m.title} className="text-center" delay={0.05 * (i + 1)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={asset(m.logo)}
+                    alt={`${m.company} logo`}
+                    width={56}
+                    height={56}
+                    className="mx-auto size-14 object-contain"
+                  />
+                  <h3 className="mt-4 font-display text-base font-semibold text-ink">
+                    {m.company}
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-[34ch] text-sm leading-relaxed text-ink-muted">
+                    {m.desc}
+                  </p>
+                </Reveal>
+              ))}
             </div>
           </div>
         </section>
