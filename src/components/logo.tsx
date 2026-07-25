@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { asset } from "@/lib/asset";
@@ -51,6 +53,11 @@ export function Logo({
     <Link
       href={href}
       aria-label="Tonnage: home"
+      onClick={() => {
+        if (window.location.pathname === href) {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }}
       className={cn(
         "inline-flex rounded-[2px] transition-opacity duration-200 ease-docket hover:opacity-70",
         className,

@@ -149,23 +149,23 @@ function Overview({ setView }: { setView: (view: View) => void }) {
       <Reveal delay={0.02}>
         <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-rule pb-5 text-xs text-ink-muted">
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Business ABN</span>
-            <span className="font-semibold text-ink">{PASSPORT_SUMMARY.abn.replace("ABN ", "")}</span>
+            <span className="text-[10px] font-semibold text-ink-faint block">Business ABN</span>
+            <span className="font-bold text-ink">{PASSPORT_SUMMARY.abn.replace("ABN ", "")}</span>
           </div>
           <div className="h-8 w-px bg-rule hidden sm:block" />
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Operating Sector</span>
-            <span className="font-semibold text-ink">Heavy motor transport · QLD</span>
+            <span className="text-[10px] font-semibold text-ink-faint block">Operating Sector</span>
+            <span className="font-bold text-ink">Heavy motor transport · QLD</span>
           </div>
           <div className="h-8 w-px bg-rule hidden sm:block" />
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Last review</span>
-            <span className="font-semibold text-ink">{PASSPORT_SUMMARY.lastReviewed}</span>
+            <span className="text-[10px] font-semibold text-ink-faint block">Last review</span>
+            <span className="font-bold text-ink">{PASSPORT_SUMMARY.lastReviewed}</span>
           </div>
           <div className="h-8 w-px bg-rule hidden sm:block" />
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Updated</span>
-            <span className="font-semibold text-accent-deep">25 Jul 2026, 10:42</span>
+            <span className="text-[10px] font-semibold text-ink-faint block">Updated</span>
+            <span className="font-bold text-accent-deep">25 Jul 2026, 10:42</span>
           </div>
         </div>
       </Reveal>
@@ -501,30 +501,17 @@ function Metric({
           ? "text-accent-deep"
           : "text-ink";
 
-  const bgWash =
-    tone === "critical"
-      ? "bg-tier-3-wash/40"
-      : tone === "warning"
-        ? "bg-tier-2-wash/40"
-        : tone === "accent"
-          ? "bg-accent-wash/30"
-          : "bg-paper-raised";
-
   return (
-    <div className="plate">
-      <div className={`plate-core p-5 h-full flex flex-col justify-between ${bgWash}`}>
-        <div>
-          <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">{label}</span>
-          <p className={`font-display text-4xl font-bold leading-none mt-4 ${textColor}`}>
-            {value}
-          </p>
-        </div>
-        <div className="mt-4 border-t border-rule/50 pt-3 flex items-center justify-between gap-2">
-          <span className="font-mono text-[9px] text-ink-faint uppercase tracking-wide">{detail}</span>
-          {trend && (
-            <span className="font-mono text-[9px] font-bold text-accent-deep uppercase">{trend}</span>
-          )}
-        </div>
+    <div className="rounded-[4px] border border-rule bg-paper-raised p-6 flex flex-col justify-between h-full">
+      <div>
+        <p className="text-xs font-semibold text-ink-muted">{label}</p>
+        <p className={`font-display text-4xl font-bold leading-none mt-3 ${textColor}`}>
+          {value}
+        </p>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[11px] text-ink-muted border-t border-rule/50 pt-2.5">
+        <span>{detail}</span>
+        {trend && <span className="font-semibold text-accent-deep">{trend}</span>}
       </div>
     </div>
   );

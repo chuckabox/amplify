@@ -121,6 +121,34 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ---------- Our Story ---------- */}
+        <section className="border-t border-rule bg-paper">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
+            <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16 items-start">
+              <Reveal>
+                <p className="field-label">Our story</p>
+                <h2 className="mt-4 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                  We didn't know what a risk engineer was either.
+                </h2>
+              </Reveal>
+
+              <Reveal delay={0.12}>
+                <div className="space-y-5 text-[1.0625rem] leading-[1.7] text-ink-muted">
+                  <p>
+                    We built Tonnage in a weekend. Friday to Sunday, at a hackathon at QUT. None of us are risk engineers.
+                  </p>
+                  <p>
+                    We came up with the idea on Friday night. On Saturday morning we walked outside and talked to truck operators parked outside U Block to validate it. We asked what it was like when a risk engineer comes out. Same answer every time: someone drives out, checks the tyres, checks the restraints, looks at some paperwork, and leaves. Most of them already had the photos and certificates. Nobody asked for them ahead of time.
+                  </p>
+                  <p>
+                    So we spent the rest of the weekend building it. Tonnage lets operators submit that evidence up front, flags anything that looks wrong, and only sends an engineer when there is real risk. The rest clears remotely.
+                  </p>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
         {/* ---------- How It Works ---------- */}
         <section className="border-t border-rule bg-paper-raised">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
@@ -300,7 +328,7 @@ export default function Home() {
               <Reveal delay={0.2}>
                 <div className="mt-12 text-center max-w-[80ch] mx-auto">
                   <p className="text-[1.0625rem] leading-[1.7] text-ink-muted font-medium">
-                    Engineers spend time investigating real risk, not confirming compliance.
+                    Fewer windshield hours. More engineering hours.
                   </p>
                 </div>
               </Reveal>
@@ -309,19 +337,22 @@ export default function Home() {
         </section>
 
         {/* ---------- Closing / CTA ---------- */}
-        <section className="border-t border-rule bg-paper">
-          <div className="mx-auto max-w-[1240px] px-6 py-24 text-center md:py-32">
+        <section className="border-t border-rule bg-ink">
+          <div className="mx-auto max-w-[1240px] px-6 py-28 text-center md:py-40">
             <Reveal>
-              <h2 className="text-[clamp(2rem,3.8vw,3rem)] leading-[1.05] font-display font-bold text-ink">
-                Tonnage
-              </h2>
-              <p className="mt-4 text-lg text-ink-muted">
-                Risk-routing for heavy-motor portfolios.
+              <p className="field-label text-ink-faint tracking-[0.2em]">
+                Ready?
               </p>
-              
-              <div className="mt-8 flex justify-center">
+              <h2 className="mt-6 text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.05] font-display font-bold text-paper">
+                Stop driving to things<br className="hidden sm:inline" /> a photo can prove.
+              </h2>
+              <p className="mt-6 text-lg text-paper/60 max-w-[48ch] mx-auto">
+                Upload an operator's evidence. Tonnage reads it, flags risk, and routes the result — in minutes, not miles.
+              </p>
+
+              <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                 <Link href="/audit">
-                  <Button variant="accent" size="lg" className="py-6 px-12">
+                  <Button variant="accent" size="lg" className="py-6 px-12 text-base">
                     Start an audit
                     <ButtonIconWell>
                       <Arrow />
