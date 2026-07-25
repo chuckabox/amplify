@@ -89,6 +89,11 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
         ],
       },
     ],
+    video: {
+      src: "/samples/IMG_2318.mp4",
+      poster: "/samples/truck-a-video-poster.jpg",
+      caption: "Walk-around video / full vehicle & load, live object detection",
+    },
     attributes: [
       { label: "Vehicle", value: "Rigid truck (flatbed)", confidence: 0.98 },
       { label: "Make", value: "Mitsubishi Fuso", confidence: 0.82, hint: "Read from the front grille badge in a related frame." },
@@ -127,9 +132,9 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
       },
     ],
     video: {
-      src: "/samples/clip.mp4",
-      poster: "/samples/clip-poster.jpg",
-      caption: "Walk-around video / plate & front confirmed",
+      src: "/samples/IMG_2332.mp4",
+      poster: "/samples/truck-b-video-poster.jpg",
+      caption: "Walk-around video / pantech rear & plate, live object detection",
     },
     attributes: [
       { label: "Vehicle", value: "Rigid truck (pantech)", confidence: 0.98 },

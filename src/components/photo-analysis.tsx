@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ScanLine, Play, Video as VideoIcon, Sparkles } from "lucide-react";
+import { ScanLine, Play, Video as VideoIcon } from "lucide-react";
 import {
   getAnalysis,
   type Detection,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/data/analysis";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/utils";
+import { VideoDetect } from "@/components/video-detect";
 
 // Detection colour by kind — pulled from the design tokens.
 const KIND_COLOR: Record<DetectionKind, string> = {
@@ -186,21 +187,12 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
               )}
             </div>
           ) : (
-            // video view
+            // video view — real-time object detection overlay
             analysis.video && (
-              <div className="relative">
-                <video
-                  src={asset(analysis.video.src)}
-                  poster={asset(analysis.video.poster)}
-                  controls
-                  playsInline
-                  className="block max-h-[460px] w-full bg-black object-contain"
-                />
-                <div className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-tier-1-ink/90 px-2.5 py-1 text-[11px] text-white">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Plate read: XB 25JG
-                </div>
-              </div>
+              <VideoDetect
+                src={asset(analysis.video.src)}
+                poster={asset(analysis.video.poster)}
+              />
             )
           )}
         </div>

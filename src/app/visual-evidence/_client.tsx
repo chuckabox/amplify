@@ -28,6 +28,7 @@ const SAMPLE_FILES: Record<SampleId, QueuedFile[]> = {
   truckA: [
     { name: "Mitsubishi_Fuso_SideProfile.jpg", size: "590 KB", isVideo: false },
     { name: "Steer_Tyre_Tread_Inspection.jpg", size: "406 KB", isVideo: false },
+    { name: "Walk-around_Fuso_Flatbed.mp4", size: "3.6 MB", isVideo: true },
   ],
   truckB: [
     { name: "Isuzu_FRR_Windscreen.jpg", size: "693 KB", isVideo: false },
@@ -38,7 +39,7 @@ const SAMPLE_FILES: Record<SampleId, QueuedFile[]> = {
 const SAMPLE_META = {
   truckA: {
     label: "Fuso flatbed",
-    evidence: "2 photos",
+    evidence: "2 photos, 1 video",
     entity: "Truck 14 / 763KLT",
     entityDetail: "2019 Fuso Fighter (existing vehicle)",
     entityConfidence: "92% match",
@@ -496,7 +497,7 @@ export default function VisualEvidenceClient() {
                 <div className="flex items-center gap-1 self-start rounded-[3px] border border-rule-strong bg-paper-raised p-1 sm:self-auto">
                   {(
                     [
-                      ["truckA", "Fuso / photos"],
+                      ["truckA", "Fuso / photo + video"],
                       ["truckB", "Isuzu / photo + video"],
                     ] as const
                   ).map(([id, label]) => (
