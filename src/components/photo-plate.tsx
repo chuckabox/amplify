@@ -53,9 +53,8 @@ export function PhotoPlate({
             imageClassName,
           )}
         />
-        {/* manila wash — pulls the photograph into the paper palette */}
         <span
-          className="pointer-events-none absolute inset-0 bg-[#efe8d8] mix-blend-color opacity-45"
+          className="pointer-events-none absolute inset-0 bg-[#d8e4ef] mix-blend-color opacity-35"
           aria-hidden
         />
         <span

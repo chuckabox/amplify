@@ -1,29 +1,27 @@
 import Link from "next/link";
 import { Button, ButtonIconWell } from "@/components/ui/button";
-import { Logo, Wordmark } from "@/components/logo";
+import { Wordmark } from "@/components/logo";
 import { PhotoPlate } from "@/components/photo-plate";
+import { HeroLottie } from "@/components/hero-lottie";
 import { TierSplit, type Lane } from "@/components/tier-split";
-import { Reveal, Stagger, StaggerItem, Ticker } from "@/components/motion";
+import { Reveal, Stagger, StaggerItem } from "@/components/motion";
 
 const LANES: Lane[] = [
   {
     share: 0.68,
     tier: 1,
-    count: "1,284 of 1,888",
     name: "Cleared on evidence",
     detail: "Clean submission. Straight through.",
   },
   {
     share: 0.22,
     tier: 2,
-    count: "416 of 1,888",
     name: "Verified remotely",
     detail: "One thing unclear. Send a clip, not a person.",
   },
   {
     share: 0.1,
     tier: 3,
-    count: "188 of 1,888",
     name: "Seen in person",
     detail: "Real risk. Send someone.",
   },
@@ -78,11 +76,10 @@ export default function Home() {
       <main id="main" className="flex-1">
         {/* ---------- Hero ---------- */}
         <section className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-28 md:pb-32">
-          <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-7">
+          <div className="grid gap-12 lg:grid-cols-2 lg:gap-10">
+            <div>
               <Reveal>
-                <p className="field-label">Risk audit routing</p>
-                <h1 className="mt-6 text-[clamp(2.75rem,6.4vw,5rem)] leading-[0.95]">
+                <h1 className="text-[clamp(2.75rem,6.4vw,5rem)] leading-[0.95]">
                   Most trucks roll straight over.
                   <span className="block text-ink-muted">
                     Only some get pulled aside.
@@ -112,66 +109,27 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <Reveal delay={0.28} className="lg:col-span-5 lg:mt-16">
-              <PhotoPlate
-                seed="wb-hero-road-train"
-                alt="A loaded prime mover crossing a weighbridge deck at dusk"
-                width={900}
-                height={1120}
-                priority
-                imageClassName="aspect-[4/5]"
-                caption="Berrimah, NT — 04:12. Submitted from the yard, cleared in 11 seconds."
-              />
+            <Reveal delay={0.28} className="flex items-center">
+              <HeroLottie />
             </Reveal>
           </div>
-
-          {/* Stats strip */}
-          <Reveal delay={0.34}>
-            <dl className="mt-20 grid grid-cols-2 gap-x-8 gap-y-8 border-t border-rule pt-8 md:grid-cols-4">
-              {[
-                { k: "Triage time", v: "8.4", u: "seconds" },
-                { k: "Audits run", v: "1,888", u: "total" },
-                { k: "Sent to a person", v: "10", u: "per cent" },
-                { k: "Engineer sign-off", v: "100", u: "per cent" },
-              ].map((s) => (
-                <div key={s.k}>
-                  <dt className="field-label">{s.k}</dt>
-                  <dd className="mt-2.5 font-mono text-[1.625rem] leading-none tabular-nums tracking-[-0.03em]">
-                    <Ticker
-                      to={Number(s.v.replace(/,/g, ""))}
-                      decimals={s.v.includes(".") ? 1 : 0}
-                    />
-                    <span className="ml-1.5 text-xs font-normal tracking-normal text-ink-muted">
-                      {s.u}
-                    </span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </Reveal>
         </section>
 
         {/* ---------- The split ---------- */}
         <section className="border-y border-rule bg-paper-sunk/50">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-            <div className="grid gap-10 lg:grid-cols-12">
-              <Reveal className="lg:col-span-4">
-                <p className="field-label">Where the work goes</p>
-                <h2 className="mt-5 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  Three lanes. Only one costs a day.
-                </h2>
-              </Reveal>
-              <Reveal delay={0.1} className="lg:col-span-8 lg:pt-3">
-                <p className="max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  The expensive part of an audit is the drive, not the
-                  assessment. Route on evidence quality and the site visits that
-                  happen are the ones that matter.
-                </p>
-              </Reveal>
-            </div>
+            <Reveal>
+              <h2 className="max-w-[24ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
+                Three lanes. Only one costs a day.
+              </h2>
+              <p className="mt-6 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                The drive costs more than the assessment. Route on evidence and
+                only the visits that matter happen.
+              </p>
+            </Reveal>
 
-            <Reveal delay={0.16} className="mt-16">
-              <TierSplit lanes={LANES} intake="1,888 submissions · trailing 12 months" />
+            <Reveal delay={0.1} className="mt-16">
+              <TierSplit lanes={LANES} />
             </Reveal>
           </div>
         </section>
@@ -194,9 +152,6 @@ export default function Home() {
                   >
                     <span
                       className="font-display text-[3.5rem] leading-none text-rule-strong"
-                      style={{
-                        fontVariationSettings: '"SOFT" 0, "WONK" 1, "opsz" 144',
-                      }}
                       aria-hidden
                     >
                       {step.n}
@@ -225,113 +180,106 @@ export default function Home() {
         {/* ---------- Anti-gaming ---------- */}
         <section className="border-y border-rule bg-paper-sunk/50">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-            <div className="grid gap-12 lg:grid-cols-12">
-              <Reveal className="lg:col-span-5">
-                <p className="field-label">Trust</p>
-                <h2 className="mt-5 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  Built for the submissions that try it on.
-                </h2>
-                <p className="mt-6 max-w-[42ch] leading-[1.7] text-ink-muted">
-                  Self-reported evidence invites people to improve it. That&apos;s
-                  a design constraint, not an edge case.
-                </p>
-              </Reveal>
+            <Reveal>
+              <p className="field-label">Trust</p>
+              <h2 className="mt-5 max-w-[24ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
+                Built for the submissions that try it on.
+              </h2>
+              <p className="mt-6 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                Self-reported evidence invites people to improve it. That&apos;s
+                a design constraint, not an edge case.
+              </p>
+            </Reveal>
 
-              <Stagger className="grid gap-px overflow-hidden rounded-[4px] border border-rule bg-rule sm:grid-cols-2 lg:col-span-7">
-                {CHECKS.map((c) => (
-                  <StaggerItem key={c.label} className="bg-paper-raised p-7">
-                    <div className="flex items-baseline gap-3">
-                      <span className="h-2 w-2 shrink-0 bg-accent" aria-hidden />
-                      <h3 className="text-[0.9375rem] font-semibold">
-                        {c.label}
-                      </h3>
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                      {c.body}
-                    </p>
-                  </StaggerItem>
-                ))}
-              </Stagger>
-            </div>
+            <Stagger className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {CHECKS.map((c, i) => (
+                <StaggerItem
+                  key={c.label}
+                  className="relative border-t-2 border-ink/10 pt-6"
+                >
+                  <span
+                    className="absolute top-0 left-0 h-[2px] w-8 bg-accent"
+                    aria-hidden
+                  />
+                  <span className="font-mono text-[11px] tracking-[0.1em] text-ink-faint">
+                    0{i + 1}
+                  </span>
+                  <h3 className="mt-2 text-[0.9375rem] font-semibold">
+                    {c.label}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                    {c.body}
+                  </p>
+                </StaggerItem>
+              ))}
+            </Stagger>
           </div>
         </section>
 
         {/* ---------- The multiplier ---------- */}
         <section className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
           <Reveal>
-            <div className="grid items-end gap-12 lg:grid-cols-12">
-              <div className="lg:col-span-7">
-                <p className="field-label">The maths</p>
-                <h2 className="mt-5 text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  3 engineers. 30 operators&apos; worth of coverage.
-                </h2>
-                <p className="mt-6 max-w-[48ch] leading-[1.7] text-ink-muted">
-                  At 10% in-person, those three spend their time on audits where
-                  their judgement changes the outcome.
-                </p>
-              </div>
+            <div className="text-center">
+              <p className="field-label">The maths</p>
+              <h2 className="mx-auto mt-5 max-w-[20ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
+                3 engineers. 30 operators&apos; worth of coverage.
+              </h2>
+            </div>
 
-              <div className="lg:col-span-5">
-                <div className="plate">
-                  <div className="plate-core p-8">
-                    <div className="flex items-end justify-between gap-6">
-                      <div>
-                        <span className="field-label">Before</span>
-                        <div className="mt-3 font-mono text-[3.5rem] leading-none tabular-nums tracking-[-0.04em] text-ink-muted">
-                          30
-                        </div>
-                        <span className="mt-2 block text-xs text-ink-muted">
-                          assessors
-                        </span>
-                      </div>
-                      <span
-                        className="mb-6 font-mono text-2xl text-rule-strong"
-                        aria-hidden
-                      >
-                        →
-                      </span>
-                      <div className="text-right">
-                        <span className="field-label">After</span>
-                        <div className="mt-3 font-mono text-[3.5rem] leading-none tabular-nums tracking-[-0.04em]">
-                          3
-                        </div>
-                        <span className="mt-2 block text-xs text-ink-muted">
-                          engineers
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mt-7 border-t border-rule pt-5">
-                      <p className="text-sm leading-relaxed text-ink-muted">
-                        Same portfolio. Same standards. A person still signs
-                        every outcome.
-                      </p>
-                    </div>
-                  </div>
+            <div className="mx-auto mt-16 flex max-w-[520px] items-center justify-center gap-6 md:gap-10">
+              <div className="text-center">
+                <span className="field-label">Before</span>
+                <div className="mt-3 font-mono text-[clamp(4rem,8vw,6rem)] leading-none tabular-nums tracking-[-0.04em] text-ink-muted">
+                  30
                 </div>
+                <span className="mt-2 block text-sm text-ink-muted">
+                  assessors
+                </span>
+              </div>
+              <span
+                className="font-mono text-3xl text-rule-strong md:text-4xl"
+                aria-hidden
+              >
+                →
+              </span>
+              <div className="text-center">
+                <span className="field-label">After</span>
+                <div className="mt-3 font-mono text-[clamp(4rem,8vw,6rem)] leading-none tabular-nums tracking-[-0.04em]">
+                  3
+                </div>
+                <span className="mt-2 block text-sm text-ink-muted">
+                  engineers
+                </span>
               </div>
             </div>
+
+            <p className="mx-auto mt-10 max-w-[48ch] text-center text-[1.0625rem] leading-[1.7] text-ink-muted">
+              At 10% in-person, those three spend their time on audits where
+              their judgement changes the outcome. Same portfolio. Same
+              standards. A person still signs every outcome.
+            </p>
           </Reveal>
         </section>
 
         {/* ---------- Closing ---------- */}
-        <section className="border-t border-rule bg-ink text-paper">
-          <div className="mx-auto grid max-w-[1240px] gap-10 px-6 py-24 md:grid-cols-12 md:py-32">
-            <Reveal className="md:col-span-7">
-              <h2 className="text-[clamp(2rem,3.8vw,3rem)] leading-[1.05] text-paper">
+        <section className="border-t border-rule">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 text-center md:py-32">
+            <Reveal>
+              <h2 className="mx-auto max-w-[20ch] text-[clamp(2rem,3.8vw,3rem)] leading-[1.05]">
                 Others automate the report.
-                <span className="block text-paper/55">
+                <span className="block text-ink-muted">
                   We change who runs the audit.
                 </span>
               </h2>
             </Reveal>
-            <Reveal delay={0.12} className="md:col-span-5 md:pt-4">
-              <p className="max-w-[42ch] leading-[1.7] text-paper/70">
+            <Reveal delay={0.12}>
+              <p className="mx-auto mt-6 max-w-[42ch] leading-[1.7] text-ink-muted">
                 Built for insurers with more heavy-motor risk than people to
                 inspect it.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex justify-center">
                 <Link href="/audit">
-                  <Button variant="accent" size="lg" className="w-full sm:w-auto">
+                  <Button variant="accent" size="lg">
                     Start an audit
                     <ButtonIconWell>
                       <Arrow />

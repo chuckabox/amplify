@@ -58,8 +58,8 @@
   --color-tier-3-ink: var(--tier-3-ink);
   --color-tier-3-wash: var(--tier-3-wash);
 
-  --font-sans: var(--font-archivo);
-  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-space);
+  --font-display: var(--font-cormorant);
   --font-mono: var(--font-jetbrains);
 
   /* Print-tight radii. Nothing here is a squircle. */
@@ -70,10 +70,10 @@
   --radius-2xl: 8px;
   --radius-3xl: 10px;
 
-  /* Warm, tinted shadows — never neutral black */
-  --shadow-plate: 0 1px 1px rgb(58 46 18 / 0.05), 0 3px 8px -3px rgb(58 46 18 / 0.07);
-  --shadow-lift: 0 2px 4px rgb(58 46 18 / 0.06), 0 16px 32px -16px rgb(58 46 18 / 0.24);
-  --shadow-press: inset 0 1px 2px rgb(58 46 18 / 0.14);
+  /* Cool-tinted shadows */
+  --shadow-plate: 0 1px 1px rgb(20 30 50 / 0.05), 0 3px 8px -3px rgb(20 30 50 / 0.07);
+  --shadow-lift: 0 2px 4px rgb(20 30 50 / 0.06), 0 16px 32px -16px rgb(20 30 50 / 0.24);
+  --shadow-press: inset 0 1px 2px rgb(20 30 50 / 0.14);
 
   --ease-docket: cubic-bezier(0.32, 0.72, 0, 1);
 }
@@ -81,37 +81,37 @@
 :root {
   --radius: 3px;
 
-  /* Manila ticket stock */
-  --paper: #efe8d8;
-  --paper-raised: #f7f2e6;
-  --paper-sunk: #e4dbc5;
+  /* Cool paper stock */
+  --paper: #eef1f5;
+  --paper-raised: #f6f8fb;
+  --paper-sunk: #e2e7ee;
 
-  /* Offset carbon — black with a green cast, never neutral */
-  --ink: #171a14;
-  --ink-muted: #575c4e;
-  --ink-faint: #8b8f7e; /* decorative only — never body text */
+  /* Neutral ink — no warm cast */
+  --ink: #141720;
+  --ink-muted: #4e5565;
+  --ink-faint: #818a9a; /* decorative only — never body text */
 
-  --rule: #d5cbb1;
-  --rule-strong: #c1b494;
+  --rule: #d0d6e0;
+  --rule-strong: #b5bdc9;
 
-  /* Dulled signal yellow — the single accent */
-  --accent: #c9a227;
-  --accent-deep: #8a6d12; /* text-safe on paper */
-  --accent-wash: #e9dcae;
-  --accent-ink: #6b5410;
+  /* Steel blue accent */
+  --accent: #2b7ec9;
+  --accent-deep: #1a5a94; /* text-safe on paper */
+  --accent-wash: #d4e4f4;
+  --accent-ink: #14476e;
 
-  /* Printed tier inks */
-  --tier-1: #4a6b52;
-  --tier-1-ink: #35513c;
-  --tier-1-wash: #dfe3d3;
+  /* Tier inks — cool monochrome ramp */
+  --tier-1: #3b82b8;
+  --tier-1-ink: #2a6490;
+  --tier-1-wash: #dae8f5;
 
-  --tier-2: #b0791f;
-  --tier-2-ink: #7d5411;
-  --tier-2-wash: #eddfbd;
+  --tier-2: #6b7f99;
+  --tier-2-ink: #4e6178;
+  --tier-2-wash: #e0e5ed;
 
-  --tier-3: #9a3a2c;
-  --tier-3-ink: #7e2c20;
-  --tier-3-wash: #ecd6cd;
+  --tier-3: #374a60;
+  --tier-3-ink: #283848;
+  --tier-3-wash: #d5dce5;
 
   /* Sits above the fold on every page, never on a scrolling container */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
@@ -156,13 +156,11 @@
     font-feature-settings: "ss01", "cv05";
   }
 
-  /* Fraunces set for display: high optical size, no softness, wonk on. */
   h1,
   h2,
   .display {
-    @apply font-display;
-    font-variation-settings: "SOFT" 0, "WONK" 1, "opsz" 144;
-    letter-spacing: -0.022em;
+    @apply font-display font-bold;
+    letter-spacing: -0.02em;
     text-wrap: balance;
   }
 
@@ -246,8 +244,8 @@
   /* Duotone treatment for placeholder photography — folds stock imagery
      into the palette so it reads as art direction, not a stock drop-in. */
   .duotone {
-    filter: grayscale(1) contrast(1.08) brightness(1.02) sepia(0.42)
-      hue-rotate(-8deg) saturate(1.25);
+    filter: grayscale(1) contrast(1.08) brightness(1.05) sepia(0.12)
+      hue-rotate(190deg) saturate(1.1);
   }
 }
 

@@ -35,8 +35,7 @@ export function Wordmark({
           tone === "paper" ? "text-paper" : "text-ink",
         )}
         style={{
-          fontVariationSettings: '"SOFT" 0, "WONK" 1, "opsz" 144',
-          fontWeight: 600,
+          fontWeight: 700,
           letterSpacing: "-0.028em",
         }}
       >

@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
-import { Fraunces, Archivo, JetBrains_Mono } from "next/font/google";
+import { Cormorant, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 
-// Display. The SOFT/WONK axes are what keep this off the shelf.
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const cormorant = Cormorant({
+  variable: "--font-cormorant",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
   display: "swap",
 });
 
-const archivo = Archivo({
-  variable: "--font-archivo",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space",
   subsets: ["latin"],
   display: "swap",
 });
@@ -71,7 +69,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${fraunces.variable} ${archivo.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${cormorant.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <a
