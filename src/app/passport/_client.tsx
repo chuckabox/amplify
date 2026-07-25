@@ -77,37 +77,47 @@ export default function PassportClient() {
         <section className="border-b border-rule bg-paper-raised">
           <div className="mx-auto max-w-[1240px] px-6 pt-20 pb-24 md:pt-24 md:pb-28">
             <Reveal>
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="grid gap-8 lg:grid-cols-[1fr_0.55fr] lg:items-end">
                 <div>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <p className="field-label">Passport</p>
-                    <span className="h-3 w-px bg-rule-strong" aria-hidden />
-                    <span className="font-mono text-[10px] text-ink-faint">
-                      UPDATED 25 JUL 2026 · 10:42
-                    </span>
-                  </div>
-                  <h1 className="mt-3 text-[clamp(2.6rem,6vw,4.6rem)] font-display font-bold leading-[0.95] text-ink">
+                  <h1 className="text-[clamp(2.6rem,6vw,4.75rem)] font-display font-bold leading-[0.96] text-ink">
                     {PASSPORT_SUMMARY.business}
                   </h1>
-                  <p className="mt-3 text-sm text-ink-muted">
-                    {PASSPORT_SUMMARY.abn} · Heavy motor transport · Queensland
+                  <p className="mt-4 max-w-[42ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                    A living ledger matching transport operations to risk controls, showing engineers what changed since the last review.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="mr-2 text-xs text-ink-faint">
-                    Last engineer review: {PASSPORT_SUMMARY.lastReviewed}
-                  </p>
-                  <Link href="/visual-evidence">
-                    <Button variant="outline">Vision</Button>
-                  </Link>
-                  <Link href="/audit">
-                    <Button variant="accent">
-                      Upload records
-                      <ButtonIconWell>
-                        <Arrow />
-                      </ButtonIconWell>
-                    </Button>
-                  </Link>
+                <div className="lg:pb-1 space-y-5">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link href="/visual-evidence">
+                      <Button variant="outline">Vision</Button>
+                    </Link>
+                    <Link href="/audit">
+                      <Button variant="accent">
+                        Upload records
+                        <ButtonIconWell>
+                          <Arrow />
+                        </ButtonIconWell>
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 border-t border-rule pt-4 text-[11px] text-ink-muted">
+                    <div>
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">ABN</span>
+                      <span className="font-semibold text-ink">{PASSPORT_SUMMARY.abn.replace("ABN ", "")}</span>
+                    </div>
+                    <div>
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Last review</span>
+                      <span className="font-semibold text-ink">{PASSPORT_SUMMARY.lastReviewed}</span>
+                    </div>
+                    <div>
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Sector</span>
+                      <span className="font-semibold text-ink">Heavy motor</span>
+                    </div>
+                    <div>
+                      <span className="font-mono text-[9px] uppercase tracking-wider text-ink-faint block">Updated</span>
+                      <span className="font-semibold text-accent-deep">25 Jul 2026, 10:42</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Reveal>
