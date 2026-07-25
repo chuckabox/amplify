@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Cormorant, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Outfit, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { MeshBg } from "@/components/mesh-bg";
 
-const cormorant = Cormorant({
-  variable: "--font-cormorant",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
   display: "swap",
 });
@@ -30,7 +30,7 @@ const SITE = "https://tonnage.au";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "Tonnage — risk audits that route themselves",
+    default: "Tonnage: risk audits that route themselves",
     template: "%s · Tonnage",
   },
   description:
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     url: SITE,
     siteName: "Tonnage",
     locale: "en_AU",
-    title: "Tonnage — risk audits that route themselves",
+    title: "Tonnage: risk audits that route themselves",
     description:
       "Most trucks roll straight over the weighbridge. Only some get pulled aside. We do that for risk audits.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tonnage — risk audits that route themselves",
+    title: "Tonnage: risk audits that route themselves",
     description:
       "Most trucks roll straight over the weighbridge. Only some get pulled aside.",
   },
@@ -70,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${cormorant.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${outfit.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col bg-paper text-ink">
         <a

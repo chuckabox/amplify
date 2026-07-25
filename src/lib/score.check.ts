@@ -104,7 +104,7 @@ function scoreAudit(
         status === "action"
           ? `${PILLAR_LABEL[section.pillar]}: "${topic}" scored high-risk and needs attention.`
           : status === "advisory"
-            ? `${PILLAR_LABEL[section.pillar]}: "${topic}" is borderline — keep an eye on it.`
+            ? `${PILLAR_LABEL[section.pillar]}: "${topic}" is borderline, keep an eye on it.`
             : `${PILLAR_LABEL[section.pillar]} meets safety standards.`,
       severity: worstWeight,
       recommendation:

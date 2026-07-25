@@ -65,7 +65,7 @@ export function Logo({
   return (
     <Link
       href={href}
-      aria-label="Tonnage — home"
+      aria-label="Tonnage: home"
       className={cn(
         "inline-flex rounded-[2px] transition-opacity duration-200 ease-docket hover:opacity-70",
         className,

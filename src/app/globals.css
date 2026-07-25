@@ -59,7 +59,7 @@
   --color-tier-3-wash: var(--tier-3-wash);
 
   --font-sans: var(--font-space);
-  --font-display: var(--font-cormorant);
+  --font-display: var(--font-outfit);
   --font-mono: var(--font-jetbrains);
 
   /* Print-tight radii. Nothing here is a squircle. */
@@ -239,6 +239,21 @@
     100% {
       transform: translateX(100%);
     }
+  }
+
+  @keyframes flow {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -10000; }
+  }
+  @keyframes flow-fast {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -15000; }
+  }
+  .animate-flow {
+    animation: flow 40s linear infinite;
+  }
+  .animate-flow-fast {
+    animation: flow-fast 25s linear infinite;
   }
 
   /* Duotone treatment for placeholder photography — folds stock imagery

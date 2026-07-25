@@ -62,7 +62,7 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
   // ---------------- Truck A — Fuso rigid flatbed ----------------
   truckA: {
     id: "truckA",
-    vehicleLabel: "Heavy rigid — flatbed tray",
+    vehicleLabel: "Heavy rigid: flatbed tray",
     make: "Mitsubishi Fuso (heavy rigid)",
     bodyType: "Flatbed tray, loaded",
     colour: "White",
@@ -74,7 +74,7 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
         detections: [
           { id: "a-veh", kind: "vehicle", label: "Rigid truck", confidence: 0.98, box: { x: 0.1, y: 0.38, w: 0.83, h: 0.3 } },
           { id: "a-cab", kind: "component", label: "Cab", confidence: 0.95, box: { x: 0.75, y: 0.38, w: 0.19, h: 0.22 } },
-          { id: "a-load", kind: "load", label: "Load — crates & cages", confidence: 0.88, box: { x: 0.13, y: 0.4, w: 0.55, h: 0.15 } },
+          { id: "a-load", kind: "load", label: "Load: crates & cages", confidence: 0.88, box: { x: 0.13, y: 0.4, w: 0.55, h: 0.15 } },
           { id: "a-rear", kind: "tyre", label: "Rear tandem axles", confidence: 0.93, box: { x: 0.3, y: 0.55, w: 0.17, h: 0.12 } },
           { id: "a-front", kind: "tyre", label: "Steer tyre", confidence: 0.92, box: { x: 0.78, y: 0.55, w: 0.09, h: 0.12 } },
         ],
@@ -97,7 +97,7 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
       { label: "Tyre", value: "Bridgestone V-STEEL M711", confidence: 0.88, hint: "Model moulded on the sidewall." },
       { label: "Tyre size", value: "11R22.5 radial", confidence: 0.91 },
       { label: "Tread", value: "~7.4 mm · ~72% left", tone: "ok", confidence: 0.86, hint: "Well above the 1.6 mm minimum. Healthy." },
-      { label: "Plate", value: "Not in frame — request front/rear shot", tone: "watch", hint: "Side profile doesn't show a plate. Tier 2 asks the operator for it." },
+      { label: "Plate", value: "Not in frame, request front/rear shot", tone: "watch", hint: "Side profile doesn't show a plate. Tier 2 asks the operator for it." },
       { label: "Load restraint", value: "Straps visible, one corner unclear", tone: "watch", confidence: 0.64 },
     ],
     modelNote:
@@ -107,7 +107,7 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
   // ---------------- Truck B — Isuzu FRR pantech ----------------
   truckB: {
     id: "truckB",
-    vehicleLabel: "Medium rigid — pantech / curtain-side",
+    vehicleLabel: "Medium rigid: pantech / curtain-side",
     make: "Isuzu FRR (F-series)",
     bodyType: "Pantech with curtain-side, loaded",
     colour: "White",
@@ -122,7 +122,7 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
           { id: "b-grille", kind: "component", label: "ISUZU grille", confidence: 0.9, box: { x: 0.33, y: 0.51, w: 0.17, h: 0.08 } },
           { id: "b-plate", kind: "plate", label: "Plate · XB·25JG", confidence: 0.79, box: { x: 0.33, y: 0.585, w: 0.11, h: 0.045 } },
           { id: "b-tyre", kind: "tyre", label: "Steer tyre", confidence: 0.9, box: { x: 0.52, y: 0.61, w: 0.1, h: 0.13 } },
-          { id: "b-load", kind: "load", label: "Load — barriers under tarp", confidence: 0.85, box: { x: 0.62, y: 0.31, w: 0.27, h: 0.3 } },
+          { id: "b-load", kind: "load", label: "Load: barriers under tarp", confidence: 0.85, box: { x: 0.62, y: 0.31, w: 0.27, h: 0.3 } },
         ],
       },
     ],
@@ -138,8 +138,8 @@ export const ANALYSIS: Record<string, VehicleAnalysis> = {
       { label: "Plate", value: "XB·25JG (QLD)", tone: "ok", confidence: 0.79, hint: "Read from the front plate in the walk-around video." },
       { label: "Axles", value: "2 (4×2)", confidence: 0.92 },
       { label: "Body", value: "Curtain-side, barriers loaded", confidence: 0.85 },
-      { label: "Steer tyre", value: "~55% — request closer shot", tone: "watch", confidence: 0.58, hint: "Only partially visible; a direct tread photo would confirm." },
-      { label: "Genuineness", value: "Video matches photo — no reuse", tone: "ok", confidence: 0.94 },
+      { label: "Steer tyre", value: "~55%, request closer shot", tone: "watch", confidence: 0.58, hint: "Only partially visible; a direct tread photo would confirm." },
+      { label: "Genuineness", value: "Video matches photo, no reuse", tone: "ok", confidence: 0.94 },
     ],
     modelNote:
       "Model: vision-detect v0 (demo fixture). Plate read from the uploaded walk-around video; boxes from the front photo.",

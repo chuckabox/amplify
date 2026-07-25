@@ -32,6 +32,10 @@ export function PhotoPlate({
   /** Drop the mat and mount — for full-bleed backdrops. */
   bare?: boolean;
 }) {
+  const imgSrc = (seed.startsWith("/") || seed.startsWith("http") || seed.includes("."))
+    ? seed
+    : `https://picsum.photos/seed/${seed}/${width}/${height}`;
+
   return (
     <figure className={cn(!bare && "plate", className)}>
       <div
@@ -42,7 +46,7 @@ export function PhotoPlate({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`https://picsum.photos/seed/${seed}/${width}/${height}`}
+          src={imgSrc}
           alt={alt}
           width={width}
           height={height}

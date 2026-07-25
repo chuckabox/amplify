@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 export const dynamic = "force-static";
 
 export const alt =
-  "Tonnage — most trucks roll straight over. Only some get pulled aside.";
+  "Tonnage: most trucks roll straight over. Only some get pulled aside.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

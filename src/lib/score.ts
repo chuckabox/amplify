@@ -78,7 +78,7 @@ export function scoreAudit(
         status === "action"
           ? `${PILLAR_LABEL[section.pillar as Pillar]}: "${topic}" scored high-risk and needs attention.`
           : status === "advisory"
-            ? `${PILLAR_LABEL[section.pillar as Pillar]}: "${topic}" is borderline — keep an eye on it.`
+            ? `${PILLAR_LABEL[section.pillar as Pillar]}: "${topic}" is borderline, keep an eye on it.`
             : `${PILLAR_LABEL[section.pillar as Pillar]} meets safety standards.`,
       severity: worstWeight as Finding["severity"],
       recommendation:

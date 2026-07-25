@@ -5,56 +5,74 @@ import { HeroLottie } from "@/components/hero-lottie";
 import { TierSplit, type Lane } from "@/components/tier-split";
 import { StepTabs, type Step } from "@/components/step-tabs";
 import { Reveal } from "@/components/motion";
+import { PhotoPlate } from "@/components/photo-plate";
 
 const LANES: Lane[] = [
   {
     share: 0.68,
     tier: 1,
     name: "Cleared on evidence",
-    detail: "Clean submission. Straight through.",
+    detail: "Perfect submission. Approved instantly.",
   },
   {
     share: 0.22,
     tier: 2,
     name: "Verified remotely",
-    detail: "One thing unclear. Send a clip, not a person.",
+    detail: "Minor issues. Request a photo or video upload instead of a visit.",
   },
   {
-    share: 0.1,
+    share: 0.10,
     tier: 3,
     name: "Seen in person",
-    detail: "Real risk. Send someone.",
+    detail: "Genuine risk. Send an inspector.",
   },
 ];
 
 const STEPS: Step[] = [
   {
     n: "01",
-    title: "Answer the questions",
-    body: "Four topics, a few questions each, plus photos from the yard. Works on a phone.",
-    seed: "wb-depot-yard",
-    alt: "A driver photographing a trailer's load restraints in a depot yard",
+    title: "Upload documents",
+    body: "Upload files to get information on the business.",
+    seed: "/samples/IMG_2316.jpg",
+    alt: "A driver uploading transport documents and assessment records",
   },
   {
     n: "02",
-    title: "We read the evidence",
-    body: "AI checks what the photos actually show — tread depth, tag dates, strap condition — and scores the answers against safety standards.",
-    seed: "wb-tyre-detail",
-    alt: "Close inspection of a heavy vehicle tyre showing tread depth",
+    title: "Tonnage reads evidence",
+    body: "The system reviews answers, photos, and metadata against safety standards.",
+    seed: "/samples/IMG_2322.jpg",
+    alt: "Close inspection of a heavy-vehicle tyre during an assessment",
   },
   {
     n: "03",
-    title: "You get a result",
-    body: "Every audit lands in one of three lanes with a reason. An engineer signs every outcome — the AI routes, it doesn't decide.",
-    seed: "wb-engineer-desk",
-    alt: "A risk engineer reviewing audit evidence on screen",
+    title: "Engineer reviews outcome",
+    body: "Submissions route into cleared, remote, or in-person lanes. The engineer signs or overrides.",
+    seed: "/samples/IMG_4871.webp",
+    alt: "A risk engineer reviewing operator evidence and assessment findings",
   },
 ];
 
-const STATS = [
-  { value: "90%", label: "Cleared without a visit" },
-  { value: "11s", label: "Average decision time" },
-  { value: "10×", label: "More coverage, same team" },
+const TRUST_CHECKS = [
+  {
+    title: "Metadata checks",
+    desc: "Verifies time and location data.",
+  },
+  {
+    title: "Photo reuse",
+    desc: "Flags duplicate or re-saved images.",
+  },
+  {
+    title: "Consistency",
+    desc: "Spots differences between answers and photos.",
+  },
+  {
+    title: "Hard gates",
+    desc: "Forces manual review for serious safety issues.",
+  },
+  {
+    title: "Engineer sign-off",
+    desc: "An engineer reviews every warning before a decision is made.",
+  },
 ];
 
 export default function Home() {
@@ -66,23 +84,21 @@ export default function Home() {
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-10">
             <div>
               <Reveal>
-                <h1 className="text-[clamp(2.75rem,6.4vw,5rem)] leading-[0.95]">
-                  Most trucks roll straight over.
-                  <span className="block text-ink-muted">
-                    Only some get pulled aside.
+                <h1 className="text-[clamp(2.25rem,5.2vw,3.5rem)] leading-[1.05] font-display font-bold">
+                  Most trucks roll straight through.
+                  <span className="block text-ink-muted mt-2 font-display">
+                    Only the exceptions get pulled aside.
                   </span>
                 </h1>
               </Reveal>
 
               <Reveal delay={0.12}>
                 <p className="mt-8 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  Tonnage reads every transport risk audit, passes the ones that
-                  are fine, and pulls aside the few that aren&apos;t. Three
-                  engineers do the work of thirty.
+                  Tonnage reviews every transport risk assessment, clears strong evidence, and escalates genuine risk to an engineer, without removing human judgement.
                 </p>
               </Reveal>
 
-              <Reveal delay={0.2}>
+              <Reveal delay={0.18}>
                 <div className="mt-10 flex flex-col gap-3 sm:flex-row">
                   <Link href="/audit" className="sm:w-auto">
                     <Button variant="accent" size="lg" className="w-full sm:w-auto">
@@ -96,104 +112,213 @@ export default function Home() {
               </Reveal>
             </div>
 
-            <Reveal delay={0.28} className="flex items-center">
+            <Reveal delay={0.24} className="flex items-center">
               <HeroLottie />
             </Reveal>
           </div>
         </section>
 
-        {/* ---------- The split ---------- */}
-        <section className="border-y border-rule bg-paper-sunk/50">
+        {/* ---------- How It Works ---------- */}
+        <section className="border-t border-rule bg-paper-raised">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
             <Reveal>
-              <h2 className="max-w-[24ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                Three lanes. Only one costs a day.
-              </h2>
-              <p className="mt-6 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                The drive costs more than the assessment. Route on evidence and
-                only the visits that matter happen.
-              </p>
+              <div>
+                <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                  How it works
+                </h2>
+                <p className="mt-3 text-lg leading-relaxed text-ink-muted font-display">
+                  From submission to engineer sign-off.
+                </p>
+              </div>
             </Reveal>
 
-            <Reveal delay={0.1} className="mt-16">
+            <Reveal delay={0.12} className="mt-16">
+              <StepTabs steps={STEPS} />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ---------- Statistics ---------- */}
+        <section className="border-t border-rule bg-paper">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
+            <Reveal className="text-center">
+              <div>
+                <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                  How routing works
+                </h2>
+                <p className="mt-3 text-lg leading-relaxed text-ink-muted max-w-[50ch] mx-auto">
+                  We sort audits automatically so engineers only travel when there is real risk.
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.12} className="mt-16">
               <TierSplit lanes={LANES} />
             </Reveal>
           </div>
         </section>
 
-        {/* ---------- How it works ---------- */}
-        <section className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-          <Reveal>
-            <div className="text-center">
-              <p className="field-label">How it works</p>
-              <h2 className="mx-auto mt-5 max-w-[18ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                From the yard to the decision.
-              </h2>
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.1} className="mt-16">
-            <StepTabs steps={STEPS} />
-          </Reveal>
-        </section>
-
-        {/* ---------- The multiplier ---------- */}
-        <section className="border-y border-rule bg-paper-sunk/50">
+        {/* ---------- Research & Trust ---------- */}
+        <section className="border-t border-rule bg-paper-sunk/35">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-            <Reveal>
-              <div className="text-center">
-                <p className="field-label">The maths</p>
-                <h2 className="mx-auto mt-5 max-w-[20ch] text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05]">
-                  3 engineers. 30 operators&apos; worth of coverage.
-                </h2>
-              </div>
-            </Reveal>
-
-            <Reveal delay={0.1}>
-              <div className="mx-auto mt-16 grid max-w-[720px] grid-cols-3 gap-6">
-                {STATS.map((s) => (
-                  <div
-                    key={s.label}
-                    className="text-center"
-                  >
-                    <div className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-bold leading-none tracking-tight">
-                      {s.value}
-                    </div>
-                    <p className="mt-3 text-sm text-ink-muted">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-
-            <Reveal delay={0.2}>
-              <p className="mx-auto mt-12 max-w-[48ch] text-center text-[1.0625rem] leading-[1.7] text-ink-muted">
-                At 10% in-person, those three spend their time on audits where
-                their judgement changes the outcome. Same portfolio. Same
-                standards. A person still signs every outcome.
+            <Reveal className="text-center">
+              <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                Built for honest results
+              </h2>
+              <p className="mt-5 max-w-[65ch] text-[1.0625rem] leading-[1.7] text-ink-muted mx-auto">
+                We check every detail to make sure self-reported evidence is genuine.
               </p>
             </Reveal>
+
+            {/* Grid of Trust Checks: 3 on top row, 2 on bottom row layout */}
+            <div className="mt-16 space-y-5">
+              {/* Top Row: 3 items */}
+              <div className="grid gap-5 md:grid-cols-3">
+                {/* Metadata checks */}
+                <Reveal className="plate bg-paper-sunk" delay={0.05}>
+                  <div className="plate-core p-6 h-full flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[0].title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[0].desc}</p>
+                    </div>
+                  </div>
+                </Reveal>
+
+                {/* Photo reuse */}
+                <Reveal className="plate bg-paper-sunk" delay={0.1}>
+                  <div className="plate-core p-6 h-full flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[1].title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[1].desc}</p>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-1.5 font-mono text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                      <div className="flex justify-between items-center bg-paper px-2 py-0.5 rounded-[2px] border border-rule">
+                        <span>IMG_2314.jpg</span>
+                        <span className="text-accent-deep font-semibold">ORIGINAL</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-accent/5 px-2 py-0.5 rounded-[2px] border border-accent/20">
+                        <span>IMG_2314_crop.jpg</span>
+                        <span className="text-tier-3-ink font-semibold">FLAGGED</span>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+
+                {/* Consistency */}
+                <Reveal className="plate bg-paper-sunk" delay={0.15}>
+                  <div className="plate-core p-6 h-full flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[2].title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[2].desc}</p>
+                    </div>
+                    <div className="mt-4 space-y-1 font-mono text-[9px] text-ink-faint border-t border-rule border-dashed pt-4">
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1 w-1 rounded-full bg-tier-1-ink" />
+                        <span>Form: "Restraints certified"</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-1 w-1 rounded-full bg-tier-3-ink" />
+                        <span>Photo: Expired 2025</span>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              </div>
+
+              {/* Bottom Row: 2 items */}
+              <div className="grid gap-5 md:grid-cols-2 max-w-[820px] mx-auto">
+                {/* Hard gates */}
+                <Reveal className="plate bg-paper-sunk" delay={0.2}>
+                  <div className="plate-core p-6 h-full flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[3].title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[3].desc}</p>
+                    </div>
+                  </div>
+                </Reveal>
+
+                {/* Engineer sign-off */}
+                <Reveal className="plate bg-paper-sunk" delay={0.25}>
+                  <div className="plate-core p-6 h-full flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-ink">{TRUST_CHECKS[4].title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-ink-muted">{TRUST_CHECKS[4].desc}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              </div>
+            </div>
+
+            {/* ---------- The Capacity Equation ---------- */}
+            <div className="mt-28 border-t border-rule pt-20">
+              <Reveal>
+                <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                  The capacity equation
+                </h2>
+                <p className="mt-3 text-lg leading-relaxed text-ink-muted font-display">
+                  Three engineers do the work of thirty.
+                </p>
+              </Reveal>
+
+              {/* 2-Column layout: animation on left, stacked cards on right */}
+              <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] items-stretch mt-12">
+                {/* Left: Supporting illustration image */}
+                <Reveal className="flex items-center justify-center" delay={0.05}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/samples/group-communicating.svg"
+                    alt="Supporting visual representing engineering capacity allocation"
+                    className="max-w-full h-auto object-contain"
+                  />
+                </Reveal>
+
+                {/* Right: Stacked cards */}
+                <div className="flex flex-col justify-between gap-6">
+                  {/* Before */}
+                  <Reveal className="rounded-[4px] border border-rule bg-paper-sunk/20 p-6 flex-1 flex flex-col justify-center" delay={0.1}>
+                    <span className="field-label text-ink-muted">Before</span>
+                    <h4 className="font-display text-2xl font-bold mt-2 text-ink">30 assessors</h4>
+                    <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                      Scheduled visits for everyone.
+                    </p>
+                  </Reveal>
+
+                  {/* After */}
+                  <Reveal className="rounded-[4px] border-[2px] border-accent bg-paper-raised p-6 flex-1 flex flex-col justify-center shadow-plate" delay={0.15}>
+                    <span className="field-label text-accent-deep">After</span>
+                    <h4 className="font-display text-2xl font-bold mt-2 text-ink">3 engineers</h4>
+                    <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+                      Remote checks clear the easy cases. Engineers focus where it matters.
+                    </p>
+                  </Reveal>
+                </div>
+              </div>
+
+              <Reveal delay={0.2}>
+                <div className="mt-12 text-center max-w-[80ch] mx-auto">
+                  <p className="text-[1.0625rem] leading-[1.7] text-ink-muted font-medium">
+                    Engineers spend time investigating real risk, not confirming compliance.
+                  </p>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </section>
 
-        {/* ---------- Closing ---------- */}
-        <section className="border-t border-rule">
+        {/* ---------- Closing / CTA ---------- */}
+        <section className="border-t border-rule bg-paper">
           <div className="mx-auto max-w-[1240px] px-6 py-24 text-center md:py-32">
             <Reveal>
-              <h2 className="mx-auto max-w-[20ch] text-[clamp(2rem,3.8vw,3rem)] leading-[1.05]">
-                Others automate the report.
-                <span className="block text-ink-muted">
-                  We change who runs the audit.
-                </span>
+              <h2 className="text-[clamp(2rem,3.8vw,3rem)] leading-[1.05] font-display font-bold text-ink">
+                Tonnage
               </h2>
-            </Reveal>
-            <Reveal delay={0.12}>
-              <p className="mx-auto mt-6 max-w-[42ch] leading-[1.7] text-ink-muted">
-                Built for insurers with more heavy-motor risk than people to
-                inspect it.
+              <p className="mt-4 text-lg text-ink-muted">
+                Risk-routing for heavy-motor portfolios.
               </p>
+              
               <div className="mt-8 flex justify-center">
                 <Link href="/audit">
-                  <Button variant="accent" size="lg">
+                  <Button variant="accent" size="lg" className="py-6 px-12">
                     Start an audit
                     <ButtonIconWell>
                       <Arrow />
@@ -226,7 +351,7 @@ function Arrow() {
 
 export function SiteFooter() {
   return (
-    <footer className="border-t-[3px] border-double border-rule-strong">
+    <footer className="border-t-[3px] border-double border-rule-strong bg-paper">
       <div className="mx-auto flex max-w-[1240px] flex-col gap-8 px-6 py-12 md:flex-row md:items-start md:justify-between">
         <div>
           <Wordmark size="sm" />

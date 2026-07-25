@@ -278,7 +278,7 @@ export default function AuditPage() {
             {evidenceHints.map((ev) => (
               <div key={ev.id} className="flex items-start gap-2 text-xs text-ink-muted">
                 <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
-                <span><span className="font-semibold text-ink">{ev.label}</span> — {ev.hint}</span>
+                <span><span className="font-semibold text-ink">{ev.label}</span>: {ev.hint}</span>
               </div>
             ))}
           </div>
@@ -513,7 +513,7 @@ export default function AuditPage() {
               <div>
                 <span className="field-label">AI vision analysis</span>
                 <p className="mt-1 text-xs text-ink-muted">
-                  What our model reads from a fleet&apos;s photos and video —
+                  What our model reads from a fleet&apos;s photos and video:
                   boxes, plate, tyre tread and vehicle type.
                 </p>
               </div>

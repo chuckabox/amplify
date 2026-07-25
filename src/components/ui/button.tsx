@@ -19,7 +19,7 @@ const buttonVariants = cva(
         // Signal yellow. Reserved for the single most important action on a
         // page — if two of these are visible at once, one is wrong.
         accent:
-          "bg-accent text-ink shadow-[0_1px_2px_rgb(58_46_18_/_0.18)] hover:bg-[#d8b134] hover:shadow-[0_2px_6px_rgb(58_46_18_/_0.24)] active:shadow-none",
+          "bg-accent text-white shadow-[0_1px_2px_rgb(58_46_18_/_0.18)] hover:bg-accent-deep hover:shadow-[0_2px_6px_rgb(58_46_18_/_0.24)] active:shadow-none",
         outline:
           "border-rule-strong bg-paper-raised text-ink hover:border-ink hover:bg-paper-sunk",
         secondary: "bg-paper-sunk text-ink hover:bg-[#dbd0b6]",
