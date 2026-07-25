@@ -2,26 +2,19 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { TierBadge } from "@/components/tier-badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { TierBadge, StatusStamp } from "@/components/tier-badge";
+import { Figure } from "@/components/figure";
+import { Reveal } from "@/components/motion";
 import { useStore } from "@/lib/operator-store";
 import {
   formatCurrency,
   formatDate,
   PILLAR_LABEL,
-  FINDING_STATUS_LABEL,
-  TIER_MEANING,
-  type FindingStatus,
 } from "@/lib/data/operators";
-import { Hint } from "@/components/hint";
 
-const statusStyles: Record<FindingStatus, string> = {
-  clear: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
-  advisory: "bg-amber-50 text-amber-700 ring-amber-600/15",
-  action: "bg-rose-50 text-rose-700 ring-rose-600/15",
-};
-
-const severityLabel: Record<number, string> = {
+const SEVERITY_LABEL: Record<number, string> = {
   1: "Negligible",
   2: "Low",
   3: "Moderate",
@@ -42,14 +35,16 @@ export default function AuditDetailPage({
 
   if (!audit) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-16 text-center">
-        <p className="text-sm text-muted-foreground">Audit not found.</p>
-        <Link
-          href="/audits"
-          className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
-        >
-          Back to audit history
-        </Link>
+      <main id="main" className="mx-auto w-full max-w-[760px] flex-1 px-6 py-16">
+        <EmptyState
+          title="No audit with that reference"
+          body={`We couldn't find ${id} on this policy. It may belong to a different fleet, or the link may be out of date.`}
+          action={
+            <Link href="/audits">
+              <Button variant="outline">Back to audit history</Button>
+            </Link>
+          }
+        />
       </main>
     );
   }
@@ -58,115 +53,140 @@ export default function AuditDetailPage({
   const down = delta < 0;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <Link
-        href="/audits"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Audit history
-      </Link>
-
-      {/* Header */}
-      <div className="mt-4 rounded-2xl border border-border bg-card p-6">
-        <div className="flex flex-wrap items-center gap-3">
-          <TierBadge tier={audit.tier} />
-          <Hint text={TIER_MEANING[audit.tier]} />
-          <span className="font-mono text-xs text-muted-foreground">
-            {audit.id}
+    <main id="main" className="mx-auto w-full max-w-[820px] flex-1 px-6 py-12">
+      <Reveal>
+        <Link
+          href="/audits"
+          className="inline-flex items-center gap-2 text-[13px] text-ink-muted transition-colors hover:text-ink"
+        >
+          <span className="font-mono" aria-hidden>
+            ←
           </span>
-          <span className="text-xs text-muted-foreground">
-            {formatDate(audit.date)}
-          </span>
-        </div>
-        <p className="mt-3 text-foreground">{audit.reason}</p>
+          Audit history
+        </Link>
 
-        <div className="mt-5 grid grid-cols-3 gap-4">
-          <div>
-            <div className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Risk score
-              <Hint text="Lower is safer. 1 is the best score, 5 is the worst." />
-            </div>
-            <div className="mt-1 text-2xl font-semibold text-foreground">
-              {audit.score.toFixed(1)}
-              <span className="text-sm text-muted-foreground">/5</span>
-            </div>
+        {/* Certificate head */}
+        <div className="mt-6 border-t-[3px] border-double border-rule-strong pt-7">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <TierBadge tier={audit.tier} />
+            <span className="font-mono text-[11px] tracking-[0.08em] text-ink-muted">
+              {audit.id} · {formatDate(audit.date)}
+            </span>
           </div>
-          <div>
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Notes
-            </div>
-            <div className="mt-1 text-2xl font-semibold text-foreground">
-              {audit.findings.length}
-            </div>
+
+          <h1 className="mt-6 max-w-[24ch] text-[clamp(1.75rem,3.4vw,2.375rem)] leading-[1.08]">
+            {audit.tier === 1
+              ? "Cleared on the evidence supplied"
+              : audit.tier === 2
+                ? "Held for remote verification"
+                : "Escalated for a site visit"}
+          </h1>
+
+          <p className="mt-5 max-w-[62ch] leading-[1.7] text-ink-muted">
+            {audit.reason}
+          </p>
+        </div>
+      </Reveal>
+
+      <Reveal delay={0.08}>
+        <div className="mt-10 grid grid-cols-3 gap-px border border-rule bg-rule">
+          <div className="bg-paper-raised p-6">
+            <Figure
+              label="Risk score"
+              value={audit.score.toFixed(1)}
+              unit="/ 5"
+              tone={
+                audit.tier === 1
+                  ? "tier-1"
+                  : audit.tier === 2
+                    ? "tier-2"
+                    : "tier-3"
+              }
+            />
           </div>
-          <div>
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Price change
-            </div>
-            <div
-              className={`mt-1 text-2xl font-semibold ${
-                down ? "text-emerald-600" : "text-rose-600"
-              }`}
-            >
-              {down ? "−" : "+"}
-              {formatCurrency(Math.abs(delta))}
-            </div>
+          <div className="bg-paper-raised p-6">
+            <Figure label="Findings" value={String(audit.findings.length)} />
+          </div>
+          <div className="bg-paper-raised p-6">
+            <Figure
+              label="Premium effect"
+              value={`${down ? "−" : "+"}${formatCurrency(Math.abs(delta))}`}
+              tone={down ? "tier-1" : "tier-3"}
+              note={`${formatCurrency(audit.premiumBefore)} → ${formatCurrency(audit.premiumAfter)}`}
+            />
           </div>
         </div>
-      </div>
+      </Reveal>
 
-      {/* Findings */}
-      <h2 className="mt-8 mb-3 text-sm font-semibold text-foreground">
-        What we found
-      </h2>
-      <div className="space-y-3">
-        {audit.findings.map((f, i) => (
-          <div key={i} className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                {PILLAR_LABEL[f.pillar]}
-              </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyles[f.status]}`}
-              >
-                {FINDING_STATUS_LABEL[f.status]}
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {f.observation}
-            </p>
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-xs font-medium text-muted-foreground">
-                Severity
-              </span>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <span
-                    key={n}
-                    className={`h-1.5 w-6 rounded-full ${
-                      n <= f.severity
-                        ? f.severity >= 4
-                          ? "bg-rose-500"
-                          : f.severity === 3
-                            ? "bg-amber-500"
-                            : "bg-emerald-500"
-                        : "bg-muted"
-                    }`}
-                  />
-                ))}
+      <Reveal delay={0.12}>
+        <h2 className="field-label mt-14">Findings register</h2>
+        <div className="mt-4 divide-y divide-rule border-y border-rule">
+          {audit.findings.map((f, i) => (
+            <article key={i} className="py-7">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <span className="font-mono text-[11px] text-ink-faint">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-1 text-base font-semibold">
+                    {PILLAR_LABEL[f.pillar]}
+                  </h3>
+                </div>
+                <StatusStamp status={f.status} />
               </div>
-              <span className="text-xs text-muted-foreground">
-                {severityLabel[f.severity]}
-              </span>
-            </div>
-            <div className="mt-3 rounded-lg bg-muted/60 px-3 py-2 text-sm text-foreground">
-              <span className="font-medium">Recommendation: </span>
-              {f.recommendation}
-            </div>
-          </div>
-        ))}
-      </div>
+
+              <p className="mt-4 max-w-[62ch] text-sm leading-relaxed text-ink-muted">
+                {f.observation}
+              </p>
+
+              {/* Severity as a stepped gauge, ruled like a measure */}
+              <div className="mt-5 flex items-center gap-3">
+                <span className="field-label">Severity</span>
+                <span className="flex gap-1" aria-hidden>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <span
+                      key={n}
+                      className={`h-2.5 w-7 ${
+                        n <= f.severity
+                          ? f.severity >= 4
+                            ? "bg-tier-3"
+                            : f.severity === 3
+                              ? "bg-tier-2"
+                              : "bg-tier-1"
+                          : "bg-paper-sunk"
+                      }`}
+                    />
+                  ))}
+                </span>
+                <span className="text-xs text-ink-muted">
+                  {SEVERITY_LABEL[f.severity]} ({f.severity}/5)
+                </span>
+              </div>
+
+              <div className="mt-5 border-l-2 border-accent bg-accent-wash/35 px-4 py-3">
+                <span className="field-label">What to do</span>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink">
+                  {f.recommendation}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </Reveal>
+
+      <Reveal delay={0.16}>
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t-[3px] border-double border-rule-strong pt-6">
+          <p className="max-w-[46ch] text-xs leading-relaxed text-ink-muted">
+            Signed off by an NTI risk engineer. Routing is automated; the
+            outcome on this record is not.
+          </p>
+          <Link href="/audits">
+            <Button variant="outline" size="sm">
+              Back to history
+            </Button>
+          </Link>
+        </div>
+      </Reveal>
     </main>
   );
 }

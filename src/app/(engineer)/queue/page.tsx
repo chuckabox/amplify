@@ -1,18 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  ListChecks,
-  Sparkles,
-  CircleCheck,
-  Layers,
-  Info,
-  ChevronRight,
-  Video,
-  MapPin,
-} from "lucide-react";
-import { TierBadge } from "@/components/tier-badge";
-import { Hint } from "@/components/hint";
+import { TierBadge, StatusStamp } from "@/components/tier-badge";
+import { Figure } from "@/components/figure";
+import { Reveal } from "@/components/motion";
 import { useStore } from "@/lib/operator-store";
 import {
   getAllWork,
@@ -21,45 +12,54 @@ import {
   type WorkItem,
 } from "@/lib/data/engineer";
 import { PILLAR_LABEL } from "@/lib/data/operators";
-
-const toneChip: Record<string, string> = {
-  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
-  blue: "bg-sky-50 text-sky-700 ring-sky-600/15",
-  amber: "bg-amber-50 text-amber-700 ring-amber-600/15",
-  rose: "bg-rose-50 text-rose-700 ring-rose-600/15",
-};
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 const scoreTone: Record<1 | 2 | 3, string> = {
-  1: "text-emerald-600",
-  2: "text-amber-600",
-  3: "text-rose-600",
+  1: "text-tier-1-ink",
+  2: "text-tier-2-ink",
+  3: "text-tier-3-ink",
 };
 
 function WorkRow({ item }: { item: WorkItem }) {
   const router = useRouter();
   const ws = workStatus(item.audit);
   const finding = item.audit.findings[0];
+  const severityLabel = item.audit.tier === 3 ? "visit" : item.audit.tier === 2 ? "video" : "clear";
+
   return (
-    <button
+    <TableRow
       onClick={() => router.push(`/queue/${item.audit.id}`)}
-      className="flex w-full items-center gap-4 px-5 py-3.5 text-left transition-colors hover:bg-muted/40"
+      className="cursor-pointer"
     >
-      <TierBadge tier={item.audit.tier} />
-      <span className={`text-sm font-semibold ${scoreTone[item.audit.tier]}`}>
-        {item.audit.score.toFixed(1)}
-        <span className="font-normal text-muted-foreground">/5</span>
-      </span>
-      <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-        {finding ? `${PILLAR_LABEL[finding.pillar]}: ` : ""}
+      <TableCell className="w-[120px]">
+        <TierBadge tier={item.audit.tier} label={`Tier ${item.audit.tier} · ${severityLabel}`} />
+      </TableCell>
+      <TableCell className="w-[80px] font-mono font-medium">
+        <span className={scoreTone[item.audit.tier]}>
+          {item.audit.score.toFixed(1)}
+        </span>
+        <span className="text-ink-faint">/5</span>
+      </TableCell>
+      <TableCell className="max-w-[280px] truncate text-ink-muted">
+        <span className="font-semibold text-ink">
+          {finding ? `${PILLAR_LABEL[finding.pillar]}: ` : ""}
+        </span>
         {item.audit.reason}
-      </span>
-      <span
-        className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${toneChip[ws.tone]}`}
-      >
-        {ws.label}
-      </span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-    </button>
+      </TableCell>
+      <TableCell className="w-[120px] text-right">
+        <StatusStamp status={ws.group === "done" ? (item.audit.status === "signed" ? "clear" : "advisory") : "action"} />
+      </TableCell>
+      <TableCell className="w-[40px] text-right font-mono text-ink-muted">
+        →
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -75,22 +75,32 @@ function OperatorGroup({
   items: WorkItem[];
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="flex items-center justify-between border-b border-border bg-muted/40 px-5 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground">{name}</span>
-          <span className="text-xs text-muted-foreground">· {region}</span>
+    <div className="mt-8 first:mt-4">
+      <div className="flex items-baseline justify-between border-b border-rule pb-2.5 mb-3">
+        <div>
+          <span className="field-label">{region} · {fleetSize} vehicles</span>
+          <h3 className="font-display text-lg font-semibold text-ink">{name}</h3>
         </div>
-        <span className="text-xs text-muted-foreground">
-          {fleetSize} vehicles · {items.length}{" "}
-          {items.length === 1 ? "check" : "checks"}
+        <span className="font-mono text-xs text-ink-muted">
+          {items.length} {items.length === 1 ? "check" : "checks"}
         </span>
       </div>
-      <div className="divide-y divide-border">
-        {items.map((it) => (
-          <WorkRow key={it.audit.id} item={it} />
-        ))}
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="w-[120px]">Standing</TableHead>
+            <TableHead className="w-[80px]">Score</TableHead>
+            <TableHead>Triage Details & Focus Areas</TableHead>
+            <TableHead className="w-[120px] text-right">Status</TableHead>
+            <TableHead className="w-[40px]"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((it) => (
+            <WorkRow key={it.audit.id} item={it} />
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -110,128 +120,118 @@ export default function EngineerQueue() {
   const needVisit = todo.filter((w) => w.audit.tier === 3).length;
 
   const metrics = [
-    { icon: ListChecks, label: "To do", value: todo.length, tone: "text-rose-600" },
-    { icon: Sparkles, label: "AI approved", value: aiApproved, tone: "text-sky-600" },
-    { icon: CircleCheck, label: "Signed off", value: signedOff, tone: "text-emerald-600" },
-    { icon: Layers, label: "All checks", value: work.length, tone: "text-foreground" },
+    { label: "To do", value: todo.length, tone: "tier-3" as const, note: `${needVideo} video, ${needVisit} visits` },
+    { label: "AI approved", value: aiApproved, tone: "tier-2" as const, note: "Cleared without site visit" },
+    { label: "Signed off", value: signedOff, tone: "tier-1" as const, note: "Approved by engineer" },
+    { label: "All checks", value: work.length, tone: "ink" as const, note: "Total compliance registry" },
   ];
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="mx-auto max-w-6xl px-6 py-12 flex-1">
       {/* Heading */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-foreground">Your work</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Everything the AI has triaged, grouped by fleet. Your to-do list is on
-          top; everything already handled is below.
-        </p>
-      </div>
+      <Reveal>
+        <div className="border-b border-rule pb-8">
+          <p className="field-label">NTI RISK ENGINEERING</p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight text-ink">
+            Triage Register
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+            The heavy-vehicle compliance triage register. Review remote video submissions and schedule site audits for flagged fleets below.
+          </p>
+        </div>
+      </Reveal>
 
       {/* Why this exists */}
-      <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-border bg-accent/40 p-4 text-sm text-muted-foreground">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-        <p>
-          <span className="font-medium text-foreground">Why this screen: </span>
-          instead of driving to every depot, the AI sorts every fleet for you.
-          You only work through the &ldquo;To do&rdquo; list — and can still open
-          anything the AI approved to double-check it.
-        </p>
-      </div>
+      <Reveal delay={0.08}>
+        <div className="mt-6 flex items-start gap-3 rounded-[3px] border border-rule bg-paper-sunk/35 p-4 text-xs leading-relaxed text-ink-muted">
+          <svg className="size-4 shrink-0 text-ink-muted mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <p>
+            <span className="font-semibold text-ink uppercase tracking-wider text-[10px] block mb-0.5">Triage Strategy: </span>
+            Instead of routing engineers to every regional depot, the Tonnage platform sorts fleets continuously. Engineers focus strictly on resolving outstanding action items in the to-do column, while retaining review authority over auto-passed checks.
+          </p>
+        </div>
+      </Reveal>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {metrics.map((m) => (
-          <div
-            key={m.label}
-            className="rounded-xl border border-border bg-card p-5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {m.label}
+      {/* Metrics Ledger Grid */}
+      <Reveal delay={0.12}>
+        <div className="grid gap-px border border-rule bg-rule grid-cols-2 lg:grid-cols-4 mt-8">
+          {metrics.map((m) => (
+            <div
+              key={m.label}
+              className="bg-paper-raised p-6"
+            >
+              <Figure label={m.label} value={m.value} tone={m.tone} note={m.note} />
+            </div>
+          ))}
+        </div>
+      </Reveal>
+
+      <div className="mt-12 grid items-start gap-10 lg:grid-cols-2">
+        {/* To do */}
+        <Reveal delay={0.16}>
+          <section>
+            <div className="mb-4 flex items-center gap-2 border-b border-rule-strong pb-2">
+              <span className="h-2 w-2 rounded-full bg-tier-3" />
+              <h2 className="text-sm font-semibold text-ink uppercase tracking-wider">
+                To do — action required
+              </h2>
+              <span className="ml-auto font-mono text-xs text-ink-muted font-bold">
+                {todo.length}
               </span>
-              <m.icon className="h-4 w-4 text-muted-foreground/70" />
             </div>
-            <div className={`mt-3 text-2xl font-semibold ${m.tone}`}>
-              {m.value}
+
+            {todoGroups.length > 0 ? (
+              <div className="space-y-6">
+                {todoGroups.map((g) => (
+                  <OperatorGroup
+                    key={g.operatorId}
+                    name={g.operatorName}
+                    region={g.region}
+                    fleetSize={g.items[0].fleetSize}
+                    items={g.items}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[4px] border border-dashed border-rule-strong bg-paper-sunk/20 p-8 text-center text-sm text-ink-muted">
+                Triage register clear — no outstanding items.
+              </div>
+            )}
+          </section>
+        </Reveal>
+
+        {/* Audited */}
+        <Reveal delay={0.2}>
+          <section>
+            <div className="mb-4 flex items-center gap-2 border-b border-rule-strong pb-2">
+              <span className="h-2 w-2 rounded-full bg-tier-1" />
+              <h2 className="text-sm font-semibold text-ink uppercase tracking-wider">
+                Audited archive
+              </h2>
+              <span className="ml-auto font-mono text-xs text-ink-muted font-bold">
+                {done.length}
+              </span>
             </div>
-          </div>
-        ))}
-      </div>
 
-      <div className="mt-8 grid items-start gap-6 lg:grid-cols-2">
-      {/* To do */}
-      <section>
-        <div className="mb-3 flex items-center gap-2">
-          <ListChecks className="h-4 w-4 text-rose-500" />
-          <h2 className="text-sm font-semibold text-foreground">
-            To do — needs your action
-          </h2>
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
-            {todo.length}
-          </span>
-          <Hint text="Only Tier 2 (video) and Tier 3 (visit) fleets land here. Tier 1 passes on its own." />
-        </div>
-
-        {todoGroups.length > 0 ? (
-          <div className="space-y-3">
-            {todoGroups.map((g) => (
-              <OperatorGroup
-                key={g.operatorId}
-                name={g.operatorName}
-                region={g.region}
-                fleetSize={g.items[0].fleetSize}
-                items={g.items}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-            You&apos;re all caught up — nothing needs action right now.
-          </div>
-        )}
-
-        {/* Small legend */}
-        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5">
-            <Video className="h-3.5 w-3.5 text-amber-500" />
-            {needVideo} waiting on a video
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <MapPin className="h-3.5 w-3.5 text-rose-500" />
-            {needVisit} waiting on a visit
-          </span>
-        </div>
-      </section>
-
-      {/* Audited */}
-      <section>
-        <div className="mb-3 flex items-center gap-2">
-          <CircleCheck className="h-4 w-4 text-emerald-500" />
-          <h2 className="text-sm font-semibold text-foreground">Audited</h2>
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">
-            {done.length}
-          </span>
-          <Hint text="Passed automatically by the AI, or signed off by you. Open any to double-check the evidence." />
-        </div>
-
-        {doneGroups.length > 0 ? (
-          <div className="space-y-3">
-            {doneGroups.map((g) => (
-              <OperatorGroup
-                key={g.operatorId}
-                name={g.operatorName}
-                region={g.region}
-                fleetSize={g.items[0].fleetSize}
-                items={g.items}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-            Nothing audited yet.
-          </div>
-        )}
-      </section>
+            {doneGroups.length > 0 ? (
+              <div className="space-y-6">
+                {doneGroups.map((g) => (
+                  <OperatorGroup
+                    key={g.operatorId}
+                    name={g.operatorName}
+                    region={g.region}
+                    fleetSize={g.items[0].fleetSize}
+                    items={g.items}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-[4px] border border-dashed border-rule-strong bg-paper-sunk/20 p-8 text-center text-sm text-ink-muted">
+                No archived check dockets found.
+              </div>
+            )}
+          </section>
+        </Reveal>
       </div>
     </main>
   );

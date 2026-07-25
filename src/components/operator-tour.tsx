@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const TOUR_KEY = "riskgate:tourSeen";
+const TOUR_KEY = "tonnage:tourSeen";
 
 const STEPS = [
   {
@@ -58,7 +58,7 @@ function runTour() {
     nextBtnText: "Next",
     prevBtnText: "Back",
     doneBtnText: "Got it",
-    popoverClass: "riskgate-tour",
+    popoverClass: "tonnage-tour",
     steps: STEPS,
   });
   d.drive();
@@ -108,7 +108,7 @@ export function OperatorTour() {
             <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
               <Sparkles className="h-5 w-5" />
             </div>
-            <DialogTitle>Welcome to RiskGate</DialogTitle>
+            <DialogTitle>Welcome to Tonnage</DialogTitle>
             <DialogDescription>
               First time here? We can give you a quick 4-step tour of the
               screen so you know what everything does. It takes about 30 seconds.

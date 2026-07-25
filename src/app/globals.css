@@ -2,175 +2,269 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+  Tonnage — "Docket" design system.
+
+  The palette is derived from the physical artefacts of the domain rather than
+  from a taste category: manila weighbridge-ticket stock, the green-cast carbon
+  black of an offset press, and the dulled signal yellow of road plant. Corners
+  are near-square because printed documents are; the only pill in the system is
+  the primary CTA. One accent, used sparingly. Everything else is a printed ink.
+*/
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
+  /* Semantic tokens consumed by the shadcn primitives */
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-card: var(--paper-raised);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--paper-raised);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--ink);
+  --color-secondary: var(--paper-sunk);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--paper-sunk);
+  --color-muted-foreground: var(--ink-muted);
+  --color-accent: var(--accent-wash);
+  --color-accent-foreground: var(--accent-ink);
+  --color-destructive: var(--tier-3-ink);
+  --color-border: var(--rule);
+  --color-input: var(--rule-strong);
+  --color-ring: var(--ink);
+
+  /* Domain tokens, named for what they are */
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-sunk: var(--paper-sunk);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
   --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-wash: var(--accent-wash);
+  --color-accent-ink: var(--accent-ink);
+
+  /* Tier inks — the only other colour allowed to appear */
+  --color-tier-1: var(--tier-1);
+  --color-tier-1-ink: var(--tier-1-ink);
+  --color-tier-1-wash: var(--tier-1-wash);
+  --color-tier-2: var(--tier-2);
+  --color-tier-2-ink: var(--tier-2-ink);
+  --color-tier-2-wash: var(--tier-2-wash);
+  --color-tier-3: var(--tier-3);
+  --color-tier-3-ink: var(--tier-3-ink);
+  --color-tier-3-wash: var(--tier-3-wash);
+
+  --font-sans: var(--font-archivo);
+  --font-display: var(--font-fraunces);
+  --font-mono: var(--font-jetbrains);
+
+  /* Print-tight radii. Nothing here is a squircle. */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 10px;
+
+  /* Warm, tinted shadows — never neutral black */
+  --shadow-plate: 0 1px 1px rgb(58 46 18 / 0.05), 0 3px 8px -3px rgb(58 46 18 / 0.07);
+  --shadow-lift: 0 2px 4px rgb(58 46 18 / 0.06), 0 16px 32px -16px rgb(58 46 18 / 0.24);
+  --shadow-press: inset 0 1px 2px rgb(58 46 18 / 0.14);
+
+  --ease-docket: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 3px;
 
-  /* Cool tinted canvas, ink-slate text */
-  --background: oklch(0.972 0.011 240);
-  --foreground: oklch(0.24 0.02 255);
+  /* Manila ticket stock */
+  --paper: #efe8d8;
+  --paper-raised: #f7f2e6;
+  --paper-sunk: #e4dbc5;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.02 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.02 255);
+  /* Offset carbon — black with a green cast, never neutral */
+  --ink: #171a14;
+  --ink-muted: #575c4e;
+  --ink-faint: #8b8f7e; /* decorative only — never body text */
 
-  /* Refined light-blue primary */
-  --primary: oklch(0.58 0.15 245);
-  --primary-foreground: oklch(0.99 0.005 250);
+  --rule: #d5cbb1;
+  --rule-strong: #c1b494;
 
-  --secondary: oklch(0.97 0.008 250);
-  --secondary-foreground: oklch(0.32 0.02 255);
+  /* Dulled signal yellow — the single accent */
+  --accent: #c9a227;
+  --accent-deep: #8a6d12; /* text-safe on paper */
+  --accent-wash: #e9dcae;
+  --accent-ink: #6b5410;
 
-  --muted: oklch(0.955 0.012 240);
-  --muted-foreground: oklch(0.55 0.02 255);
+  /* Printed tier inks */
+  --tier-1: #4a6b52;
+  --tier-1-ink: #35513c;
+  --tier-1-wash: #dfe3d3;
 
-  /* Soft sky tint for accents */
-  --accent: oklch(0.955 0.025 240);
-  --accent-foreground: oklch(0.46 0.11 245);
+  --tier-2: #b0791f;
+  --tier-2-ink: #7d5411;
+  --tier-2-wash: #eddfbd;
 
-  --destructive: oklch(0.58 0.2 22);
+  --tier-3: #9a3a2c;
+  --tier-3-ink: #7e2c20;
+  --tier-3-wash: #ecd6cd;
 
-  --border: oklch(0.922 0.008 250);
-  --input: oklch(0.922 0.008 250);
-  --ring: oklch(0.58 0.15 245);
-
-  --chart-1: oklch(0.58 0.15 245);
-  --chart-2: oklch(0.68 0.12 200);
-  --chart-3: oklch(0.72 0.14 145);
-  --chart-4: oklch(0.78 0.13 85);
-  --chart-5: oklch(0.62 0.2 25);
-
-  --sidebar: oklch(0.985 0.004 250);
-  --sidebar-foreground: oklch(0.24 0.02 255);
-  --sidebar-primary: oklch(0.58 0.15 245);
-  --sidebar-primary-foreground: oklch(0.99 0.005 250);
-  --sidebar-accent: oklch(0.955 0.025 240);
-  --sidebar-accent-foreground: oklch(0.46 0.11 245);
-  --sidebar-border: oklch(0.922 0.008 250);
-  --sidebar-ring: oklch(0.58 0.15 245);
-}
-
-.dark {
-  --background: oklch(0.2 0.02 255);
-  --foreground: oklch(0.96 0.006 250);
-  --card: oklch(0.24 0.02 255);
-  --card-foreground: oklch(0.96 0.006 250);
-  --popover: oklch(0.24 0.02 255);
-  --popover-foreground: oklch(0.96 0.006 250);
-  --primary: oklch(0.7 0.14 245);
-  --primary-foreground: oklch(0.2 0.02 255);
-  --secondary: oklch(0.3 0.02 255);
-  --secondary-foreground: oklch(0.96 0.006 250);
-  --muted: oklch(0.3 0.02 255);
-  --muted-foreground: oklch(0.7 0.02 255);
-  --accent: oklch(0.34 0.04 245);
-  --accent-foreground: oklch(0.9 0.04 245);
-  --destructive: oklch(0.65 0.19 22);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.7 0.14 245);
-  --chart-1: oklch(0.7 0.14 245);
-  --chart-2: oklch(0.72 0.12 200);
-  --chart-3: oklch(0.76 0.14 145);
-  --chart-4: oklch(0.8 0.13 85);
-  --chart-5: oklch(0.68 0.2 25);
-  --sidebar: oklch(0.24 0.02 255);
-  --sidebar-foreground: oklch(0.96 0.006 250);
-  --sidebar-primary: oklch(0.7 0.14 245);
-  --sidebar-primary-foreground: oklch(0.2 0.02 255);
-  --sidebar-accent: oklch(0.34 0.04 245);
-  --sidebar-accent-foreground: oklch(0.9 0.04 245);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.7 0.14 245);
+  /* Sits above the fold on every page, never on a scrolling container */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-rule;
   }
+
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "cv11", "ss01";
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
-  h1, h2, h3, h4, h5 {
-    @apply tracking-tight;
+
+  body {
+    @apply bg-paper text-ink;
+    font-feature-settings: "ss01", "cv05";
+  }
+
+  /* Fraunces set for display: high optical size, no softness, wonk on. */
+  h1,
+  h2,
+  .display {
+    @apply font-display;
+    font-variation-settings: "SOFT" 0, "WONK" 1, "opsz" 144;
+    letter-spacing: -0.022em;
     text-wrap: balance;
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-sans font-semibold;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Every figure in this product is compared against another figure. */
+  :is(table, .tabular) {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+}
+
+@layer components {
+  /* Fixed, pointer-events-none, never attached to a scrolling container. */
+  .grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    background-image: var(--grain);
+    opacity: 0.055;
+    mix-blend-mode: multiply;
+  }
+
+  /* Small caps label — the docket's field headings. */
+  .field-label {
+    @apply font-sans text-[10px] font-semibold uppercase text-ink-muted;
+    letter-spacing: 0.14em;
+  }
+
+  /* A ruled line as a printed form would set it. */
+  .rule-hair {
+    border-top: 1px solid var(--rule);
+  }
+
+  .rule-double {
+    border-top: 3px double var(--rule-strong);
+  }
+
+  /*
+    The print equivalent of the double-bezel: a mounted plate. Outer mat in
+    sunk paper, inner core raised, concentric so the curves nest.
+  */
+  .plate {
+    @apply rounded-[6px] bg-paper-sunk p-[5px];
+    box-shadow: var(--shadow-plate);
+  }
+
+  .plate-core {
+    @apply rounded-[3px] bg-paper-raised;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6);
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Duotone treatment for placeholder photography — folds stock imagery
+     into the palette so it reads as art direction, not a stock drop-in. */
+  .duotone {
+    filter: grayscale(1) contrast(1.08) brightness(1.02) sepia(0.42)
+      hue-rotate(-8deg) saturate(1.25);
   }
 }
 
 /* Product tour (driver.js) — themed to match the design system */
-.driver-popover.riskgate-tour {
+.driver-popover.tonnage-tour {
   border-radius: 14px;
   padding: 18px;
   box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.25);
   background: var(--popover);
   color: var(--popover-foreground);
 }
-.driver-popover.riskgate-tour .driver-popover-title {
+.driver-popover.tonnage-tour .driver-popover-title {
   font-size: 15px;
   font-weight: 600;
 }
-.driver-popover.riskgate-tour .driver-popover-description {
+.driver-popover.tonnage-tour .driver-popover-description {
   font-size: 13px;
   line-height: 1.5;
   color: var(--muted-foreground);
 }
-.driver-popover.riskgate-tour .driver-popover-progress-text {
+.driver-popover.tonnage-tour .driver-popover-progress-text {
   font-size: 12px;
   color: var(--muted-foreground);
 }
-.driver-popover.riskgate-tour .driver-popover-next-btn,
-.driver-popover.riskgate-tour .driver-popover-prev-btn {
+.driver-popover.tonnage-tour .driver-popover-next-btn,
+.driver-popover.tonnage-tour .driver-popover-prev-btn {
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -180,7 +274,7 @@
   font-weight: 500;
   padding: 6px 12px;
 }
-.driver-popover.riskgate-tour .driver-popover-next-btn {
+.driver-popover.tonnage-tour .driver-popover-next-btn {
   background: var(--primary);
   border-color: var(--primary);
   color: var(--primary-foreground);

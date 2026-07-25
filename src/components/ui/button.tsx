@@ -3,34 +3,40 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/*
+  Docket buttons are set square, like the fields on a printed form — not the
+  rounded-full pills every other product ships. Weight and fill carry the
+  hierarchy instead of radius. Press gives a physical 1px drop.
+*/
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button relative inline-flex shrink-0 items-center justify-center rounded-[3px] border border-transparent text-sm font-medium whitespace-nowrap transition-[background-color,color,border-color,box-shadow,transform] duration-200 ease-docket outline-none select-none active:translate-y-px disabled:pointer-events-none disabled:opacity-45 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        // The workhorse: carbon ink on manila.
+        default:
+          "bg-ink text-paper shadow-[0_1px_2px_rgb(58_46_18_/_0.18)] hover:bg-[#22261e] hover:shadow-[0_2px_6px_rgb(58_46_18_/_0.24)] active:shadow-none",
+        // Signal yellow. Reserved for the single most important action on a
+        // page — if two of these are visible at once, one is wrong.
+        accent:
+          "bg-accent text-ink shadow-[0_1px_2px_rgb(58_46_18_/_0.18)] hover:bg-[#d8b134] hover:shadow-[0_2px_6px_rgb(58_46_18_/_0.24)] active:shadow-none",
         outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "border-rule-strong bg-paper-raised text-ink hover:border-ink hover:bg-paper-sunk",
+        secondary: "bg-paper-sunk text-ink hover:bg-[#dbd0b6]",
+        ghost: "text-ink-muted hover:bg-paper-sunk hover:text-ink",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border-tier-3/30 bg-tier-3-wash text-tier-3-ink hover:border-tier-3/60 hover:bg-[#e5c6bb]",
+        link: "h-auto p-0 text-accent-ink underline decoration-rule-strong decoration-1 underline-offset-4 hover:decoration-ink",
       },
       size: {
-        default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        icon: "size-8",
-        "icon-xs":
-          "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm":
-          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-9",
+        default: "h-10 gap-2 px-5",
+        xs: "h-7 gap-1 px-2.5 text-xs [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 gap-1.5 px-3.5 text-[0.8125rem] [&_svg:not([class*='size-'])]:size-3.5",
+        lg: "h-12 gap-2.5 px-7 text-[0.9375rem]",
+        icon: "size-10",
+        "icon-xs": "size-7 [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 [&_svg:not([class*='size-'])]:size-3.5",
+        "icon-lg": "size-12",
       },
     },
     defaultVariants: {
@@ -55,4 +61,29 @@ function Button({
   )
 }
 
-export { Button, buttonVariants }
+/*
+  The nested trailing icon. Sits in its own recessed tile flush with the
+  button's right padding rather than floating naked beside the label, and
+  translates on hover for internal kinetic tension. Pair with `group/button`.
+*/
+function ButtonIconWell({
+  className,
+  children,
+}: {
+  className?: string
+  children: React.ReactNode
+}) {
+  return (
+    <span
+      className={cn(
+        "-mr-2 ml-1 flex size-6 items-center justify-center rounded-[2px] bg-current/12 transition-transform duration-200 ease-docket group-hover/button:translate-x-0.5",
+        className
+      )}
+      aria-hidden
+    >
+      {children}
+    </span>
+  )
+}
+
+export { Button, ButtonIconWell, buttonVariants }

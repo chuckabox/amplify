@@ -15,7 +15,7 @@ import {
   type Vehicle,
 } from "@/lib/data/operators";
 
-const STORAGE_KEY = "riskgate:v2";
+const STORAGE_KEY = "tonnage:v1";
 
 interface Persisted {
   operators: Operator[];
@@ -61,6 +61,7 @@ export function OperatorProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const data = load();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOperators(data.operators);
     setCurrentId(data.currentId);
     setReady(true);

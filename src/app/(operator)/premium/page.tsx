@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Info, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TierBadge } from "@/components/tier-badge";
+import { Reveal } from "@/components/motion";
 import { useStore } from "@/lib/operator-store";
 import {
   fleetBasePremium,
   mileageLoading,
   riskMultiplier,
   computePremium,
+  totalOdometer,
   formatCurrency,
   formatDate,
   VEHICLE_BASE_RATE,
   VEHICLE_TYPES,
+  MILEAGE_RATE_PER_MILLION_KM,
   type VehicleType,
 } from "@/lib/data/operators";
 
@@ -27,190 +29,232 @@ export default function PremiumPage() {
   const premium = computePremium(current);
   const latest = current.audits[0];
   const riskAdjustment = Math.round(base * mult - base);
+  const odo = totalOdometer(current.vehicles);
 
-  // Group vehicles by type for the base breakdown.
   const byType = VEHICLE_TYPES.map((t) => ({
     type: t as VehicleType,
     count: current.vehicles.filter((v) => v.type === t).length,
   })).filter((r) => r.count > 0);
 
-  const multLabel =
-    mult < 1 ? "discount" : mult > 1 ? "loading" : "neutral";
-
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-foreground">
-          How your price is worked out
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Exactly how we get to your {formatCurrency(premium)} yearly price — and
-          how doing a safety check changes it.
-        </p>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Calculation */}
-        <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
-          <h2 className="text-sm font-semibold text-foreground">Calculation</h2>
-
-          {/* Base by vehicle type */}
-          <div className="mt-4 space-y-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              1 · Starting price for your vehicles
-            </div>
-            {byType.map((r) => (
-              <div
-                key={r.type}
-                className="flex items-center justify-between text-sm"
-              >
-                <span className="text-muted-foreground">
-                  {r.count} × {r.type}
-                  <span className="text-muted-foreground/60">
-                    {" "}
-                    @ {formatCurrency(VEHICLE_BASE_RATE[r.type])}
-                  </span>
-                </span>
-                <span className="font-medium text-foreground">
-                  {formatCurrency(VEHICLE_BASE_RATE[r.type] * r.count)}
-                </span>
-              </div>
-            ))}
-            <div className="flex items-center justify-between border-t border-border pt-2 text-sm">
-              <span className="font-medium text-foreground">Subtotal</span>
-              <span className="font-semibold text-foreground">
-                {formatCurrency(base)}
-              </span>
-            </div>
-          </div>
-
-          {/* Risk multiplier */}
-          <div className="mt-6 space-y-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              2 · Change from your safety check
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-muted-foreground">
-                {latest ? (
-                  <>
-                    <TierBadge tier={latest.tier} /> ×{mult.toFixed(2)}{" "}
-                    {multLabel === "loading" ? "extra" : multLabel}
-                  </>
-                ) : (
-                  <>No check yet — extra added ×{mult.toFixed(2)}</>
-                )}
-              </span>
-              <span
-                className={`font-medium ${
-                  riskAdjustment < 0 ? "text-emerald-600" : "text-rose-600"
-                }`}
-              >
-                {riskAdjustment < 0 ? "−" : "+"}
-                {formatCurrency(Math.abs(riskAdjustment))}
-              </span>
-            </div>
-          </div>
-
-          {/* Mileage loading */}
-          <div className="mt-6 space-y-2">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              3 · Extra for distance driven
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                More kilometres means more time on the road, so a little more.
-              </span>
-              <span className="font-medium text-foreground">
-                +{formatCurrency(loading)}
-              </span>
-            </div>
-          </div>
-
-          {/* Total */}
-          <div className="mt-6 flex items-center justify-between rounded-xl bg-accent/60 px-4 py-3">
-            <span className="text-sm font-semibold text-foreground">
-              Your yearly price
-            </span>
-            <span className="text-xl font-semibold text-foreground">
-              {formatCurrency(premium)}
-            </span>
-          </div>
+    <main id="main" className="mx-auto w-full max-w-[1000px] flex-1 px-6 py-12">
+      <Reveal>
+        <div className="border-b border-rule pb-8">
+          <p className="field-label">Schedule of rating</p>
+          <h1 className="mt-4 text-[clamp(2rem,4vw,2.75rem)] leading-[1.02]">
+            How your premium is built
+          </h1>
+          <p className="mt-4 max-w-[62ch] leading-[1.7] text-ink-muted">
+            Three lines, in order. Nothing here is a black box — if the figure
+            changes, one of these three moved.
+          </p>
         </div>
+      </Reveal>
 
-        {/* Side: how to lower it */}
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <div className="flex items-center gap-2">
-              <Info className="h-4 w-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">
-                How to pay less
-              </h2>
-            </div>
-            <ul className="mt-3 space-y-3 text-sm text-muted-foreground">
-              <li>
-                A{" "}
-                <span className="font-medium text-foreground">passing check</span>{" "}
-                takes 10% off your starting price.
-              </li>
-              <li>
-                Fix the things flagged in your last check before the next one to
-                improve your score.
-              </li>
-              <li>
-                Have an approved workshop do the check for you — it&apos;s trusted
-                more and clears faster.
-              </li>
-            </ul>
-            <Link href="/audit/new">
-              <Button className="mt-5 w-full gap-2">
-                Run a guided audit
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+      <div className="mt-12 grid gap-12 lg:grid-cols-12">
+        {/* ---------- The calculation sheet ---------- */}
+        <Reveal delay={0.08} className="lg:col-span-7">
+          <section aria-labelledby="calc-heading">
+            <h2 id="calc-heading" className="field-label">
+              Calculation
+            </h2>
 
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="text-sm font-semibold text-foreground">Policy</h2>
-            <dl className="mt-3 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Number</dt>
-                <dd className="font-medium text-foreground">
-                  {current.policy.number}
-                </dd>
+            {/* 1 — base */}
+            <div className="mt-6">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-xs text-ink-faint">01</span>
+                <h3 className="text-[15px] font-semibold">Fleet base rate</h3>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Excess</dt>
-                <dd className="font-medium text-foreground">
-                  {formatCurrency(current.policy.excess)}
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Rating</dt>
-                <dd className="font-medium text-foreground">
-                  {current.policy.riskRating}
-                </dd>
-              </div>
-              {latest && (
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Priced on</dt>
-                  <dd className="font-medium text-foreground">
-                    {formatDate(latest.date)}
+              <dl className="mt-4 space-y-2.5">
+                {byType.map((r) => (
+                  <div
+                    key={r.type}
+                    className="flex items-baseline justify-between gap-4 text-sm"
+                  >
+                    <dt className="flex items-baseline gap-2 text-ink-muted">
+                      <span className="font-mono tabular-nums">{r.count}×</span>
+                      <span>{r.type}</span>
+                      <span className="font-mono text-xs text-ink-faint">
+                        @ {formatCurrency(VEHICLE_BASE_RATE[r.type])}
+                      </span>
+                    </dt>
+                    {/* dotted leader, as a printed schedule sets it */}
+                    <span
+                      className="mx-2 flex-1 translate-y-[-3px] border-b border-dotted border-rule-strong"
+                      aria-hidden
+                    />
+                    <dd className="font-mono tabular-nums">
+                      {formatCurrency(VEHICLE_BASE_RATE[r.type] * r.count)}
+                    </dd>
+                  </div>
+                ))}
+                <div className="flex items-baseline justify-between border-t border-rule pt-3 text-sm font-medium">
+                  <dt>Base subtotal</dt>
+                  <dd className="font-mono tabular-nums">
+                    {formatCurrency(base)}
                   </dd>
                 </div>
-              )}
-            </dl>
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {current.policy.coverage.map((c) => (
-                <span
-                  key={c}
-                  className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground"
-                >
-                  {c}
-                </span>
-              ))}
+              </dl>
             </div>
+
+            {/* 2 — audit adjustment */}
+            <div className="mt-10">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-xs text-ink-faint">02</span>
+                <h3 className="text-[15px] font-semibold">Audit adjustment</h3>
+              </div>
+              <div className="mt-4 flex flex-wrap items-baseline justify-between gap-3 text-sm">
+                <div className="flex items-center gap-3">
+                  {latest ? (
+                    <TierBadge tier={latest.tier} />
+                  ) : (
+                    <span className="text-ink-muted">No audit on file</span>
+                  )}
+                  <span className="font-mono tabular-nums text-ink-muted">
+                    ×{mult.toFixed(2)}
+                  </span>
+                </div>
+                <span
+                  className={`font-mono tabular-nums ${
+                    riskAdjustment < 0 ? "text-tier-1-ink" : "text-tier-3-ink"
+                  }`}
+                >
+                  {riskAdjustment < 0 ? "−" : "+"}
+                  {formatCurrency(Math.abs(riskAdjustment))}
+                </span>
+              </div>
+              <p className="mt-3 max-w-[58ch] text-xs leading-relaxed text-ink-muted">
+                {latest
+                  ? `Applied from ${latest.id}, submitted ${formatDate(latest.date)}. A Tier 1 outcome discounts the base rate; Tier 2 and Tier 3 load it.`
+                  : "Policies without a completed audit carry a 1.18× loading until one is submitted."}
+              </p>
+            </div>
+
+            {/* 3 — distance */}
+            <div className="mt-10">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-xs text-ink-faint">03</span>
+                <h3 className="text-[15px] font-semibold">Distance loading</h3>
+              </div>
+              <div className="mt-4 flex items-baseline justify-between gap-4 text-sm">
+                <span className="text-ink-muted">
+                  <span className="font-mono tabular-nums">
+                    {(odo / 1_000_000).toFixed(2)}M
+                  </span>{" "}
+                  fleet km at{" "}
+                  <span className="font-mono tabular-nums">
+                    {formatCurrency(MILEAGE_RATE_PER_MILLION_KM)}
+                  </span>{" "}
+                  per million
+                </span>
+                <span className="font-mono tabular-nums">
+                  +{formatCurrency(loading)}
+                </span>
+              </div>
+            </div>
+
+            {/* total */}
+            <div className="mt-10 border-t-[3px] border-double border-rule-strong pt-6">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <span className="text-lg font-semibold">Annual premium</span>
+                <span className="font-mono text-[2.25rem] leading-none tabular-nums tracking-[-0.04em]">
+                  {formatCurrency(premium)}
+                </span>
+              </div>
+              <p className="mt-3 font-mono text-[11px] text-ink-muted">
+                ROUNDED TO THE NEAREST $10 · EXCESS{" "}
+                {formatCurrency(current.policy.excess)}
+              </p>
+            </div>
+          </section>
+        </Reveal>
+
+        {/* ---------- Side ---------- */}
+        <Reveal delay={0.14} className="lg:col-span-5">
+          <div className="space-y-8">
+            <section className="border border-rule bg-paper-raised p-7">
+              <h2 className="text-[15px] font-semibold">
+                What actually moves this figure
+              </h2>
+              <ol className="mt-5 space-y-5">
+                {[
+                  {
+                    n: "01",
+                    body: "A Tier 1 outcome applies a 0.88× discount to the base rate. On this fleet that is worth roughly " +
+                      formatCurrency(Math.abs(Math.round(base * 0.88 - base))) +
+                      " a year.",
+                  },
+                  {
+                    n: "02",
+                    body: "Clearing open findings before the next audit lifts the score, which is what decides the tier.",
+                  },
+                  {
+                    n: "03",
+                    body: "Evidence attested by an accredited workshop raises the trust signal and clears more items without a follow-up.",
+                  },
+                ].map((item) => (
+                  <li key={item.n} className="flex gap-4">
+                    <span className="font-mono text-xs text-ink-faint">
+                      {item.n}
+                    </span>
+                    <p className="text-[13px] leading-relaxed text-ink-muted">
+                      {item.body}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+              <Link href="/audit/new" className="mt-7 block">
+                <Button variant="accent" className="w-full">
+                  Run a guided audit
+                </Button>
+              </Link>
+            </section>
+
+            <section className="border border-rule bg-paper-raised p-7">
+              <h2 className="field-label">Policy</h2>
+              <dl className="mt-4 space-y-3 text-sm">
+                {[
+                  ["Number", current.policy.number],
+                  ["Excess", formatCurrency(current.policy.excess)],
+                  ["Rating", current.policy.riskRating],
+                  [
+                    "Review cycle",
+                    `${current.policy.auditIntervalMonths} months`,
+                  ],
+                  ...(latest
+                    ? ([["Priced on", formatDate(latest.date)]] as [
+                        string,
+                        string,
+                      ][])
+                    : []),
+                ].map(([k, v]) => (
+                  <div key={k} className="flex items-baseline justify-between gap-4">
+                    <dt className="text-ink-muted">{k}</dt>
+                    <dd className="font-mono text-xs tabular-nums">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="mt-6 border-t border-rule pt-5">
+                <span className="field-label">Covers</span>
+                <ul className="mt-3 space-y-2">
+                  {current.policy.coverage.map((c) => (
+                    <li
+                      key={c}
+                      className="flex items-start gap-2.5 text-[13px] text-ink-muted"
+                    >
+                      <span
+                        className="mt-[6px] size-1.5 shrink-0 bg-accent"
+                        aria-hidden
+                      />
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
           </div>
-        </div>
+        </Reveal>
       </div>
     </main>
   );

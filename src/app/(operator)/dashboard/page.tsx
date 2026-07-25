@@ -1,20 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Truck,
-  Wallet,
-  Route,
-  CalendarClock,
-  ArrowRight,
-  ClipboardCheck,
-  ChevronRight,
-  TrendingDown,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { TierBadge } from "@/components/tier-badge";
-import { Hint } from "@/components/hint";
-import { OperatorTour } from "@/components/operator-tour";
+import { Button, ButtonIconWell } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { TierBadge, StatusStamp } from "@/components/tier-badge";
+import { Figure } from "@/components/figure";
+import { Reveal } from "@/components/motion";
 import { useStore } from "@/lib/operator-store";
 import {
   computePremium,
@@ -24,15 +15,7 @@ import {
   daysUntil,
   totalOdometer,
   PILLAR_LABEL,
-  FINDING_STATUS_LABEL,
-  TIER_MEANING,
 } from "@/lib/data/operators";
-
-const statusStyles: Record<string, string> = {
-  clear: "bg-emerald-50 text-emerald-700 ring-emerald-600/15",
-  advisory: "bg-amber-50 text-amber-700 ring-amber-600/15",
-  action: "bg-rose-50 text-rose-700 ring-rose-600/15",
-};
 
 export default function OperatorDashboard() {
   const { current } = useStore();
@@ -44,202 +27,230 @@ export default function OperatorDashboard() {
   const latest = current.audits[0];
   const odo = totalOdometer(current.vehicles);
 
-  const stats = [
+  const ledger = [
     {
       href: "/fleet",
-      icon: Truck,
-      label: "Fleet size",
-      value: `${current.vehicles.length}`,
-      sub: "vehicles — manage fleet",
+      label: "Fleet",
+      value: String(current.vehicles.length),
+      unit: "vehicles",
+      note: "Add or retire a vehicle to re-price",
     },
     {
       href: "/premium",
-      icon: Wallet,
-      label: "Yearly price",
+      label: "Annual premium",
       value: formatCurrency(premium),
-      sub: "see how it's worked out",
+      note: "See the arithmetic",
     },
     {
       href: "/fleet",
-      icon: Route,
-      label: "Total distance driven",
-      value: `${(odo / 1_000_000).toFixed(2)}M km`,
-      sub: "across the fleet",
+      label: "Fleet distance",
+      value: (odo / 1_000_000).toFixed(2),
+      unit: "M km",
+      note: "Loaded at $3,420 per million",
     },
     {
       href: "/audit/new",
-      icon: CalendarClock,
-      label: "Next check due",
-      value: dueDays > 0 ? `${dueDays} days` : "Due now",
-      sub: `due ${formatDate(due)}`,
+      label: "Next audit",
+      value: dueDays > 0 ? String(dueDays) : "Due",
+      unit: dueDays > 0 ? "days" : "now",
+      note: `Falls due ${formatDate(due)}`,
     },
   ];
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
-      {/* Greeting banner */}
-      <div className="relative mb-8 overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground sm:p-8">
-        <div
-          className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl"
-          aria-hidden
-        />
-        <div className="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+    <main id="main" className="mx-auto w-full max-w-[1240px] flex-1 px-6 py-12">
+      {/* ---------- Docket head ---------- */}
+      <Reveal>
+        <div className="flex flex-col justify-between gap-8 border-b border-rule pb-9 md:flex-row md:items-end">
           <div>
-            <p className="text-sm text-primary-foreground/75">
+            <p className="field-label">
               {current.industry} · {current.region}
             </p>
-            <h1 className="mt-1 text-2xl font-semibold">{current.name}</h1>
-            <div className="mt-2 flex items-center gap-2 text-sm text-primary-foreground/80">
-              <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs font-medium">
-                {current.policy.riskRating}
-              </span>
-              <span>Policy {current.policy.number}</span>
-            </div>
-            <div className="mt-3">
-              <OperatorTour />
-            </div>
+            <h1 className="mt-4 text-[clamp(2rem,4vw,2.75rem)] leading-[1.02]">
+              {current.name}
+            </h1>
+            <dl className="mt-5 flex flex-wrap items-center gap-x-7 gap-y-2 font-mono text-xs text-ink-muted">
+              <div className="flex gap-2">
+                <dt className="text-ink-faint">POLICY</dt>
+                <dd>{current.policy.number}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-ink-faint">RATING</dt>
+                <dd className="text-ink">{current.policy.riskRating}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-ink-faint">SINCE</dt>
+                <dd>{current.memberSince}</dd>
+              </div>
+            </dl>
           </div>
-          <Link href="/audit/new" data-tour="start-audit">
-            <Button
-              size="lg"
-              className="gap-2 bg-white text-primary hover:bg-white/90"
-            >
-              <ClipboardCheck className="h-4 w-4" />
-              Start safety check
+
+          <Link href="/audit/new" className="shrink-0">
+            <Button variant="accent" size="lg" className="w-full md:w-auto">
+              Start an audit
+              <ButtonIconWell>
+                <span className="font-mono text-xs">→</span>
+              </ButtonIconWell>
             </Button>
           </Link>
         </div>
-      </div>
+      </Reveal>
 
-      {/* Stats (clickable) */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4" data-tour="stats">
-        {stats.map((s) => (
-          <Link
-            key={s.label}
-            href={s.href}
-            className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {s.label}
+      {/* ---------- Ledger ---------- */}
+      <Reveal delay={0.08}>
+        <div className="mt-px grid gap-px border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-4">
+          {ledger.map((s) => (
+            <Link
+              key={s.label}
+              href={s.href}
+              className="group bg-paper-raised p-6 transition-colors duration-200 ease-docket hover:bg-accent-wash/35"
+            >
+              <Figure label={s.label} value={s.value} unit={s.unit} />
+              <span className="mt-3 flex items-center gap-1.5 text-xs text-ink-muted">
+                {s.note}
+                <span
+                  className="font-mono transition-transform duration-200 ease-docket group-hover:translate-x-0.5"
+                  aria-hidden
+                >
+                  →
+                </span>
               </span>
-              <s.icon className="h-4 w-4 text-muted-foreground/70" />
-            </div>
-            <div className="mt-3 text-2xl font-semibold text-foreground">
-              {s.value}
-            </div>
-            <div className="mt-0.5 flex items-center gap-0.5 text-xs text-muted-foreground">
-              {s.sub}
-              <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-            </div>
-          </Link>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      </Reveal>
 
-      {/* Two column */}
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        {/* Latest audit */}
-        <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              Your last safety check
-            </h2>
+      {/* ---------- Latest audit + premium ---------- */}
+      <div className="mt-12 grid gap-10 lg:grid-cols-12">
+        <Reveal delay={0.12} className="lg:col-span-7">
+          <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-3">
+            <h2 className="text-xl">Most recent audit</h2>
             {latest && (
               <Link
                 href={`/audits/${latest.id}`}
-                className="text-xs font-medium text-primary hover:underline"
+                className="text-[13px] text-ink-muted underline decoration-rule-strong underline-offset-4 hover:text-ink"
               >
-                View details
+                Full record
               </Link>
             )}
           </div>
 
           {latest ? (
-            <>
+            <div className="pt-6">
               <div className="flex flex-wrap items-center gap-3">
                 <TierBadge tier={latest.tier} />
-                <Hint text={TIER_MEANING[latest.tier]} />
-                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                  {formatDate(latest.date)} · score {latest.score.toFixed(1)}/5
-                  <Hint text="Lower is safer. 1 is the best score, 5 is the worst." />
+                <span className="font-mono text-xs text-ink-muted">
+                  {latest.id} · {formatDate(latest.date)} · SCORE{" "}
+                  {latest.score.toFixed(1)}/5
                 </span>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">
+
+              <p className="mt-5 max-w-[62ch] leading-[1.7] text-ink-muted">
                 {latest.reason}
               </p>
-              <ul className="mt-4 divide-y divide-border">
+
+              <h3 className="field-label mt-9">Findings</h3>
+              <ul className="mt-3 divide-y divide-rule border-t border-rule">
                 {latest.findings.map((f, i) => (
-                  <li key={i} className="flex items-center justify-between py-2.5">
+                  <li
+                    key={i}
+                    className="flex items-start justify-between gap-5 py-4"
+                  >
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-foreground">
+                      <div className="text-sm font-medium">
                         {PILLAR_LABEL[f.pillar]}
                       </div>
-                      <div className="truncate text-xs text-muted-foreground">
+                      <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">
                         {f.observation}
-                      </div>
+                      </p>
                     </div>
-                    <span
-                      className={`ml-3 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusStyles[f.status]}`}
-                    >
-                      {FINDING_STATUS_LABEL[f.status]}
-                    </span>
+                    <StatusStamp status={f.status} className="mt-0.5 shrink-0" />
                   </li>
                 ))}
               </ul>
-            </>
+            </div>
           ) : (
-            <p className="text-sm text-muted-foreground">
-              No safety checks yet. Do your first one to set your price.
-            </p>
+            <EmptyState
+              className="mt-6"
+              title="No audit on file yet"
+              body="Your premium is currently carrying the un-audited loading of 1.18×. Running the guided audit replaces that estimate with a figure priced on your own evidence — it takes about ten minutes in the yard."
+              action={
+                <Link href="/audit/new">
+                  <Button variant="accent">Start your first audit</Button>
+                </Link>
+              }
+            />
           )}
-        </div>
+        </Reveal>
 
-        {/* Premium / benchmark */}
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-accent/50 p-6" data-tour="premium">
-            <h2 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-              Your yearly price
-              <Hint text="Your insurance premium — what you pay NTI each year to be covered." />
-            </h2>
-            <div className="mt-3 text-3xl font-semibold text-foreground">
-              {formatCurrency(premium)}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">per year</p>
-            {latest && (
-              <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-xs font-medium text-emerald-700">
-                <TrendingDown className="h-3 w-3" />
-                Based on your {formatDate(latest.date)} check
+        {/* Side column */}
+        <Reveal delay={0.18} className="lg:col-span-5">
+          <div className="space-y-8">
+            <div className="plate">
+              <div className="plate-core p-7">
+                <span className="field-label">Annual premium</span>
+                <div className="mt-4 font-mono text-[2.75rem] leading-none tabular-nums tracking-[-0.04em]">
+                  {formatCurrency(premium)}
+                </div>
+                {latest ? (
+                  <p className="mt-4 text-[13px] leading-relaxed text-ink-muted">
+                    Priced on your {formatDate(latest.date)} audit, which
+                    applied a {latest.tier === 1 ? "0.88×" : latest.tier === 2 ? "1.14×" : "1.42×"}{" "}
+                    adjustment to the fleet base rate.
+                  </p>
+                ) : (
+                  <p className="mt-4 text-[13px] leading-relaxed text-ink-muted">
+                    Carrying the un-audited loading until your first submission.
+                  </p>
+                )}
+                <Link href="/premium" className="mt-6 block">
+                  <Button variant="outline" className="w-full">
+                    How this is calculated
+                  </Button>
+                </Link>
               </div>
-            )}
-            <Link href="/premium">
-              <Button variant="outline" size="sm" className="mt-4 w-full gap-1">
-                See how it&apos;s worked out
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </Link>
-          </div>
+            </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="text-sm font-semibold text-foreground">
-              How you compare
-            </h2>
-            <div className="mt-3 flex items-end gap-1">
-              <span className="text-3xl font-semibold text-foreground">
-                Top {100 - current.benchmarkPercentile}%
-              </span>
+            <div className="border border-rule bg-paper-raised p-7">
+              <span className="field-label">Against comparable fleets</span>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="font-mono text-[2.75rem] leading-none tabular-nums tracking-[-0.04em]">
+                  {current.benchmarkPercentile}
+                </span>
+                <span className="text-sm text-ink-muted">th percentile</span>
+              </div>
+
+              {/* A ruled scale, not a rounded progress pill */}
+              <div className="mt-6" aria-hidden>
+                <div className="relative h-8">
+                  <div className="absolute inset-x-0 top-4 h-px bg-rule-strong" />
+                  {Array.from({ length: 11 }).map((_, i) => (
+                    <span
+                      key={i}
+                      className="absolute top-4 h-2 w-px bg-rule-strong"
+                      style={{ left: `${i * 10}%` }}
+                    />
+                  ))}
+                  <span
+                    className="absolute top-0 h-8 w-[2px] bg-ink"
+                    style={{ left: `${current.benchmarkPercentile}%` }}
+                  />
+                </div>
+                <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-faint">
+                  <span>0</span>
+                  <span>50</span>
+                  <span>100</span>
+                </div>
+              </div>
+
+              <p className="mt-5 text-[13px] leading-relaxed text-ink-muted">
+                Safer than {current.benchmarkPercentile}% of fleets in the same
+                region and size band. The comparison uses audited outcomes, not
+                claims history.
+              </p>
             </div>
-            <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${current.benchmarkPercentile}%` }}
-              />
-            </div>
-            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              Safer than {current.benchmarkPercentile}% of similar fleets your
-              size in your area.
-            </p>
           </div>
-        </div>
+        </Reveal>
       </div>
     </main>
   );

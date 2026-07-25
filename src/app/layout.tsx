@@ -1,24 +1,64 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Archivo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { OperatorProvider } from "@/lib/operator-store";
 
-const inter = Inter({
-  variable: "--font-sans",
+// Display. The SOFT/WONK axes are what keep this off the shelf.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK", "opsz"],
+  display: "swap",
+});
+
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
   display: "swap",
 });
 
+// Every audit score, premium and odometer reading is set in this.
 const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-jetbrains",
   subsets: ["latin"],
   display: "swap",
 });
+
+const SITE = "https://tonnage.au";
 
 export const metadata: Metadata = {
-  title: "RiskGate — Tiered Risk-Audit Platform",
+  metadataBase: new URL(SITE),
+  title: {
+    default: "Tonnage — risk audits that route themselves",
+    template: "%s · Tonnage",
+  },
   description:
-    "AI-powered triage that lets NTI engineers cover 10x more operators by only visiting audits that need a human.",
+    "Tonnage triages every transport risk audit and sends it to the cheapest tier that can safely clear it, so a handful of engineers can cover a portfolio that would otherwise need thirty.",
+  applicationName: "Tonnage",
+  authors: [{ name: "Tonnage" }],
+  keywords: [
+    "transport risk audit",
+    "heavy vehicle insurance",
+    "fleet compliance",
+    "risk engineering",
+  ],
+  // og/twitter images and the favicon come from app/opengraph-image.tsx and
+  // app/icon.svg via the file conventions — no need to declare them here.
+  openGraph: {
+    type: "website",
+    url: SITE,
+    siteName: "Tonnage",
+    locale: "en_AU",
+    title: "Tonnage — risk audits that route themselves",
+    description:
+      "Most trucks roll straight over the weighbridge. Only some get pulled aside. We do that for risk audits.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tonnage — risk audits that route themselves",
+    description:
+      "Most trucks roll straight over the weighbridge. Only some get pulled aside.",
+  },
 };
 
 export default function RootLayout({
@@ -28,11 +68,18 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      lang="en-AU"
+      className={`${fraunces.variable} ${archivo.variable} ${jetbrainsMono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col bg-paper text-ink">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-[3px] focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-paper"
+        >
+          Skip to content
+        </a>
         <OperatorProvider>{children}</OperatorProvider>
+        <div className="grain-overlay" aria-hidden />
       </body>
     </html>
   );

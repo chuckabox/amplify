@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>Tonnage</title>
+  <rect width="32" height="32" rx="3" fill="#171A14" />
+  <!-- the load sitting on the deck -->
+  <rect x="10" y="9" width="12" height="9" fill="#EFE8D8" />
+  <!-- the deck plate -->
+  <rect x="5" y="19" width="22" height="3.5" fill="#C9A227" />
+  <!-- the pit beneath, and the ground rule -->
+  <rect x="8" y="24" width="2" height="2.5" fill="#EFE8D8" opacity="0.55" />
+  <rect x="22" y="24" width="2" height="2.5" fill="#EFE8D8" opacity="0.55" />
+  <rect x="5" y="27.5" width="22" height="1.25" fill="#EFE8D8" opacity="0.8" />
+</svg>

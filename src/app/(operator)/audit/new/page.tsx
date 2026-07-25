@@ -2,22 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Loader2,
-  Camera,
-  Upload,
-  ShieldCheck,
-  Sparkles,
-  X,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonIconWell } from "@/components/ui/button";
 import { TierBadge } from "@/components/tier-badge";
 import { useStore } from "@/lib/operator-store";
 import { QUESTIONNAIRE } from "@/lib/data/questionnaire";
+import { Reveal } from "@/components/motion";
 import {
   fleetBasePremium,
   mileageLoading,
@@ -70,7 +59,6 @@ const ANALYSIS_STAGES = [
 type Preview = { name: string; url: string };
 
 export default function GuidedAuditPage() {
-  const router = useRouter();
   const { current, completeAudit } = useStore();
 
   // step: 0 = intro, 1..4 = pillars, 5 = evidence, 6 = analyzing, 7 = result
@@ -84,43 +72,6 @@ export default function GuidedAuditPage() {
   const pillarCount = QUESTIONNAIRE.length;
   const totalSegments = pillarCount + 1; // pillars + evidence
   const progressStep = Math.min(Math.max(step, 0), totalSegments);
-
-  // Drive the analysis animation when we reach the analyzing step.
-  useEffect(() => {
-    if (step !== 6) return;
-    setStageIdx(0);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    ANALYSIS_STAGES.forEach((_, i) => {
-      timers.push(setTimeout(() => setStageIdx(i + 1), (i + 1) * 750));
-    });
-    timers.push(
-      setTimeout(() => finalize(), (ANALYSIS_STAGES.length + 1) * 750),
-    );
-    return () => timers.forEach(clearTimeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
-
-  if (!current) return null;
-
-  function setAnswer(qid: string, value: string) {
-    setAnswers((a) => ({ ...a, [qid]: value }));
-  }
-
-  function onFiles(evId: string, files: FileList | null) {
-    if (!files) return;
-    const previews = Array.from(files).map((f) => ({
-      name: f.name,
-      url: URL.createObjectURL(f),
-    }));
-    setEvidence((e) => ({ ...e, [evId]: [...(e[evId] ?? []), ...previews] }));
-  }
-
-  function removeEvidence(evId: string, idx: number) {
-    setEvidence((e) => ({
-      ...e,
-      [evId]: (e[evId] ?? []).filter((_, i) => i !== idx),
-    }));
-  }
 
   // Findings react to the tier: at Tier 2/3 the worst area becomes a real
   // "needs fixing" item; at Tier 1 everything reads good or minor.
@@ -197,49 +148,94 @@ export default function GuidedAuditPage() {
     setStep(7);
   }
 
+  // Drive the analysis animation when we reach the analyzing step.
+  useEffect(() => {
+    if (step !== 6) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    ANALYSIS_STAGES.forEach((_, i) => {
+      timers.push(setTimeout(() => setStageIdx(i + 1), (i + 1) * 750));
+    });
+    timers.push(
+      setTimeout(() => finalize(), (ANALYSIS_STAGES.length + 1) * 750),
+    );
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  if (!current) return null;
+
+  function setAnswer(qid: string, value: string) {
+    setAnswers((a) => ({ ...a, [qid]: value }));
+  }
+
+  function onFiles(evId: string, files: FileList | null) {
+    if (!files) return;
+    const previews = Array.from(files).map((f) => ({
+      name: f.name,
+      url: URL.createObjectURL(f),
+    }));
+    setEvidence((e) => ({ ...e, [evId]: [...(e[evId] ?? []), ...previews] }));
+  }
+
+  function removeEvidence(evId: string, idx: number) {
+    setEvidence((e) => ({
+      ...e,
+      [evId]: (e[evId] ?? []).filter((_, i) => i !== idx),
+    }));
+  }
+
   // ---------- Intro ----------
   if (step === 0) {
     return (
-      <Shell>
-        <div className="mx-auto max-w-xl text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-            <ShieldCheck className="h-6 w-6" />
-          </span>
-          <h1 className="mt-5 text-2xl font-semibold text-foreground">
-            Guided audit
+      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1">
+        <Reveal>
+          <p className="field-label">POLICY SAFETY AUDIT</p>
+          <h1 className="mt-4 text-4xl font-semibold leading-tight text-ink">
+            Guided safety check
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-            You&apos;re completing this audit as part of your NTI policy. We&apos;ll
-            walk you through the four risk pillars, ask you to snap a few photos
-            as evidence, then price your premium on the result — usually with no
-            site visit required.
+          <p className="mt-4 text-sm leading-relaxed text-ink-muted">
+            You are completing this audit as part of your NTI policy rules. We will walk you through the four risk pillars, ask you to capture a few photos as evidence, and then price your premium based on the results — usually without requiring a site visit.
           </p>
-          <div className="mt-6 grid gap-2 text-left">
-            {QUESTIONNAIRE.map((s, i) => (
-              <div
-                key={s.pillar}
-                className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
-                  {i + 1}
-                </span>
-                <span className="text-sm font-medium text-foreground">
-                  {s.title}
-                </span>
-              </div>
-            ))}
+
+          <div className="mt-8 border border-rule bg-paper-raised rounded-[4px] overflow-hidden">
+            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+              <span className="field-label">Audit Pillars</span>
+            </div>
+            <div className="divide-y divide-rule">
+              {QUESTIONNAIRE.map((s, i) => (
+                <div
+                  key={s.pillar}
+                  className="flex items-center justify-between px-5 py-3.5 text-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-ink-faint">
+                      0{i + 1}
+                    </span>
+                    <span className="font-sans font-medium text-ink">
+                      {s.title}
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-ink-faint">
+                    PENDING
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="mt-8 flex justify-center gap-3">
+
+          <div className="mt-8 flex items-center justify-start gap-4">
             <Link href="/dashboard">
               <Button variant="outline">Cancel</Button>
             </Link>
-            <Button className="gap-2" onClick={() => setStep(1)}>
+            <Button onClick={() => setStep(1)} variant="accent">
               Begin audit
-              <ArrowRight className="h-4 w-4" />
+              <ButtonIconWell>
+                <span className="font-mono text-xs">→</span>
+              </ButtonIconWell>
             </Button>
           </div>
-        </div>
-      </Shell>
+        </Reveal>
+      </main>
     );
   }
 
@@ -249,52 +245,59 @@ export default function GuidedAuditPage() {
     const allAnswered = section.questions.every((q) => answers[q.id]);
 
     return (
-      <Shell>
-        <ProgressBar current={progressStep} total={totalSegments} />
-        <div className="mx-auto mt-6 max-w-2xl">
-          <div className="text-xs font-medium uppercase tracking-wide text-primary">
-            Pillar {step} of {pillarCount}
-          </div>
-          <h1 className="mt-1 text-2xl font-semibold text-foreground">
+      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1">
+        <Reveal>
+          <ProgressBar current={progressStep} total={totalSegments} />
+        </Reveal>
+
+        <Reveal delay={0.08} className="mt-8">
+          <p className="field-label">Pillar {step} of {pillarCount}</p>
+          <h1 className="mt-3 text-3xl font-semibold text-ink">
             {section.title}
           </h1>
-          <div className="mt-3 rounded-xl border border-border bg-accent/40 p-3 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Why we ask: </span>
+
+          <div className="mt-4 border border-rule-strong bg-paper-sunk/30 p-4 rounded-[3px] text-xs leading-relaxed text-ink-muted">
+            <span className="font-semibold text-ink uppercase tracking-wider text-[10px] block mb-1">
+              Why NTI asks:
+            </span>
             {section.why}
           </div>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-8 space-y-8">
             {section.questions.map((q) => (
-              <div key={q.id}>
-                <div className="text-sm font-medium text-foreground">
+              <div key={q.id} className="space-y-3">
+                <h3 className="text-sm font-semibold text-ink">
                   {q.prompt}
-                </div>
+                </h3>
                 {q.help && (
-                  <div className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-xs leading-relaxed text-ink-muted">
                     {q.help}
-                  </div>
+                  </p>
                 )}
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2">
                   {q.options.map((o) => {
                     const active = answers[q.id] === o.value;
                     return (
                       <button
                         key={o.value}
+                        type="button"
                         onClick={() => setAnswer(q.id, o.value)}
-                        className={`flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                        className={`flex items-center gap-3 rounded-[3px] border px-4 py-3 text-left text-sm transition-all cursor-pointer ${
                           active
-                            ? "border-primary bg-accent text-foreground"
-                            : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                            ? "border-ink bg-paper-sunk text-ink font-medium shadow-press"
+                            : "border-rule-strong bg-paper-raised text-ink-muted hover:border-ink hover:text-ink"
                         }`}
                       >
                         <span
-                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px] border ${
                             active
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-muted-foreground/40"
+                              ? "border-ink bg-paper-raised text-ink"
+                              : "border-rule-strong bg-paper"
                           }`}
                         >
-                          {active && <Check className="h-3 w-3" strokeWidth={3} />}
+                          {active && (
+                            <span className="h-2 w-2 bg-accent rounded-[1px]" />
+                          )}
                         </span>
                         {o.label}
                       </button>
@@ -305,64 +308,64 @@ export default function GuidedAuditPage() {
             ))}
           </div>
 
-          <div className="mt-8 flex items-center justify-between">
+          <div className="mt-10 border-t border-rule pt-6 flex items-center justify-between">
             <Button
               variant="ghost"
-              className="gap-1.5"
               onClick={() => setStep(step - 1)}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <span className="font-mono mr-1.5">←</span>
               Back
             </Button>
             <Button
-              className="gap-1.5"
               disabled={!allAnswered}
               onClick={() => setStep(step + 1)}
+              variant="default"
             >
               Continue
-              <ArrowRight className="h-4 w-4" />
+              <ButtonIconWell>
+                <span className="font-mono text-xs">→</span>
+              </ButtonIconWell>
             </Button>
           </div>
-        </div>
-      </Shell>
+        </Reveal>
+      </main>
     );
   }
 
   // ---------- Evidence step ----------
   if (step === 5) {
     return (
-      <Shell>
-        <ProgressBar current={progressStep} total={totalSegments} />
-        <div className="mx-auto mt-6 max-w-2xl">
-          <div className="text-xs font-medium uppercase tracking-wide text-primary">
-            Final step
-          </div>
-          <h1 className="mt-1 text-2xl font-semibold text-foreground">
-            Upload evidence
+      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1">
+        <Reveal>
+          <ProgressBar current={progressStep} total={totalSegments} />
+        </Reveal>
+
+        <Reveal delay={0.08} className="mt-8">
+          <p className="field-label">Final compliance step</p>
+          <h1 className="mt-3 text-3xl font-semibold text-ink">
+            Upload safety evidence
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Snap a photo for each item below. Photos record the time and place
-            they were taken, which helps us check they&apos;re genuine — so take
-            them on site, right now.
+          <p className="mt-3 text-sm leading-relaxed text-ink-muted">
+            Snap a photo for each registry category below. Photos record GPS, device orientation, and timestamps. This confirms they are taken live on-site and helps expedite NTI compliance triage.
           </p>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-8 space-y-6">
             {QUESTIONNAIRE.map((s) => {
               const ev = s.evidence;
               const files = evidence[ev.id] ?? [];
               return (
                 <div
                   key={ev.id}
-                  className="rounded-xl border border-border bg-card p-4"
+                  className="rounded-[4px] border border-rule bg-paper-raised p-5"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-foreground">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-semibold text-ink">
                         {ev.label}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
+                      </h4>
+                      <p className="text-xs text-ink-muted">
                         {ev.hint}
-                      </div>
+                      </p>
                     </div>
                     <label className="shrink-0 cursor-pointer">
                       <input
@@ -373,31 +376,32 @@ export default function GuidedAuditPage() {
                         className="hidden"
                         onChange={(e) => onFiles(ev.id, e.target.files)}
                       />
-                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40">
-                        <Camera className="h-4 w-4" />
+                      <span className="inline-flex items-center gap-1.5 rounded-[3px] border border-rule-strong bg-paper px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-ink">
+                        <svg className="size-3.5 text-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                         {files.length ? "Add" : "Capture"}
                       </span>
                     </label>
                   </div>
 
                   {files.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-3">
                       {files.map((f, i) => (
                         <div
                           key={i}
-                          className="group relative h-16 w-16 overflow-hidden rounded-lg border border-border"
+                          className="group relative h-16 w-16 overflow-hidden rounded-[3px] border border-rule p-[2px] bg-paper"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={f.url}
                             alt={f.name}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover rounded-[1px]"
                           />
                           <button
+                            type="button"
                             onClick={() => removeEvidence(ev.id, i)}
-                            className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            className="absolute right-0.5 top-0.5 flex h-4 w-4 items-center justify-center rounded-[2px] bg-ink/75 text-paper opacity-0 transition-opacity group-hover:opacity-100 cursor-pointer"
                           >
-                            <X className="h-3 w-3" />
+                            <span className="font-mono text-[9px]">✕</span>
                           </button>
                         </div>
                       ))}
@@ -408,83 +412,86 @@ export default function GuidedAuditPage() {
             })}
           </div>
 
-          <div className="mt-4 flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-            <Upload className="h-3.5 w-3.5" />
-            Evidence is optional for this demo — you can submit without every
-            photo.
+          <div className="mt-5 flex items-start gap-2.5 rounded-[3px] bg-paper-sunk/35 border border-rule p-3 text-xs leading-relaxed text-ink-muted">
+            <svg className="size-4 shrink-0 text-ink-muted mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <p>
+              <span className="font-semibold text-ink">Demo reference: </span>
+              Evidence uploads are simulated for this demonstration. You can click submit with or without actual photos.
+            </p>
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-8 border-t border-rule pt-6 flex items-center justify-between">
             <Button
               variant="ghost"
-              className="gap-1.5"
               onClick={() => setStep(4)}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <span className="font-mono mr-1.5">←</span>
               Back
             </Button>
-            <Button className="gap-1.5" onClick={() => setStep(6)}>
+            <Button onClick={() => { setStageIdx(0); setStep(6); }} variant="accent">
               Submit for analysis
-              <Sparkles className="h-4 w-4" />
+              <ButtonIconWell>
+                <span className="font-mono text-xs">→</span>
+              </ButtonIconWell>
             </Button>
           </div>
-        </div>
-      </Shell>
+        </Reveal>
+      </main>
     );
   }
 
   // ---------- Analyzing step ----------
   if (step === 6) {
     return (
-      <Shell>
-        <div className="mx-auto max-w-md py-10 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-            <Sparkles className="h-7 w-7 animate-pulse" />
-          </span>
-          <h1 className="mt-5 text-xl font-semibold text-foreground">
-            Analysing your submission
+      <main className="mx-auto w-full max-w-[540px] px-6 py-20 flex-1 text-center">
+        <Reveal>
+          <div className="inline-flex size-14 items-center justify-center rounded-[4px] bg-accent text-ink">
+            <span className="animate-spin text-xl font-semibold font-mono">/</span>
+          </div>
+          <h1 className="mt-6 text-3xl font-semibold text-ink">
+            Analyzing submission
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Our triage engine is scoring your evidence against NTI standards.
+          <p className="mt-2 text-sm text-ink-muted max-w-[36ch] mx-auto">
+            The Tonnage triage engine is evaluating compliance answers and photo metadata.
           </p>
 
-          <div className="mt-8 space-y-2.5 text-left">
-            {ANALYSIS_STAGES.map((label, i) => {
-              const done = i < stageIdx;
-              const active = i === stageIdx;
-              return (
-                <div
-                  key={label}
-                  className={`flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors ${
-                    done
-                      ? "border-border bg-card"
-                      : active
-                        ? "border-primary/40 bg-accent/40"
-                        : "border-border bg-card opacity-50"
-                  }`}
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                    {done ? (
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white">
-                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                      </span>
-                    ) : active ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                    ) : (
-                      <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
-                    )}
-                  </span>
-                  <span
-                    className={`text-sm ${done || active ? "text-foreground" : "text-muted-foreground"}`}
+          <div className="mt-10 border border-rule bg-paper-raised rounded-[4px] overflow-hidden text-left">
+            <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+              <span className="field-label">Triage Process Logs</span>
+            </div>
+            <div className="divide-y divide-rule px-5">
+              {ANALYSIS_STAGES.map((label, i) => {
+                const done = i < stageIdx;
+                const active = i === stageIdx;
+                return (
+                  <div
+                    key={label}
+                    className={`flex items-center justify-between py-3.5 text-sm ${
+                      done ? "text-ink" : active ? "text-accent-deep font-semibold" : "text-ink-faint"
+                    }`}
                   >
-                    {label}
-                  </span>
-                </div>
-              );
-            })}
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs">
+                        0{i + 1}
+                      </span>
+                      <span>{label}</span>
+                    </div>
+                    <div className="font-mono text-xs">
+                      {done ? (
+                        <span className="text-tier-1-ink font-semibold">✓ DONE</span>
+                      ) : active ? (
+                        <span className="animate-pulse text-accent-deep">● RUNNING</span>
+                      ) : (
+                        <span className="text-ink-faint">PENDING</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </Shell>
+        </Reveal>
+      </main>
     );
   }
 
@@ -497,145 +504,170 @@ export default function GuidedAuditPage() {
     const head =
       t === 1
         ? {
-            ring: "bg-emerald-100 text-emerald-600",
-            title: "You passed",
-            badge: "Passed · no visit needed",
+            title: "Cleared on evidence",
+            badge: "Passed · cleared automatically",
           }
         : t === 2
           ? {
-              ring: "bg-amber-100 text-amber-600",
-              title: "Almost there — one quick video",
-              badge: "Video check needed",
+              title: "Held for remote verification",
+              badge: "Video verification needed",
             }
           : {
-              ring: "bg-rose-100 text-rose-600",
-              title: "An engineer will visit",
-              badge: "In-person visit needed",
+              title: "Escalated for a site visit",
+              badge: "In-person visit required",
             };
 
     const actionItems = result.findings.filter((f) => f.status === "action");
 
     return (
-      <Shell>
-        <div className="mx-auto max-w-lg py-6 text-center">
-          <span
-            className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full ${head.ring}`}
-          >
-            {t === 1 ? (
-              <Check className="h-8 w-8" strokeWidth={2.5} />
-            ) : t === 2 ? (
-              <Camera className="h-7 w-7" />
-            ) : (
-              <ShieldCheck className="h-7 w-7" />
-            )}
-          </span>
-          <h1 className="mt-5 text-2xl font-semibold text-foreground">
+      <main className="mx-auto w-full max-w-[640px] px-6 py-12 flex-1 text-center">
+        <Reveal>
+          <span className="field-label">AUDIT COMPLETE</span>
+          <h1 className="mt-3 text-4xl font-semibold leading-tight text-ink">
             {head.title}
           </h1>
-          <div className="mt-3 flex items-center justify-center gap-2">
+
+          <div className="mt-4 flex items-center justify-center gap-3">
             <TierBadge tier={t} label={head.badge} />
-            <span className="text-sm text-muted-foreground">
-              score {result.score.toFixed(1)}/5
+            <span className="font-mono text-xs text-ink-muted">
+              SCORE {result.score.toFixed(1)}/5
             </span>
           </div>
-          <p className="mx-auto mt-3 max-w-sm text-sm text-muted-foreground">
+
+          <p className="mt-5 max-w-[52ch] mx-auto text-sm leading-relaxed text-ink-muted">
             {result.reason}
           </p>
 
-          {/* Next step for Tier 2 / 3 */}
-          {t >= 2 && actionItems.length > 0 && (
-            <div className="mt-6 rounded-2xl border border-border bg-card p-5 text-left">
-              <div className="text-sm font-semibold text-foreground">
-                {t === 2 ? "What to send next" : "What the engineer will check"}
+          <div className="mt-8 border-t-[3px] border-double border-rule-strong pt-8" />
+        </Reveal>
+
+        {/* Action items for Tier 2/3 */}
+        {t >= 2 && actionItems.length > 0 && (
+          <Reveal delay={0.08} className="mt-6 text-left">
+            <div className="rounded-[4px] border border-rule bg-paper-raised overflow-hidden">
+              <div className="border-b border-rule bg-paper-sunk/40 px-5 py-3.5">
+                <span className="field-label">
+                  {t === 2 ? "Required Video Evidence Tasks" : "Site Inspection Checklist"}
+                </span>
               </div>
-              <ul className="mt-3 space-y-2">
+              <ul className="divide-y divide-rule">
                 {actionItems.map((f, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                    <span className="text-muted-foreground">
-                      {PILLAR_LABEL[f.pillar]} — {f.recommendation}
+                  <li key={i} className="flex items-start gap-3 px-5 py-4 text-sm leading-relaxed">
+                    <span className="mt-1 font-mono text-xs text-ink-faint">
+                      0{i + 1}
                     </span>
+                    <div>
+                      <span className="font-semibold text-ink">
+                        {PILLAR_LABEL[f.pillar]}:
+                      </span>{" "}
+                      <span className="text-ink-muted">{f.recommendation}</span>
+                    </div>
                   </li>
                 ))}
               </ul>
               {t === 2 && (
-                <Button className="mt-4 w-full gap-1.5" disabled>
-                  <Camera className="h-4 w-4" />
-                  Record video (demo)
-                </Button>
+                <div className="p-5 border-t border-rule bg-paper-sunk/20">
+                  <Button className="w-full" disabled variant="outline">
+                    <span className="inline-flex items-center gap-1.5">
+                      <svg className="size-3.5 text-ink-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                      Record verification video (demo)
+                    </span>
+                  </Button>
+                </div>
               )}
             </div>
-          )}
+          </Reveal>
+        )}
 
-          {/* Premium result */}
-          <div className="mt-6 rounded-2xl border border-border bg-card p-6 text-left">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Price before
-              </span>
-              <span className="text-sm text-muted-foreground line-through">
-                {formatCurrency(result.premiumBefore)}
-              </span>
-            </div>
-            <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                {t === 1 ? "Your new yearly price" : "Your price for now"}
-              </span>
-              <span className="text-2xl font-semibold text-foreground">
-                {formatCurrency(result.premiumAfter)}
-              </span>
-            </div>
-            {saved > 0 ? (
-              <div className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm font-medium text-emerald-700">
-                You saved {formatCurrency(saved)} per year
+        {/* Premium result with plate pattern */}
+        <Reveal delay={0.12} className="mt-6 text-left">
+          <div className="plate">
+            <div className="plate-core p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-rule pb-3.5">
+                <div>
+                  <h4 className="text-sm font-semibold text-ink">
+                    Premium Calculation
+                  </h4>
+                  <p className="text-xs text-ink-muted mt-0.5">
+                    Adjusted automatically for fleet audits
+                  </p>
+                </div>
+                <span className="font-mono text-xs text-ink-faint">
+                  POLICY {current.policy.number}
+                </span>
               </div>
-            ) : (
-              <div className="mt-3 rounded-lg bg-muted/70 px-3 py-2 text-center text-xs text-muted-foreground">
-                {t === 2
-                  ? "This can come down once your video clears the flagged item."
-                  : "This can come down after the visit if the issues are fixed."}
-              </div>
-            )}
-          </div>
 
-          <div className="mt-6 flex justify-center gap-3">
-            <Link href="/dashboard">
-              <Button variant="outline">Back to dashboard</Button>
-            </Link>
-            <Link href={`/audits/${result.id}`}>
-              <Button className="gap-1.5">
-                See the details
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-ink-muted">Previous yearly price</span>
+                <span className="font-mono tabular-nums text-ink-muted">
+                  {formatCurrency(result.premiumBefore)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between border-t border-dashed border-rule pt-4">
+                <span className="text-sm font-semibold text-ink">
+                  {t === 1 ? "New yearly price" : "Simulated interim price"}
+                </span>
+                <span className="font-mono text-2xl font-bold text-ink tabular-nums tracking-tight">
+                  {formatCurrency(result.premiumAfter)}
+                </span>
+              </div>
+
+              {saved > 0 ? (
+                <div className="mt-4 rounded-[3px] bg-tier-1-wash border border-tier-1/30 px-3 py-2 text-center text-xs font-semibold text-tier-1-ink">
+                  ✓ ANNUAL PREMIUM REDUCED BY {formatCurrency(saved)}
+                </div>
+              ) : (
+                <div className="mt-4 rounded-[3px] bg-paper-sunk/50 border border-rule px-3 py-2 text-center text-xs text-ink-muted leading-relaxed">
+                  {t === 2
+                    ? "Premium reductions will activate once video verification clears the flagged items."
+                    : "Premium updates will activate after site verification items are cleared by risk engineers."}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </Shell>
+        </Reveal>
+
+        <Reveal delay={0.16} className="mt-10 flex justify-center items-center gap-4">
+          <Link href="/dashboard">
+            <Button variant="outline">Back to dashboard</Button>
+          </Link>
+          <Link href={`/audits/${result.id}`}>
+            <Button variant="default">
+              See full audit record
+              <ButtonIconWell>
+                <span className="font-mono text-xs">→</span>
+              </ButtonIconWell>
+            </Button>
+          </Link>
+        </Reveal>
+      </main>
     );
   }
 
   return null;
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl px-6 py-10">{children}</div>;
-}
-
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const pct = Math.round((current / total) * 100);
   return (
     <div>
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-          Step {current} of {total}
-        </span>
-        <span>{pct}%</span>
+      <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-ink-muted font-mono">
+        <span>Step {current} of {total}</span>
+        <span>{pct}% COMPLETE</span>
       </div>
-      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
-          style={{ width: `${pct}%` }}
-        />
+      <div className="mt-3 flex gap-1.5" aria-hidden>
+        {Array.from({ length: total }).map((_, idx) => {
+          const active = idx < current;
+          return (
+            <div
+              key={idx}
+              className={`h-2 flex-1 rounded-[1px] transition-colors duration-300 ${
+                active ? "bg-accent" : "bg-paper-sunk"
+              }`}
+            />
+          );
+        })}
       </div>
     </div>
   );

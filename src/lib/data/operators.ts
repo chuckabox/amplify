@@ -1,4 +1,4 @@
-// Mock domain data + business logic for the RiskGate operator experience.
+// Mock domain data + business logic for the Weighbridge operator experience.
 // No backend — this is the single source of truth the client store hydrates from.
 
 export type Pillar =
@@ -23,12 +23,12 @@ export const VEHICLE_TYPES: VehicleType[] = [
   "Van",
 ];
 
-// Annual base insurance rate per vehicle type (AUD).
+// Annual base insurance rate per vehicle type (AUD), as filed.
 export const VEHICLE_BASE_RATE: Record<VehicleType, number> = {
-  "Prime mover": 8200,
-  Rigid: 5200,
-  Trailer: 2400,
-  Van: 1900,
+  "Prime mover": 8240,
+  Rigid: 5180,
+  Trailer: 2360,
+  Van: 1890,
 };
 
 export interface Vehicle {
@@ -128,14 +128,18 @@ export function totalOdometer(vehicles: Vehicle[]): number {
 export function riskMultiplier(operator: Operator): number {
   const latest = operator.audits[0];
   if (!latest) return 1.18; // un-audited applicants carry a loading
-  if (latest.tier === 1) return 0.9;
-  if (latest.tier === 2) return 1.12;
-  return 1.4;
+  if (latest.tier === 1) return 0.88;
+  if (latest.tier === 2) return 1.14;
+  return 1.42;
 }
 
-// Mileage loading: ~$3,500 per million fleet km.
+// Mileage loading: $3,420 per million fleet km.
+export const MILEAGE_RATE_PER_MILLION_KM = 3420;
+
 export function mileageLoading(vehicles: Vehicle[]): number {
-  return Math.round((totalOdometer(vehicles) / 1_000_000) * 3500);
+  return Math.round(
+    (totalOdometer(vehicles) / 1_000_000) * MILEAGE_RATE_PER_MILLION_KM,
+  );
 }
 
 export function computePremium(operator: Operator): number {
@@ -199,61 +203,66 @@ const v = (
 
 export const INITIAL_OPERATORS: Operator[] = [
   {
-    id: "acme",
-    name: "Acme Transport",
-    initials: "AT",
+    id: "halloran",
+    name: "Halloran Haulage",
+    initials: "HH",
     industry: "General road freight",
-    region: "Brisbane, QLD",
-    contact: "ops@acmetransport.com.au",
+    region: "Rocklea, QLD",
+    contact: "ops@halloranhaulage.com.au",
     memberSince: "2021",
     demoLogin: true,
     policy: {
       number: "NTI-QLD-04821",
       coverage: ["Heavy motor", "Goods in transit", "Public liability"],
-      excess: 5000,
+      excess: 5500,
       riskRating: "Preferred",
       auditIntervalMonths: 12,
     },
-    benchmarkPercentile: 78,
+    benchmarkPercentile: 81,
     vehicles: [
-      v("ACM-01", "Prime mover", "Kenworth T610", 2021, 412000),
-      v("ACM-02", "Prime mover", "Volvo FH16", 2020, 508000),
-      v("ACM-03", "Prime mover", "Kenworth T410", 2022, 214000),
-      v("ACM-11", "Trailer", "Maxitrans B-Double", 2019, 380000),
-      v("ACM-12", "Trailer", "Vawdrey Curtainsider", 2020, 341000),
-      v("ACM-21", "Rigid", "Isuzu FVR", 2021, 176000, "maintenance"),
-      v("ACM-22", "Rigid", "Hino 500", 2022, 98000),
+      v("HAL-01", "Prime mover", "Kenworth T610", 2021, 412480),
+      v("HAL-02", "Prime mover", "Volvo FH16", 2020, 508130),
+      v("HAL-03", "Prime mover", "Kenworth T410", 2022, 213960),
+      v("HAL-11", "Trailer", "Maxitrans B-Double", 2019, 379740),
+      v("HAL-12", "Trailer", "Vawdrey Curtainsider", 2020, 341285),
+      v("HAL-21", "Rigid", "Isuzu FVR", 2021, 176320, "maintenance"),
+      v("HAL-22", "Rigid", "Hino 500", 2022, 97845),
     ],
     audits: [
       {
-        id: "AUD-2025-114",
-        date: "2025-08-14",
+        id: "AUD-2026-1142",
+        date: "2026-03-14",
         tier: 1,
-        score: 1.8,
+        score: 1.7,
         status: "signed",
-        reason: "All pillars within standard; strong trust signals.",
-        premiumBefore: 61200,
-        premiumAfter: 55980,
+        reason:
+          "All four pillars sat within standard and the evidence checked out on metadata. Cleared to spot-check.",
+        premiumBefore: 61240,
+        premiumAfter: 55910,
         findings: [
           {
             pillar: "asset_management",
-            observation: "Tyre tread on ACM-02 measured at 4.1mm, well above limit.",
+            observation:
+              "Tread on HAL-02 measured 4.1mm across the centre three-quarters, well clear of the limit.",
             severity: 1,
-            recommendation: "No action. Continue quarterly tread checks.",
+            recommendation: "No action. Keep the quarterly tread checks running.",
             status: "clear",
           },
           {
             pillar: "people_capability",
-            observation: "All 9 drivers hold current fatigue-management accreditation.",
+            observation:
+              "All nine drivers hold current fatigue-management accreditation, most recent issued 11 Feb.",
             severity: 1,
             recommendation: "No action.",
             status: "clear",
           },
           {
             pillar: "site_safety_security",
-            observation: "Load-restraint photos consistent with NTC guide.",
+            observation:
+              "Restraint photos match the NTC load-restraint guide, though only two of six departures were documented.",
             severity: 2,
-            recommendation: "Advisory: photograph restraints before each departure.",
+            recommendation:
+              "Photograph restraints before every departure, not just the long runs.",
             status: "advisory",
           },
         ],
@@ -261,53 +270,57 @@ export const INITIAL_OPERATORS: Operator[] = [
     ],
   },
   {
-    id: "northern",
-    name: "Northern Freight",
-    initials: "NF",
+    id: "tanami",
+    name: "Tanami Freight Lines",
+    initials: "TF",
     industry: "Long-haul & refrigerated",
-    region: "Darwin, NT",
-    contact: "compliance@northernfreight.com.au",
+    region: "Berrimah, NT",
+    contact: "compliance@tanamifreight.com.au",
     memberSince: "2019",
     demoLogin: true,
     policy: {
       number: "NTI-NT-01193",
       coverage: ["Heavy motor", "Refrigerated goods", "Public liability", "Downtime"],
-      excess: 10000,
+      excess: 11000,
       riskRating: "Standard",
       auditIntervalMonths: 9,
     },
-    benchmarkPercentile: 54,
+    benchmarkPercentile: 47,
     vehicles: [
-      v("NFR-100", "Prime mover", "Mack Super-Liner", 2018, 812000),
-      v("NFR-101", "Prime mover", "Kenworth C509", 2019, 690000),
-      v("NFR-102", "Prime mover", "Volvo FH16", 2021, 355000),
-      v("NFR-103", "Prime mover", "Western Star 4800", 2017, 940000, "maintenance"),
-      v("NFR-201", "Trailer", "Maxitrans Reefer", 2020, 410000),
-      v("NFR-202", "Trailer", "Vawdrey Road-train", 2019, 505000),
-      v("NFR-203", "Trailer", "Krueger Flat-top", 2018, 620000),
-      v("NFR-301", "Rigid", "Isuzu Giga", 2020, 260000),
+      v("TAN-100", "Prime mover", "Mack Super-Liner", 2018, 811620),
+      v("TAN-101", "Prime mover", "Kenworth C509", 2019, 689450),
+      v("TAN-102", "Prime mover", "Volvo FH16", 2021, 354870),
+      v("TAN-103", "Prime mover", "Western Star 4800", 2017, 941305, "maintenance"),
+      v("TAN-201", "Trailer", "Maxitrans Reefer", 2020, 409760),
+      v("TAN-202", "Trailer", "Vawdrey Road-train", 2019, 504915),
+      v("TAN-203", "Trailer", "Krueger Flat-top", 2018, 619840),
+      v("TAN-301", "Rigid", "Isuzu Giga", 2020, 259630),
     ],
     audits: [
       {
-        id: "AUD-2025-098",
-        date: "2025-08-22",
+        id: "AUD-2026-0981",
+        date: "2026-04-22",
         tier: 2,
-        score: 2.9,
+        score: 3.1,
         status: "video_requested",
-        reason: "Tyre tread on NFR-103 near limit; brake-line corrosion suspected.",
-        premiumBefore: 78400,
-        premiumAfter: 82600,
+        reason:
+          "Tread on TAN-103 reads close to the limit and the brake lines are hard to judge from the angle supplied. Asked for a clip rather than a visit.",
+        premiumBefore: 78380,
+        premiumAfter: 82640,
         findings: [
           {
             pillar: "asset_management",
-            observation: "NFR-103 front tyres estimated near 1.8mm; verification requested.",
+            observation:
+              "TAN-103 front tyres estimate at roughly 1.8mm. The photo was taken at an angle that makes the reading unreliable.",
             severity: 3,
-            recommendation: "Submit close-up video of both front tyres and brake lines.",
+            recommendation:
+              "Send a close-up clip of both front tyres and the brake lines, square on.",
             status: "action",
           },
           {
             pillar: "emergency_incident",
-            observation: "Fire extinguisher on NFR-201 inspection tag expired 3 months ago.",
+            observation:
+              "The inspection tag on TAN-201's extinguisher expired on 18 January, three months before submission.",
             severity: 3,
             recommendation: "Re-inspect and re-tag all depot fire equipment.",
             status: "action",
@@ -315,20 +328,21 @@ export const INITIAL_OPERATORS: Operator[] = [
         ],
       },
       {
-        id: "AUD-2024-071",
-        date: "2024-11-19",
+        id: "AUD-2025-0713",
+        date: "2025-07-19",
         tier: 1,
-        score: 2.1,
+        score: 2.2,
         status: "signed",
-        reason: "Cleared with minor advisories.",
-        premiumBefore: 75200,
-        premiumAfter: 71900,
+        reason: "Cleared with two advisories, neither affecting the rate.",
+        premiumBefore: 75180,
+        premiumAfter: 71940,
         findings: [
           {
             pillar: "site_safety_security",
-            observation: "Depot access gate unmonitored overnight.",
+            observation:
+              "The Berrimah yard gate is unmonitored between 19:00 and 05:00.",
             severity: 2,
-            recommendation: "Advisory: add after-hours access log.",
+            recommendation: "Add an after-hours access log.",
             status: "advisory",
           },
         ],
@@ -336,60 +350,65 @@ export const INITIAL_OPERATORS: Operator[] = [
     ],
   },
   {
-    id: "highway",
-    name: "Highway Haulage",
-    initials: "HH",
+    id: "coalfields",
+    name: "Coalfields Carriers",
+    initials: "CC",
     industry: "Regional distribution",
-    region: "Newcastle, NSW",
-    contact: "admin@highwayhaulage.com.au",
+    region: "Cardiff, NSW",
+    contact: "admin@coalfieldscarriers.com.au",
     memberSince: "2023",
     demoLogin: true,
     policy: {
       number: "NTI-NSW-07740",
       coverage: ["Heavy motor", "Goods in transit"],
-      excess: 7500,
+      excess: 8250,
       riskRating: "Watch",
       auditIntervalMonths: 6,
     },
-    benchmarkPercentile: 22,
+    benchmarkPercentile: 19,
     vehicles: [
-      v("HWY-1", "Rigid", "Hino 300", 2019, 240000),
-      v("HWY-2", "Rigid", "Isuzu FSR", 2018, 318000, "maintenance"),
-      v("HWY-3", "Prime mover", "DAF CF", 2017, 720000),
-      v("HWY-4", "Van", "Mercedes Sprinter", 2021, 96000),
-      v("HWY-5", "Van", "Ford Transit", 2020, 141000),
-      v("HWY-6", "Trailer", "Maxitrans Tautliner", 2016, 480000),
+      v("CFC-1", "Rigid", "Hino 300", 2019, 239870),
+      v("CFC-2", "Rigid", "Isuzu FSR", 2018, 318450, "maintenance"),
+      v("CFC-3", "Prime mover", "DAF CF", 2017, 719630),
+      v("CFC-4", "Van", "Mercedes Sprinter", 2021, 95720),
+      v("CFC-5", "Van", "Ford Transit", 2020, 141380),
+      v("CFC-6", "Trailer", "Maxitrans Tautliner", 2016, 480215),
     ],
     audits: [
       {
-        id: "AUD-2025-061",
-        date: "2025-08-08",
+        id: "AUD-2026-0617",
+        date: "2026-05-08",
         tier: 3,
-        score: 4.2,
+        score: 4.4,
         status: "escalated",
-        reason: "Load-restraint non-conformance and inconsistent photo GPS.",
-        premiumBefore: 30100,
-        premiumAfter: 42140,
+        reason:
+          "Restraint on CFC-6 does not meet the NTC guide, and three photos carry GPS points 40km from the depot. This one needs a person on site.",
+        premiumBefore: 30080,
+        premiumAfter: 42190,
         findings: [
           {
             pillar: "site_safety_security",
-            observation: "Load on HWY-6 not restrained to NTC guide; straps frayed.",
+            observation:
+              "The load on CFC-6 is not restrained to the NTC guide and two straps are frayed through the webbing.",
             severity: 5,
-            recommendation: "Immediate: replace restraints and re-train loaders.",
+            recommendation:
+              "Replace the restraints and re-train the loading crew before the next run.",
             status: "action",
           },
           {
             pillar: "asset_management",
-            observation: "HWY-2 brake pads below 3mm friction material.",
+            observation:
+              "CFC-2 brake pads measure under 3mm of friction material on the near-side front.",
             severity: 4,
-            recommendation: "Immediate: replace pads before return to service.",
+            recommendation: "Replace the pads before the vehicle returns to service.",
             status: "action",
           },
           {
             pillar: "people_capability",
-            observation: "2 of 5 drivers' fatigue training lapsed.",
+            observation:
+              "Two of five drivers have fatigue training that lapsed in February.",
             severity: 3,
-            recommendation: "Re-certify drivers within 30 days.",
+            recommendation: "Re-certify both drivers within 30 days.",
             status: "action",
           },
         ],
