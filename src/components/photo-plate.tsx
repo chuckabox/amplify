@@ -21,6 +21,7 @@ export function PhotoPlate({
   caption,
   priority = false,
   bare = false,
+  plain = false,
 }: {
   seed: string;
   alt: string;
@@ -32,6 +33,8 @@ export function PhotoPlate({
   priority?: boolean;
   /** Drop the mat and mount — for full-bleed backdrops. */
   bare?: boolean;
+  /** Show the photo as shot: no duotone, no colour wash, no gradient. */
+  plain?: boolean;
 }) {
   const imgSrc = (seed.startsWith("/") || seed.startsWith("http") || seed.includes("."))
     ? seed
@@ -54,18 +57,23 @@ export function PhotoPlate({
           loading={priority ? "eager" : "lazy"}
           decoding="async"
           className={cn(
-            "duotone h-full w-full object-cover",
+            "h-full w-full object-cover",
+            !plain && "duotone",
             imageClassName,
           )}
         />
-        <span
-          className="pointer-events-none absolute inset-0 bg-[#d8e4ef] mix-blend-color opacity-35"
-          aria-hidden
-        />
-        <span
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#171a14]/45 via-transparent to-transparent"
-          aria-hidden
-        />
+        {!plain && (
+          <>
+            <span
+              className="pointer-events-none absolute inset-0 bg-[#d8e4ef] mix-blend-color opacity-35"
+              aria-hidden
+            />
+            <span
+              className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#171a14]/45 via-transparent to-transparent"
+              aria-hidden
+            />
+          </>
+        )}
       </div>
       {caption && (
         <figcaption className="px-1 pt-2 text-[11px] tracking-[0.06em] text-ink-muted">

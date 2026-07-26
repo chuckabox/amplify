@@ -37,7 +37,7 @@ const STEPS: Step[] = [
     n: "01",
     title: "Upload documents",
     body: "Upload files to get information on the business.",
-    seed: "/samples/IMG_4871.webp",
+    seed: "/samples/IMG_2316.jpg",
     alt: "A driver uploading transport documents and assessment records",
   },
   {
@@ -51,7 +51,7 @@ const STEPS: Step[] = [
     n: "03",
     title: "Engineer reviews outcome",
     body: "Submissions route into cleared, remote, or in-person lanes. The engineer signs or overrides.",
-    seed: "/samples/IMG_2316.jpg",
+    seed: "/samples/IMG_2314.jpg",
     alt: "A risk engineer reviewing operator evidence and assessment findings",
   },
 ];
@@ -165,25 +165,32 @@ export default function Home() {
         {/* ---------- Our Story ---------- */}
         <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-            <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-16 items-start">
+            <div className="grid gap-12 lg:grid-cols-[1.25fr_1fr] lg:gap-16 items-start">
               <Reveal>
-                <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
-                  We didn't know what a risk engineer was either.
-                </h2>
+                <div>
+                  <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
+                    We didn't know what a risk engineer was either.
+                  </h2>
+                  <div className="mt-8 space-y-5 text-[1.0625rem] leading-[1.7] text-ink-muted">
+                    <p>
+                      We built TONNAGE in a weekend. Friday to Sunday, at a hackathon at QUT. None of us are risk engineers.
+                    </p>
+                    <p>
+                      We came up with the idea on Friday night. On Saturday morning we walked outside and talked to truck operators parked outside U Block to validate it. We asked what it was like when a risk engineer comes out. Same answer every time: someone drives out, checks the tyres, checks the restraints, looks at some paperwork, and leaves. Most of them already had the photos and certificates. Nobody asked for them ahead of time.
+                    </p>
+                    <p>
+                      So we spent the rest of the weekend building it. TONNAGE lets operators submit that evidence up front, flags anything that looks wrong, and only sends an engineer when there is real risk. The rest clears remotely.
+                    </p>
+                  </div>
+                </div>
               </Reveal>
 
               <Reveal delay={0.12}>
-                <div className="space-y-5 text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  <p>
-                    We built TONNAGE in a weekend. Friday to Sunday, at a hackathon at QUT. None of us are risk engineers.
-                  </p>
-                  <p>
-                    We came up with the idea on Friday night. On Saturday morning we walked outside and talked to truck operators parked outside U Block to validate it. We asked what it was like when a risk engineer comes out. Same answer every time: someone drives out, checks the tyres, checks the restraints, looks at some paperwork, and leaves. Most of them already had the photos and certificates. Nobody asked for them ahead of time.
-                  </p>
-                  <p>
-                    So we spent the rest of the weekend building it. TONNAGE lets operators submit that evidence up front, flags anything that looks wrong, and only sends an engineer when there is real risk. The rest clears remotely.
-                  </p>
-                </div>
+                <PhotoPlate
+                  seed="/samples/IMG_4871.webp"
+                  alt="A risk engineer reviewing operator evidence and assessment findings"
+                  plain
+                />
               </Reveal>
             </div>
           </div>
