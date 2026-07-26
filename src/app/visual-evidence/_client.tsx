@@ -329,7 +329,8 @@ export default function VisualEvidenceClient() {
                             onClick={() => {
                               addSampleSet(id);
                               setAttached(false);
-                              setPhase("review");
+                              setStageIndex(0);
+                              setPhase("extracting");
                             }}
                             className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-paper-sunk/45"
                           >
