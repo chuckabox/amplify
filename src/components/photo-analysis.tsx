@@ -3,24 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ScanLine, Play, Video as VideoIcon } from "lucide-react";
-import {
-  getAnalysis,
-  type Detection,
-  type DetectionKind,
-} from "@/lib/data/analysis";
+import { getAnalysis, type Detection } from "@/lib/data/analysis";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/utils";
 import { VideoDetect } from "@/components/video-detect";
-
-// Detection colour by kind — pulled from the design tokens.
-const KIND_COLOR: Record<DetectionKind, string> = {
-  vehicle: "var(--ink)",
-  component: "var(--accent-deep)",
-  tyre: "var(--tier-2-ink)",
-  plate: "var(--tier-1-ink)",
-  load: "var(--tier-1-ink)",
-  hazard: "var(--tier-3-ink)",
-};
+import { KIND_COLOR } from "@/lib/detection-colors";
 
 const SCAN_MS = 1700;
 
@@ -187,11 +174,12 @@ export function PhotoAnalysis({ analysisId }: { analysisId: string }) {
               )}
             </div>
           ) : (
-            // video view — real-time object detection overlay
+            // video view — object detection synced to playback
             analysis.video && (
               <VideoDetect
                 src={asset(analysis.video.src)}
                 poster={asset(analysis.video.poster)}
+                keyframes={analysis.video.keyframes}
               />
             )
           )}
