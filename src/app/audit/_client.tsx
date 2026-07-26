@@ -21,6 +21,13 @@ interface QueuedDocument {
   kind: DocumentKind;
 }
 
+const SAVE_STAGES = [
+  "Writing records to the passport",
+  "Linking facts to vehicles and drivers",
+  "Updating control coverage",
+  "Logging changes since the last review",
+] as const;
+
 const EXTRACTION_STAGES = [
   "Reading document layout and text",
   "Identifying vehicles, drivers and dates",
@@ -49,7 +56,9 @@ function inferKind(name: string): DocumentKind {
 
 export default function AuditClient() {
   const router = useRouter();
-  const [phase, setPhase] = useState<"upload" | "extracting" | "review">("upload");
+  const [phase, setPhase] = useState<
+    "upload" | "extracting" | "review" | "saving"
+  >("upload");
   const [record, setRecord] = useState<ExtractedRecord>(SAMPLE_EXTRACTION);
 
   useEffect(() => {
@@ -124,11 +133,22 @@ export default function AuditClient() {
       }),
     );
     // Only the fresh maintenance extraction triggers the "just updated" banner.
-    router.push(
+    const destination =
       record.id === SAMPLE_EXTRACTION.id
         ? "/passport?updated=truck-28"
-        : "/passport",
-    );
+        : "/passport";
+
+    setStageIndex(0);
+    setPhase("saving");
+    const interval = window.setInterval(() => {
+      setStageIndex((current) => {
+        if (current >= SAVE_STAGES.length - 1) {
+          window.clearInterval(interval);
+          setTimeout(() => router.push(destination), 600);
+        }
+        return current + 1;
+      });
+    }, 900);
   }
 
   if (phase === "upload") {
@@ -404,8 +424,10 @@ export default function AuditClient() {
     );
   }
 
-  if (phase === "extracting") {
-    const total = EXTRACTION_STAGES.length;
+  if (phase === "extracting" || phase === "saving") {
+    const saving = phase === "saving";
+    const stages = saving ? SAVE_STAGES : EXTRACTION_STAGES;
+    const total = stages.length;
     const progress = Math.min(stageIndex + 1, total);
     return (
       <div className="flex min-h-screen flex-col">
@@ -414,14 +436,22 @@ export default function AuditClient() {
             <div className="mx-auto flex w-full max-w-[540px] flex-col justify-center px-6 py-28 md:py-36">
               <Reveal>
                 <div>
-                  <p className="field-label text-center">DOCUMENT ENGINE</p>
+                  <p className="field-label text-center">
+                    {saving ? "RISK PASSPORT" : "DOCUMENT ENGINE"}
+                  </p>
                   <h1 className="mt-4 text-center text-[clamp(1.75rem,4vw,2.25rem)] font-display font-bold leading-tight text-ink">
-                    Building structured records
+                    {saving ? "Updating the passport" : "Building structured records"}
                   </h1>
                   <p className="mt-3 text-center text-sm text-ink-muted">
-                    Reading {documents.length} source file
-                    {documents.length === 1 ? "" : "s"} and connecting the facts to
-                    the existing Passport.
+                    {saving ? (
+                      <>Saving {record.fields.length} facts against {record.entityLabel}.</>
+                    ) : (
+                      <>
+                        Reading {documents.length} source file
+                        {documents.length === 1 ? "" : "s"} and connecting the facts to
+                        the existing Passport.
+                      </>
+                    )}
                   </p>
                 </div>
 
@@ -430,7 +460,7 @@ export default function AuditClient() {
                     <ProgressBar current={progress} total={total} />
 
                     <div className="mt-8 space-y-4">
-                      {EXTRACTION_STAGES.map((label, idx) => {
+                      {stages.map((label, idx) => {
                         const pending = idx > progress - 1;
                         const active = idx === progress - 1;
                         return (

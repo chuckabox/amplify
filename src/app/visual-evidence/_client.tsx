@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, ButtonIconWell } from "@/components/ui/button";
 import { PhotoAnalysis } from "@/components/photo-analysis";
 import { Reveal } from "@/components/motion";
 import { SiteFooter } from "@/app/(marketing)/page";
 
 type SampleId = "truckA" | "truckB";
-type Phase = "upload" | "extracting" | "review";
+type Phase = "upload" | "extracting" | "review" | "saving";
 
 interface QueuedFile {
   name: string;
@@ -22,6 +23,13 @@ const EXTRACTION_STAGES = [
   "Extracting license plates and registration",
   "Running tyre tread depth estimation",
   "Verifying evidence against safety controls",
+] as const;
+
+const SAVE_STAGES = [
+  "Writing findings to the passport",
+  "Linking media to the matched vehicle",
+  "Updating control coverage",
+  "Logging changes since the last review",
 ] as const;
 
 const SAMPLE_FILES: Record<SampleId, QueuedFile[]> = {
@@ -79,6 +87,7 @@ function formatBytes(bytes: number): string {
 }
 
 export default function VisualEvidenceClient() {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("upload");
   const [sampleId, setSampleId] = useState<SampleId>("truckB");
   const [attached, setAttached] = useState(false);
@@ -90,24 +99,26 @@ export default function VisualEvidenceClient() {
   const sample = SAMPLE_META[sampleId];
 
   useEffect(() => {
-    if (phase !== "extracting") return;
+    if (phase !== "extracting" && phase !== "saving") return;
 
+    const saving = phase === "saving";
+    const stages = saving ? SAVE_STAGES : EXTRACTION_STAGES;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    EXTRACTION_STAGES.forEach((_, index) => {
+    stages.forEach((_, index) => {
       timers.push(
         setTimeout(() => setStageIndex(index + 1), (index + 1) * 600),
       );
     });
     timers.push(
       setTimeout(
-        () => setPhase("review"),
-        (EXTRACTION_STAGES.length + 1) * 600,
+        () => (saving ? router.push("/passport") : setPhase("review")),
+        (stages.length + 1) * 600,
       ),
     );
     return () => {
       timers.forEach(clearTimeout);
     };
-  }, [phase]);
+  }, [phase, router]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -403,8 +414,10 @@ export default function VisualEvidenceClient() {
   }
 
   // ---------- Phase 2: Processing Loader ----------
-  if (phase === "extracting") {
-    const total = EXTRACTION_STAGES.length;
+  if (phase === "extracting" || phase === "saving") {
+    const saving = phase === "saving";
+    const stages = saving ? SAVE_STAGES : EXTRACTION_STAGES;
+    const total = stages.length;
     const progress = Math.min(stageIndex, total);
     return (
       <div className="flex min-h-screen flex-col">
@@ -413,12 +426,16 @@ export default function VisualEvidenceClient() {
             <div className="mx-auto flex w-full max-w-[540px] flex-col justify-center px-6 py-28 md:py-36">
               <Reveal>
                 <div>
-                  <p className="field-label text-center">AI VISION ENGINE</p>
+                  <p className="field-label text-center">
+                    {saving ? "RISK PASSPORT" : "AI VISION ENGINE"}
+                  </p>
                   <h1 className="mt-4 text-center text-[clamp(1.75rem,4vw,2.25rem)] font-display font-bold leading-tight text-ink">
-                    Running vision analysis
+                    {saving ? "Updating the passport" : "Running vision analysis"}
                   </h1>
                   <p className="mt-3 text-center text-sm text-ink-muted">
-                    Detecting vehicles, estimating tyre tread and checking metadata.
+                    {saving
+                      ? `Attaching the visual findings to ${sample.entity}.`
+                      : "Detecting vehicles, estimating tyre tread and checking metadata."}
                   </p>
                 </div>
 
@@ -427,7 +444,7 @@ export default function VisualEvidenceClient() {
                     <ProgressBar current={progress} total={total} />
 
                     <div className="mt-8 space-y-4">
-                      {EXTRACTION_STAGES.map((label, idx) => {
+                      {stages.map((label, idx) => {
                         const pending = idx > progress - 1;
                         const active = idx === progress - 1;
                         return (
@@ -674,14 +691,18 @@ export default function VisualEvidenceClient() {
                 >
                   Analyse another batch
                 </Button>
-                <Link href="/passport">
-                  <Button variant="default">
-                    Go to Passport
-                    <ButtonIconWell>
-                      <Arrow />
-                    </ButtonIconWell>
-                  </Button>
-                </Link>
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    setStageIndex(0);
+                    setPhase("saving");
+                  }}
+                >
+                  Go to Passport
+                  <ButtonIconWell>
+                    <Arrow />
+                  </ButtonIconWell>
+                </Button>
               </div>
             </Reveal>
           </div>
