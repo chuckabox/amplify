@@ -39,6 +39,8 @@ const SAMPLE_FILES: Record<SampleId, QueuedFile[]> = {
 const SAMPLE_META = {
   truckA: {
     label: "Fuso flatbed",
+    historyLabel: "Truck A walkaround",
+    analysedAt: "25 Jul 2026, 11:05",
     evidence: "2 photos, 1 video",
     entity: "Truck 14 / 763KLT",
     entityDetail: "2019 Fuso Fighter (existing vehicle)",
@@ -54,6 +56,8 @@ const SAMPLE_META = {
   },
   truckB: {
     label: "Isuzu pantech",
+    historyLabel: "Truck B walkaround",
+    analysedAt: "25 Jul 2026, 10:18",
     evidence: "1 photo, 1 video",
     entity: "Truck 28 / ABC123",
     entityDetail: "2021 Isuzu FYJ (existing vehicle)",
@@ -273,40 +277,75 @@ export default function VisualEvidenceClient() {
                     </div>
                   )}
 
-                  <div className="mt-8 flex flex-col gap-6 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="field-label">For the hackathon demo</p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => addSampleSet("truckA")}
-                          className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
-                        >
-                          + Truck A (Fuso flatbed)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => addSampleSet("truckB")}
-                          className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
-                        >
-                          + Truck B (Isuzu pantech)
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Link href="/">
-                        <Button variant="outline">Cancel</Button>
-                      </Link>
-                      <Button
-                        variant="default"
-                        disabled={evidence.length === 0}
-                        onClick={runVisionAnalysis}
-                      >
-                        Analyse media
-                        <ButtonIconWell>
-                          <Arrow />
-                        </ButtonIconWell>
-                      </Button>
+                  <div className="mt-8 flex justify-end border-t border-rule pt-6">
+                    <Button
+                      variant="default"
+                      disabled={evidence.length === 0}
+                      onClick={runVisionAnalysis}
+                    >
+                      Analyse media
+                      <ButtonIconWell>
+                        <Arrow />
+                      </ButtonIconWell>
+                    </Button>
+                  </div>
+                </section>
+              </Reveal>
+            </div>
+          </section>
+
+          {/* Past analyses */}
+          <section className="border-b border-rule bg-transparent">
+            <div className="mx-auto max-w-[1240px] px-6 py-16 md:py-20">
+              <Reveal delay={0.1}>
+                <section aria-labelledby="past-analyses-title">
+                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <h2 id="past-analyses-title" className="text-2xl font-display font-bold text-ink">
+                      Past analyses
+                    </h2>
+                    <span className="text-xs text-ink-faint">
+                      Open a previous capture without uploading again
+                    </span>
+                  </div>
+                  <div className="plate mt-5">
+                    <div className="plate-core divide-y divide-rule overflow-hidden">
+                      {(Object.keys(SAMPLE_META) as SampleId[]).map((id) => {
+                        const past = SAMPLE_META[id];
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => {
+                              addSampleSet(id);
+                              setAttached(false);
+                              setPhase("review");
+                            }}
+                            className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-paper-sunk/45"
+                          >
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk text-[9px] font-semibold text-accent-deep">
+                              MEDIA
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-sm font-semibold text-ink">
+                                {past.historyLabel}
+                              </span>
+                              <span className="mt-0.5 block truncate text-xs text-ink-faint">
+                                {past.evidence} / {past.entity}
+                              </span>
+                            </span>
+                            <span className="hidden shrink-0 text-xs text-ink-faint sm:block">
+                              {past.analysedAt}
+                            </span>
+                            <span
+                              className={`shrink-0 text-[9px] font-semibold uppercase tracking-wider ${
+                                past.coverage < 80 ? "text-tier-2-ink" : "text-tier-1-ink"
+                              }`}
+                            >
+                              {past.coverage < 80 ? "Watch" : "Clear"}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </section>
@@ -489,7 +528,7 @@ export default function VisualEvidenceClient() {
             <Reveal delay={0.08}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                  <p className="field-label">Hackathon evidence set</p>
+                  <p className="field-label">Past evidence set</p>
                   <h2 className="mt-2 text-2xl font-semibold text-ink">
                     Choose a vehicle capture
                   </h2>

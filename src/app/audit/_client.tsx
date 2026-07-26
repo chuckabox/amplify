@@ -19,7 +19,6 @@ interface QueuedDocument {
   name: string;
   size: string;
   kind: DocumentKind;
-  isSample?: boolean;
 }
 
 const EXTRACTION_STAGES = [
@@ -29,27 +28,6 @@ const EXTRACTION_STAGES = [
   "Linking records to known entities",
   "Mapping evidence to risk controls",
 ] as const;
-
-const SAMPLE_DOCUMENTS: QueuedDocument[] = [
-  {
-    name: "Truck_28_Service_12-Jun-2026.pdf",
-    size: "1.8 MB",
-    kind: "maintenance",
-    isSample: true,
-  },
-  {
-    name: "Prestart_Logs_Q2-2026.xlsx",
-    size: "842 KB",
-    kind: "maintenance",
-    isSample: true,
-  },
-  {
-    name: "Driver_Credentials_Jul-2026.zip",
-    size: "12.4 MB",
-    kind: "driver",
-    isSample: true,
-  },
-];
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -103,13 +81,6 @@ export default function AuditClient() {
     setDocuments((current) => [...current, ...next]);
   }
 
-  function addSample(sample: QueuedDocument) {
-    setDocuments((current) => [
-      ...current,
-      { name: sample.name, size: sample.size, kind: sample.kind },
-    ]);
-  }
-
   function removeDocument(index: number) {
     setDocuments((current) => current.filter((_, idx) => idx !== index));
   }
@@ -131,7 +102,7 @@ export default function AuditClient() {
   }
 
   function addToPassport() {
-    window.localStorage.setItem("tonnage-risk-passport-updated", "true");
+    window.localStorage.setItem(PASSPORT_STORAGE_KEY, "true");
     window.localStorage.setItem(
       "tonnage-record-latest",
       JSON.stringify({
@@ -289,41 +260,17 @@ export default function AuditClient() {
                     </div>
                   )}
 
-                  <div className="mt-8 flex flex-col gap-6 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="field-label">For the hackathon demo</p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {SAMPLE_DOCUMENTS.map((sampleDoc) => (
-                          <button
-                            key={sampleDoc.name}
-                            type="button"
-                            onClick={() => addSample(sampleDoc)}
-                            className="rounded-[3px] border border-rule-strong bg-paper-raised px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-ink hover:text-ink"
-                          >
-                            + {sampleDoc.kind === "maintenance"
-                              ? sampleDoc.name.includes("Prestart")
-                                ? "Pre-start logs"
-                                : "Maintenance PDF"
-                              : "Driver records"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Link href="/">
-                        <Button variant="outline">Cancel</Button>
-                      </Link>
-                      <Button
-                        variant="default"
-                        disabled={documents.length === 0}
-                        onClick={processDocuments}
-                      >
-                        Extract records
-                        <ButtonIconWell>
-                          <Arrow />
-                        </ButtonIconWell>
-                      </Button>
-                    </div>
+                  <div className="mt-8 flex justify-end border-t border-rule pt-6">
+                    <Button
+                      variant="default"
+                      disabled={documents.length === 0}
+                      onClick={processDocuments}
+                    >
+                      Extract records
+                      <ButtonIconWell>
+                        <Arrow />
+                      </ButtonIconWell>
+                    </Button>
                   </div>
                 </section>
               </Reveal>
@@ -515,12 +462,12 @@ export default function AuditClient() {
             <Reveal>
               <div className="flex flex-col gap-6 border-b border-rule pb-8 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="field-label">
-                    {isPast
-                      ? `Past audit / ${extraction.historyLabel} / ${extraction.extractedAt}`
-                      : "Extraction complete / review before saving"}
-                  </p>
-                  <h1 className="mt-3 text-[clamp(2.3rem,5vw,4rem)] font-display font-bold leading-none text-ink">
+                  {isPast && (
+                    <p className="field-label">
+                      {`Past audit / ${extraction.historyLabel} / ${extraction.extractedAt}`}
+                    </p>
+                  )}
+                  <h1 className={`text-[clamp(2.3rem,5vw,4rem)] font-display font-bold leading-none text-ink ${isPast ? "mt-3" : ""}`}>
                     One document. {extraction.fields.length} useful facts.
                   </h1>
                   <p className="mt-4 max-w-[62ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
@@ -528,17 +475,6 @@ export default function AuditClient() {
                     searchable records linked to {extraction.entityLabel}.
                   </p>
                 </div>
-                <span
-                  className={`self-start rounded-[3px] border px-3 py-2 text-[10px] font-semibold uppercase tracking-wider md:self-auto ${
-                    extraction.alert.severity === "critical"
-                      ? "border-tier-3-ink bg-tier-3-wash text-tier-3-ink"
-                      : "border-tier-2-ink bg-tier-2-wash text-tier-2-ink"
-                  }`}
-                >
-                  {extraction.alert.severity === "critical"
-                    ? "Critical item found"
-                    : "Attention item found"}
-                </span>
               </div>
             </Reveal>
           </div>
