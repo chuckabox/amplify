@@ -138,7 +138,7 @@ export default function Home() {
 
               <Reveal delay={0.12}>
                 <p className="mt-8 max-w-[52ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
-                  TONNAGE reviews every transport risk assessment, clears strong evidence, and escalates genuine risk to an engineer, without removing human judgement.
+                  TONNAGE checks the paperwork on every job. If the evidence stacks up, it goes through. If something looks off, an engineer takes a look.
                 </p>
               </Reveal>
 
