@@ -8,7 +8,7 @@ import { SiteFooter } from "@/app/(marketing)/page";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "TONNAGE is priced on the audits it clears without a site visit. One plan for insurers, one for larger risk teams.",
+    "TONNAGE is priced on the audits it clears without a site visit. One plan, built around your risk engineering team.",
 };
 
 type Plan = {
@@ -26,36 +26,23 @@ type Plan = {
 // docs/nti-riskgate-business-model.md before the pitch.
 const PLANS: Plan[] = [
   {
-    name: "Insurer",
+    name: "Enterprise",
     tagline: "For the risk engineering team",
-    price: "$299",
-    unit: "per engineer, per month",
-    cta: "Book a pilot",
+    price: "Custom",
+    unit: "let us talk",
+    cta: "Contact us",
     featured: true,
     features: [
       "Every submission routed by risk",
       "Engineer queue, escalations, and portfolio view",
       "An engineer signs off on every adverse result",
       "Trust checks on metadata, photo reuse, and gates",
-      "Reporting on engineer hours saved",
+      "Custom risk areas and standards packs",
+      "Fleet wide risk data for underwriters",
+      "Single sign on and data residency options",
       "No integration needed to start",
     ],
     foot: "Costs less than the site visits it removes.",
-  },
-  {
-    name: "Enterprise",
-    tagline: "For larger risk teams",
-    price: "Custom",
-    unit: "let us talk",
-    cta: "Contact us",
-    features: [
-      "Everything in Insurer, plus custom risk models",
-      "Authorised workshop partner network",
-      "Fleet wide risk data for underwriters",
-      "Custom risk areas and standards packs",
-      "Single sign on and data residency options",
-    ],
-    foot: "For teams that want to price against real risk.",
   },
 ];
 
@@ -94,7 +81,7 @@ export default function PricingPage() {
         {/* Plans */}
         <section className="border-b border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-20 md:py-28">
-            <div className="mx-auto max-w-[960px] grid gap-8 md:grid-cols-2">
+            <div className="mx-auto grid max-w-[520px] gap-8">
               {PLANS.map((plan, i) => (
                 <Reveal key={plan.name} delay={0.08 * (i + 1)}>
                   <div className="plate h-full">
