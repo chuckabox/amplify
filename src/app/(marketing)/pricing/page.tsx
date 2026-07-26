@@ -16,7 +16,6 @@ type Plan = {
   price: string;
   unit: string;
   cta: string;
-  href: string;
   featured?: boolean;
   features: string[];
   foot: string;
@@ -31,7 +30,6 @@ const PLANS: Plan[] = [
     price: "$299",
     unit: "per engineer, per month",
     cta: "Book a pilot",
-    href: "/audit",
     featured: true,
     features: [
       "Every submission routed by risk",
@@ -49,7 +47,6 @@ const PLANS: Plan[] = [
     price: "Custom",
     unit: "let us talk",
     cta: "Contact us",
-    href: "/audit",
     features: [
       "Everything in Insurer, plus custom risk models",
       "Authorised workshop partner network",
@@ -127,14 +124,13 @@ export default function PricingPage() {
                       </ul>
 
                       <div className="mt-8 flex flex-1 flex-col justify-end">
-                        <Link href={plan.href}>
-                          <Button
-                            variant={plan.featured ? "default" : "outline"}
-                            className="w-full"
-                          >
-                            {plan.cta}
-                          </Button>
-                        </Link>
+                        {/* Inert on purpose — no sales flow behind these yet. */}
+                        <Button
+                          variant={plan.featured ? "default" : "outline"}
+                          className="w-full"
+                        >
+                          {plan.cta}
+                        </Button>
                         <p className="mt-4 text-xs leading-relaxed text-ink-faint">
                           {plan.foot}
                         </p>

@@ -243,9 +243,10 @@ function Overview({ setView }: { setView: (view: View) => void }) {
             <div className="plate mt-5">
               <div className="plate-core overflow-hidden">
                 {RECENT_CHANGES.map((change, index) => (
-                  <article
+                  <Link
                     key={change.title}
-                    className={`grid grid-cols-[54px_1fr] gap-4 px-5 py-4 ${
+                    href={`/audit?past=${change.auditId}`}
+                    className={`grid grid-cols-[54px_1fr] gap-4 px-5 py-4 transition-colors hover:bg-paper-sunk/45 ${
                       index < RECENT_CHANGES.length - 1 ? "border-b border-rule" : ""
                     }`}
                   >
@@ -275,8 +276,11 @@ function Overview({ setView }: { setView: (view: View) => void }) {
                       <p className="mt-1 text-xs text-ink-muted">
                         {change.detail}
                       </p>
+                      <p className="mt-1.5 text-[10px] font-semibold text-accent-deep">
+                        View past audit →
+                      </p>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             </div>

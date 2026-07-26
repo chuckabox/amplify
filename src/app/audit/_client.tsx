@@ -7,9 +7,11 @@ import { Button, ButtonIconWell } from "@/components/ui/button";
 import { Reveal } from "@/components/motion";
 import {
   DOCUMENT_TYPES,
+  PAST_AUDITS,
   SAMPLE_EXTRACTION,
   PASSPORT_STORAGE_KEY,
   type DocumentKind,
+  type ExtractedRecord,
 } from "@/lib/data/passport";
 import { SiteFooter } from "@/app/(marketing)/page";
 
@@ -70,10 +72,21 @@ function inferKind(name: string): DocumentKind {
 export default function AuditClient() {
   const router = useRouter();
   const [phase, setPhase] = useState<"upload" | "extracting" | "review">("upload");
+  const [record, setRecord] = useState<ExtractedRecord>(SAMPLE_EXTRACTION);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [phase]);
+
+  // Deep link from the passport: /audit?past=<record id> opens that past audit.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("past");
+    const past = PAST_AUDITS.find((item) => item.id === id);
+    if (past) {
+      setRecord(past);
+      setPhase("review");
+    }
+  }, []);
   const [documents, setDocuments] = useState<QueuedDocument[]>([]);
   const [stageIndex, setStageIndex] = useState(0);
   const [selectedKind, setSelectedKind] = useState<DocumentKind>("maintenance");
@@ -102,6 +115,7 @@ export default function AuditClient() {
   }
 
   function processDocuments() {
+    setRecord(SAMPLE_EXTRACTION);
     setStageIndex(0);
     setPhase("extracting");
     const interval = window.setInterval(() => {
@@ -121,12 +135,17 @@ export default function AuditClient() {
     window.localStorage.setItem(
       "tonnage-record-latest",
       JSON.stringify({
-        recordId: SAMPLE_EXTRACTION.id,
-        entityId: SAMPLE_EXTRACTION.entityId,
+        recordId: record.id,
+        entityId: record.entityId,
         updatedAt: new Date().toISOString(),
       }),
     );
-    router.push("/passport?updated=truck-28");
+    // Only the fresh maintenance extraction triggers the "just updated" banner.
+    router.push(
+      record.id === SAMPLE_EXTRACTION.id
+        ? "/passport?updated=truck-28"
+        : "/passport",
+    );
   }
 
   if (phase === "upload") {
@@ -311,6 +330,63 @@ export default function AuditClient() {
             </div>
           </section>
 
+          {/* Past audits */}
+          <section className="border-b border-rule bg-transparent">
+            <div className="mx-auto max-w-[1240px] px-6 py-16 md:py-20">
+              <Reveal delay={0.1}>
+                <section aria-labelledby="past-audits-title">
+                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                    <h2 id="past-audits-title" className="text-2xl font-display font-bold text-ink">
+                      Past audits
+                    </h2>
+                    <span className="text-xs text-ink-faint">
+                      Open a previous extraction without uploading again
+                    </span>
+                  </div>
+                  <div className="plate mt-5">
+                    <div className="plate-core divide-y divide-rule overflow-hidden">
+                      {PAST_AUDITS.map((past) => (
+                        <button
+                          key={past.id}
+                          type="button"
+                          onClick={() => {
+                            setRecord(past);
+                            setPhase("review");
+                          }}
+                          className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-paper-sunk/45"
+                        >
+                          <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk text-[9px] font-semibold text-accent-deep">
+                            {past.source.format}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-semibold text-ink">
+                              {past.historyLabel}
+                            </span>
+                            <span className="mt-0.5 block truncate text-xs text-ink-faint">
+                              {past.sourceName} / {past.entityLabel}
+                            </span>
+                          </span>
+                          <span className="hidden shrink-0 text-xs text-ink-faint sm:block">
+                            {past.extractedAt}
+                          </span>
+                          <span
+                            className={`shrink-0 text-[9px] font-semibold uppercase tracking-wider ${
+                              past.alert.severity === "critical"
+                                ? "text-tier-3-ink"
+                                : "text-tier-2-ink"
+                            }`}
+                          >
+                            {past.alert.severity === "critical" ? "Critical" : "Watch"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              </Reveal>
+            </div>
+          </section>
+
           {/* Understood record types listing */}
           <section className="border-b border-rule bg-transparent">
             <div className="mx-auto max-w-[1240px] px-6 py-16 md:py-20">
@@ -427,7 +503,8 @@ export default function AuditClient() {
     );
   }
 
-  const extraction = SAMPLE_EXTRACTION;
+  const extraction = record;
+  const isPast = extraction.id !== SAMPLE_EXTRACTION.id;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -438,17 +515,29 @@ export default function AuditClient() {
             <Reveal>
               <div className="flex flex-col gap-6 border-b border-rule pb-8 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="field-label">Extraction complete / review before saving</p>
+                  <p className="field-label">
+                    {isPast
+                      ? `Past audit / ${extraction.historyLabel} / ${extraction.extractedAt}`
+                      : "Extraction complete / review before saving"}
+                  </p>
                   <h1 className="mt-3 text-[clamp(2.3rem,5vw,4rem)] font-display font-bold leading-none text-ink">
-                    One document. Seven useful facts.
+                    One document. {extraction.fields.length} useful facts.
                   </h1>
                   <p className="mt-4 max-w-[62ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
                     The source remains attached. The extracted values become
                     searchable records linked to {extraction.entityLabel}.
                   </p>
                 </div>
-                <span className="self-start rounded-[3px] border border-tier-3-ink bg-tier-3-wash px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-tier-3-ink md:self-auto">
-                  Critical item found
+                <span
+                  className={`self-start rounded-[3px] border px-3 py-2 text-[10px] font-semibold uppercase tracking-wider md:self-auto ${
+                    extraction.alert.severity === "critical"
+                      ? "border-tier-3-ink bg-tier-3-wash text-tier-3-ink"
+                      : "border-tier-2-ink bg-tier-2-wash text-tier-2-ink"
+                  }`}
+                >
+                  {extraction.alert.severity === "critical"
+                    ? "Critical item found"
+                    : "Attention item found"}
                 </span>
               </div>
             </Reveal>
@@ -461,14 +550,32 @@ export default function AuditClient() {
             <div className="space-y-8">
               {/* Row 1: Critical review required */}
               <Reveal delay={0.08}>
-                <div className="plate border border-tier-3-ink bg-tier-3-wash">
+                <div
+                  className={`plate border ${
+                    extraction.alert.severity === "critical"
+                      ? "border-tier-3-ink bg-tier-3-wash"
+                      : "border-tier-2-ink bg-tier-2-wash"
+                  }`}
+                >
                   <div className="plate-core p-5">
                     <div className="flex items-start gap-4">
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[2px] bg-tier-3-ink text-sm font-bold text-paper">
+                      <span
+                        className={`flex size-8 shrink-0 items-center justify-center rounded-[2px] text-sm font-bold text-paper ${
+                          extraction.alert.severity === "critical"
+                            ? "bg-tier-3-ink"
+                            : "bg-tier-2-ink"
+                        }`}
+                      >
                         !
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-tier-3-ink">
+                        <p
+                          className={`text-sm font-semibold ${
+                            extraction.alert.severity === "critical"
+                              ? "text-tier-3-ink"
+                              : "text-tier-2-ink"
+                          }`}
+                        >
                           {extraction.alert.label}
                         </p>
                         <p className="mt-1 text-sm leading-relaxed text-ink-muted">
@@ -540,13 +647,12 @@ export default function AuditClient() {
                     </div>
                     <div className="px-5 py-5">
                       <p className="text-sm font-semibold text-ink">
-                        Control: Safety-critical defects are repaired and closed
+                        {extraction.control.label}
                       </p>
                       <div className="mt-4 space-y-3">
-                        <MappingRow label="Defect identified in service record" value="Found" state="good" />
-                        <MappingRow label="Vehicle matched" value="Truck 28" state="good" />
-                        <MappingRow label="Repair completion recorded" value="No" state="bad" />
-                        <MappingRow label="Separate repair evidence found" value="Missing" state="bad" />
+                        {extraction.control.rows.map((row) => (
+                          <MappingRow key={row.label} {...row} />
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -565,27 +671,28 @@ export default function AuditClient() {
                         <div className="flex items-start justify-between border-b-2 border-ink pb-4">
                           <div>
                             <p className="font-display text-xl font-bold text-ink">
-                              Fleet Service Report
+                              {extraction.source.title}
                             </p>
                             <p className="mt-1 text-[9px] text-ink-faint">
-                              COORANBONG FREIGHT / WORK ORDER 88241
+                              {extraction.source.ref}
                             </p>
                           </div>
                           <span className="text-xs font-bold text-ink">
-                            PDF
+                            {extraction.source.format}
                           </span>
                         </div>
                         <dl className="mt-6 space-y-4 text-[10px] leading-relaxed">
-                          <SourceRow label="Vehicle" value="Truck 28" />
-                          <SourceRow label="Registration" value="ABC123" />
-                          <SourceRow label="Service date" value="12 June 2026" />
-                          <SourceRow label="Odometer" value="482,350 km" />
-                          <SourceRow label="Brake defect" value="YES" marked />
-                          <SourceRow label="Repair completed" value="NO" marked />
-                          <SourceRow label="Next service" value="500,000 km" />
+                          {extraction.fields.map((field) => (
+                            <SourceRow
+                              key={field.label}
+                              label={field.label}
+                              value={field.value}
+                              marked={field.tone === "critical" || field.tone === "warning"}
+                            />
+                          ))}
                         </dl>
                         <div className="mt-6 border-t border-rule pt-3 text-[8px] leading-relaxed text-ink-faint">
-                          Signed electronically / B. Morton / Workshop supervisor
+                          {extraction.source.signedBy}
                         </div>
                       </div>
                       <div className="mt-4">
@@ -593,7 +700,8 @@ export default function AuditClient() {
                           {extraction.sourceName}
                         </p>
                         <p className="mt-1 text-xs text-ink-faint">
-                          Maintenance / uploaded today
+                          {extraction.source.typeLabel} /{" "}
+                          {isPast ? extraction.extractedAt : "uploaded today"}
                         </p>
                       </div>
                     </div>
@@ -605,19 +713,28 @@ export default function AuditClient() {
             {/* Bottom save bar */}
             <Reveal delay={0.16} className="mt-8 flex flex-col gap-4 border-t border-rule pt-6">
               <p className="text-xs leading-relaxed text-ink-muted">
-                Saving updates Truck 28, creates an open defect, attaches the source
-                PDF and records this as a change since the last engineer review.
+                Saving updates {extraction.entityLabel}, attaches the source file and
+                records this as a change since the last engineer review.
               </p>
-              <Button
-                variant="default"
-                className="w-full"
-                onClick={() => {
-                  setPhase("upload");
-                  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-                }}
-              >
-                Analyse another batch
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDocuments([]);
+                    setRecord(SAMPLE_EXTRACTION);
+                    setPhase("upload");
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                  }}
+                >
+                  Analyse another batch
+                </Button>
+                <Button variant="default" onClick={addToPassport}>
+                  Go to Passport
+                  <ButtonIconWell>
+                    <Arrow />
+                  </ButtonIconWell>
+                </Button>
+              </div>
             </Reveal>
           </div>
         </section>
