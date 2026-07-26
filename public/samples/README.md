@@ -17,4 +17,4 @@ Notes
   sit sideways (HEIC orientation quirks) — the ones the app actually shows are
   upright.
 - Paths are loaded through `src/lib/asset.ts` so they resolve under the site's
-  basePath (`/amplify` in production, root in dev).
+  basePath (`/Tonnage` in production, root in dev).

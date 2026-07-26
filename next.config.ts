@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === "production";
-const BASE_PATH = isProd ? "/amplify" : "";
+const BASE_PATH = isProd ? "/Tonnage" : "";
 
 const nextConfig: NextConfig = {
   output: "export",
@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
-  // Deployed to https://chuckabox.github.io/amplify/
+  // Deployed to https://chuckabox.github.io/Tonnage/
   // Only apply basePath in production so dev server works at localhost:3000/
   basePath: BASE_PATH,
   images: {
