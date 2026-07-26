@@ -623,10 +623,9 @@ export default function VisualEvidenceClient() {
                 </div>
               </div>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Button
-                  variant="default"
-                  className="w-full"
+                  variant="outline"
                   onClick={() => {
                     setPhase("upload");
                     setAttached(false);
@@ -636,6 +635,14 @@ export default function VisualEvidenceClient() {
                 >
                   Analyse another batch
                 </Button>
+                <Link href="/passport">
+                  <Button variant="default">
+                    Go to Passport
+                    <ButtonIconWell>
+                      <Arrow />
+                    </ButtonIconWell>
+                  </Button>
+                </Link>
               </div>
             </Reveal>
           </div>

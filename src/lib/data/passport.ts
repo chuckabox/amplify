@@ -177,7 +177,7 @@ export const PAST_AUDITS: ExtractedRecord[] = [
     entityType: "Depot",
     entityId: "depot-rocklea",
     entityLabel: "Rocklea depot / 18 vehicles",
-    extractedAt: "18 Jul 2026, 09:15",
+    extractedAt: "25 Jul 2026, 09:15",
     fields: [
       { label: "Logs submitted", value: "186", confidence: 0.99 },
       { label: "Vehicles covered", value: "18", confidence: 0.98 },
@@ -227,7 +227,7 @@ export const PAST_AUDITS: ExtractedRecord[] = [
     entityType: "Driver",
     entityId: "driver-ravi",
     entityLabel: "Ravi Sandhu / MC licence",
-    extractedAt: "23 Jul 2026, 14:08",
+    extractedAt: "25 Jul 2026, 08:20",
     fields: [
       { label: "Drivers in batch", value: "29", confidence: 0.99 },
       { label: "Current licences", value: "29", confidence: 0.98 },

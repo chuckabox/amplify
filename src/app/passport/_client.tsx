@@ -63,7 +63,7 @@ export default function PassportClient() {
                 </div>
                 <button
                   type="button"
-                  className="self-start rounded-[2px] px-2 py-1 text-[10px] text-ink-muted hover:bg-paper/50 hover:text-ink"
+                  className="self-start rounded-[2px] px-2 py-1 text-[10px] text-ink-muted hover:bg-paper/50 hover:text-ink sm:self-center"
                   onClick={() => setJustUpdated(false)}
                 >
                   DISMISS
@@ -141,6 +141,34 @@ export default function PassportClient() {
           {view === "controls" && <ControlsView />}
           {view === "documents" && <DocumentsView />}
         </div>
+
+        {/* Visual evidence CTA */}
+        <section className="border-t border-rule bg-transparent">
+          <div className="mx-auto max-w-[1240px] px-6 py-16 md:py-20">
+            <Reveal>
+              <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="max-w-[20ch] text-[clamp(1.75rem,4vw,2.75rem)] font-display font-bold leading-tight text-ink">
+                    Photos and video prove what paperwork cannot.
+                  </h2>
+                  <p className="mt-4 max-w-[54ch] text-[1.0625rem] leading-[1.7] text-ink-muted">
+                    Analyse walkaround footage and site photos. TONNAGE detects
+                    defects and conditions, then links what it finds to the same
+                    vehicles, drivers and controls in this passport.
+                  </p>
+                </div>
+                <Link href="/visual-evidence" className="shrink-0">
+                  <Button variant="default">
+                    Analyse photo and video
+                    <ButtonIconWell>
+                      <Arrow />
+                    </ButtonIconWell>
+                  </Button>
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </div>
