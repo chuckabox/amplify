@@ -143,6 +143,34 @@ export default function PricingPage() {
 
           </div>
         </section>
+
+        {/* Thank you */}
+        <section className="border-b border-rule bg-transparent">
+          <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-28">
+            <Reveal>
+              <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:items-start">
+                <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] font-display font-bold leading-[1.05] text-ink">
+                  Thank you.
+                </h2>
+                <div className="space-y-5 text-[1.0625rem] leading-[1.7] text-ink-muted">
+                  <p>
+                    Thanks to the truck operators who stopped and talked to us,
+                    and told us honestly what a site visit is actually like.
+                    Everything here started with those conversations.
+                  </p>
+                  <p>
+                    Thanks to the risk engineers who explained the job properly,
+                    and to everyone who looked at an early version and told us
+                    what was wrong with it.
+                  </p>
+                  <p className="text-ink font-semibold">
+                    And thanks for reading this far.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </div>
