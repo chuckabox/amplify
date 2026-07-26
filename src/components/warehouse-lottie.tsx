@@ -6,7 +6,7 @@ import { asset } from "@/lib/asset";
 export function WarehouseLottie() {
   return (
     <DotLottiePlayer
-      src={asset("/warehouse-delivery.lottie")}
+      src={asset("/delivery-truck.lottie")}
       loop
       autoplay
       className="w-full [&_canvas]:!h-auto [&_canvas]:!w-full [&_svg]:!h-auto [&_svg]:!w-full"
