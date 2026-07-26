@@ -78,7 +78,20 @@ export default function AuditClient() {
       size: formatBytes(file.size),
       kind: inferKind(file.name),
     }));
+    // Own files always demo the maintenance extraction.
+    setRecord(SAMPLE_EXTRACTION);
     setDocuments((current) => [...current, ...next]);
+  }
+
+  // Queue a past batch so it runs through the extraction animation again.
+  function selectPastBatch(past: ExtractedRecord) {
+    setRecord(past);
+    setDocuments([
+      { name: past.sourceName, size: past.sourceSize, kind: past.documentKind },
+    ]);
+    window.document
+      .getElementById("upload-records-title")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function removeDocument(index: number) {
@@ -86,7 +99,6 @@ export default function AuditClient() {
   }
 
   function processDocuments() {
-    setRecord(SAMPLE_EXTRACTION);
     setStageIndex(0);
     setPhase("extracting");
     const interval = window.setInterval(() => {
@@ -287,7 +299,7 @@ export default function AuditClient() {
                       Past audits
                     </h2>
                     <span className="text-xs text-ink-faint">
-                      Open a previous extraction without uploading again
+                      Load a previous batch, then run the extraction again
                     </span>
                   </div>
                   <div className="plate mt-5">
@@ -296,11 +308,12 @@ export default function AuditClient() {
                         <button
                           key={past.id}
                           type="button"
-                          onClick={() => {
-                            setRecord(past);
-                            setPhase("review");
-                          }}
-                          className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-paper-sunk/45"
+                          onClick={() => selectPastBatch(past)}
+                          className={`flex w-full items-center gap-4 px-5 py-4 text-left transition-colors ${
+                            documents.some((item) => item.name === past.sourceName)
+                              ? "bg-accent-wash/45"
+                              : "hover:bg-paper-sunk/45"
+                          }`}
                         >
                           <span className="flex size-9 shrink-0 items-center justify-center rounded-[2px] bg-paper-sunk text-[9px] font-semibold text-accent-deep">
                             {past.source.format}

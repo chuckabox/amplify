@@ -165,7 +165,7 @@ export default function Home() {
         {/* ---------- Our Story ---------- */}
         <section className="border-t border-rule bg-transparent">
           <div className="mx-auto max-w-[1240px] px-6 py-24 md:py-32">
-            <div className="grid gap-12 lg:grid-cols-[1.25fr_1fr] lg:gap-16 items-start">
+            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
               <Reveal>
                 <div>
                   <h2 className="text-[clamp(2rem,3.6vw,2.875rem)] leading-[1.05] font-display font-bold">
@@ -188,7 +188,9 @@ export default function Home() {
               <Reveal delay={0.12}>
                 <PhotoPlate
                   seed="/samples/IMG_4871.webp"
-                  alt="A risk engineer reviewing operator evidence and assessment findings"
+                  alt="The four of us in front of a flatbed truck outside U Block at QUT"
+                  width={1200}
+                  height={900}
                   plain
                 />
               </Reveal>

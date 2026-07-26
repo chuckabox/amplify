@@ -93,6 +93,7 @@ export interface ExtractedRecord {
   entityId: string;
   entityLabel: string;
   extractedAt: string;
+  sourceSize: string;
   fields: ExtractedField[];
   alert: {
     label: string;
@@ -122,6 +123,7 @@ export const PAST_AUDITS: ExtractedRecord[] = [
     entityId: "vehicle-28",
     entityLabel: "Truck 28 / ABC123",
     extractedAt: "25 Jul 2026, 10:42",
+    sourceSize: "1.8 MB",
     fields: [
       { label: "Vehicle", value: "Truck 28", confidence: 0.99 },
       { label: "Registration", value: "ABC123", confidence: 0.98 },
@@ -178,6 +180,7 @@ export const PAST_AUDITS: ExtractedRecord[] = [
     entityId: "depot-rocklea",
     entityLabel: "Rocklea depot / 18 vehicles",
     extractedAt: "25 Jul 2026, 09:15",
+    sourceSize: "842 KB",
     fields: [
       { label: "Logs submitted", value: "186", confidence: 0.99 },
       { label: "Vehicles covered", value: "18", confidence: 0.98 },
@@ -228,6 +231,7 @@ export const PAST_AUDITS: ExtractedRecord[] = [
     entityId: "driver-ravi",
     entityLabel: "Ravi Sandhu / MC licence",
     extractedAt: "25 Jul 2026, 08:20",
+    sourceSize: "12.4 MB",
     fields: [
       { label: "Drivers in batch", value: "29", confidence: 0.99 },
       { label: "Current licences", value: "29", confidence: 0.98 },
