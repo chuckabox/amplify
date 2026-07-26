@@ -161,9 +161,10 @@ export default function PricingPage() {
                       Everything here started with those conversations.
                     </p>
                     <p>
-                      Thanks to the risk engineers who explained the job properly,
-                      and to everyone who looked at an early version and told us
-                      what was wrong with it.
+                      TONNAGE is here to make the risk engineer's job easier, not
+                      to take it off them. The engineer still makes the call. We
+                      just clear the routine work so they can spend their time on
+                      the jobs that actually need them.
                     </p>
                     <p className="font-semibold text-ink">
                       And thanks for your time today.
