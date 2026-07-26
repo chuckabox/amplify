@@ -37,7 +37,7 @@ const STEPS: Step[] = [
     n: "01",
     title: "Upload documents",
     body: "Upload files to get information on the business.",
-    seed: "/samples/IMG_2316.jpg",
+    seed: "/samples/IMG_4871.webp",
     alt: "A driver uploading transport documents and assessment records",
   },
   {
@@ -51,7 +51,7 @@ const STEPS: Step[] = [
     n: "03",
     title: "Engineer reviews outcome",
     body: "Submissions route into cleared, remote, or in-person lanes. The engineer signs or overrides.",
-    seed: "/samples/IMG_4871.webp",
+    seed: "/samples/IMG_2316.jpg",
     alt: "A risk engineer reviewing operator evidence and assessment findings",
   },
 ];
